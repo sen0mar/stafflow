@@ -17,6 +17,7 @@ If architecture, UI direction, scope, or standards change, update the relevant c
 - Before starting a new feature, create a new feature branch from `main`; if the user explicitly says not to create a branch, skip this workflow and follow the user's instructions.
 - After agreeing on the feature scope with the user and before implementation, fill the placeholders in `context/features/current-feature.md`, then ask whether to start implementation.
 - After implementation is complete and the user asks to commit and merge into `main`, reset `context/features/current-feature.md` back to placeholders and add a concise entry to `context/features/feature-history.md`.
+- Commit messages must use a short title and a concise description of what changed.
 
 # Dependency Installs
 
