@@ -2,6 +2,28 @@ type RequestOptions = Omit<RequestInit, 'body'> & {
   body?: BodyInit | Record<string, unknown>
 }
 
+type ApiErrorResponse = {
+  error?: {
+    message?: string
+    code?: string
+    details?: unknown
+  }
+}
+
+export class ApiClientError extends Error {
+  status: number
+  code?: string
+  details?: unknown
+
+  constructor(message: string, status: number, code?: string, details?: unknown) {
+    super(message)
+    this.name = 'ApiClientError'
+    this.status = status
+    this.code = code
+    this.details = details
+  }
+}
+
 const isJsonBody = (body: RequestOptions['body']) =>
   body !== undefined &&
   body !== null &&
@@ -33,7 +55,20 @@ export const apiClient = async <TResponse>(
   })
 
   if (!response.ok) {
-    throw new Error(`Request failed with status ${response.status}`)
+    let errorPayload: ApiErrorResponse | undefined
+
+    try {
+      errorPayload = (await response.json()) as ApiErrorResponse
+    } catch {
+      errorPayload = undefined
+    }
+
+    throw new ApiClientError(
+      errorPayload?.error?.message ?? `Request failed with status ${response.status}`,
+      response.status,
+      errorPayload?.error?.code,
+      errorPayload?.error?.details,
+    )
   }
 
   if (response.status === 204) {
