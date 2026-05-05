@@ -7,6 +7,7 @@ Keep entries short. This file should explain what changed, not become a detailed
 ## Completed Features
 
 - Feature 01: UI Foundation Setup — initialized Tailwind CSS v4 and shadcn/ui foundation files, translated semantic light/dark UI tokens into `client/src/index.css`, added shared UI utilities and a minimal button primitive, and documented dependency-install sandbox handling.
+- Feature 02: Client Foundations — added root workspace scripts, frontend application dependencies, shadcn/ui primitives, Vite-compatible Geist font loading, and the initial `client/src` app/shared/features folder structure.
 
 ## Entry Format
 
