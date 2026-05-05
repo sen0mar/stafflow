@@ -9,6 +9,7 @@ Keep entries short. This file should explain what changed, not become a detailed
 - Feature 01: UI Foundation Setup — initialized Tailwind CSS v4 and shadcn/ui foundation files, translated semantic light/dark UI tokens into `client/src/index.css`, added shared UI utilities and a minimal button primitive, and documented dependency-install sandbox handling.
 - Feature 02: Client Foundations — added root workspace scripts, frontend application dependencies, shadcn/ui primitives, Vite-compatible Geist font loading, and the initial `client/src` app/shared/features folder structure.
 - Feature 03: App Foundation Providers — wired React Query, React Router, next-themes, and Sonner providers; added the initial app router; and normalized the native cookie-authenticated API client error handling.
+- Feature 04: Route Placeholder Scaffold — added public and protected frontend route placeholders, a dashboard app shell with sidebar navigation, an `/app` dashboard redirect, and a future `/auth/me` protected-route integration point.
 
 ## Entry Format
 
