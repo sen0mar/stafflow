@@ -1,0 +1,15 @@
+{
+  "private": true,
+  "workspaces": [
+    "client",
+    "backend"
+  ],
+  "scripts": {
+    "dev": "npm run dev:client",
+    "dev:client": "npm --prefix client run dev",
+    "dev:server": "npm --prefix backend run dev --if-present",
+    "build": "npm run build --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "typecheck": "npm --prefix client exec -- tsc -b client/tsconfig.json"
+  }
+}
