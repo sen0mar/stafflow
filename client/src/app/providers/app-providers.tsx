@@ -13,7 +13,7 @@ const AppThemeProvider = ThemeProvider as ComponentType<PropsWithChildren<ThemeP
 
 export const AppProviders = () => (
   <QueryClientProvider client={queryClient}>
-    <AppThemeProvider attribute="class" defaultTheme="system" enableSystem>
+    <AppThemeProvider attribute="class" defaultTheme="dark" enableSystem>
       <RouterProvider router={appRouter} />
       <Toaster richColors closeButton />
     </AppThemeProvider>
