@@ -123,6 +123,7 @@
   --color-dot: var(--bg-dot);
 
   --color-default: var(--border-default);
+  --color-strong: var(--border-strong);
   --color-border: var(--border-default);
   --color-input: var(--border-default);
   --color-ring: var(--accent-primary);

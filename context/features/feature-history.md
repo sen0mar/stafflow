@@ -10,6 +10,7 @@ Keep entries short. This file should explain what changed, not become a detailed
 - Feature 02: Client Foundations — added root workspace scripts, frontend application dependencies, shadcn/ui primitives, Vite-compatible Geist font loading, and the initial `client/src` app/shared/features folder structure.
 - Feature 03: App Foundation Providers — wired React Query, React Router, next-themes, and Sonner providers; added the initial app router; and normalized the native cookie-authenticated API client error handling.
 - Feature 04: Route Placeholder Scaffold — added public and protected frontend route placeholders, a dashboard app shell with sidebar navigation, an `/app` dashboard redirect, and a future `/auth/me` protected-route integration point.
+- Feature 05: Landing Page Shell — added the Stafflow public homepage with dark/light theme support, a themed dashboard preview, module cards, metrics strip, footer, and a dedicated homepage feature folder.
 
 ## Entry Format
 
