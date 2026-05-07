@@ -1,8 +1,9 @@
 import type { ErrorRequestHandler } from "express";
 
 import { env } from "../../config/env";
+import type { ApiError } from "../types/api-response";
 import { logger } from "../logger/logger";
-import { HttpError } from "./http-error";
+import { AppError } from "./app-error";
 
 export const globalErrorHandler: ErrorRequestHandler = (
   error,
@@ -10,12 +11,12 @@ export const globalErrorHandler: ErrorRequestHandler = (
   response,
   _next,
 ) => {
-  const isHttpError = error instanceof HttpError;
-  const statusCode = isHttpError ? error.statusCode : 500;
-  const message = isHttpError ? error.message : "Internal server error";
-  const code = isHttpError ? error.code : "INTERNAL_SERVER_ERROR";
+  const isAppError = error instanceof AppError;
+  const statusCode = isAppError ? error.statusCode : 500;
+  const message = isAppError ? error.message : "Internal server error";
+  const code = isAppError ? error.code : "INTERNAL_SERVER_ERROR";
   const details =
-    isHttpError || env.NODE_ENV !== "production" ? error.details : undefined;
+    isAppError || env.NODE_ENV !== "production" ? error.details : undefined;
 
   logger.error(
     {
@@ -26,11 +27,13 @@ export const globalErrorHandler: ErrorRequestHandler = (
     "Request failed",
   );
 
-  response.status(statusCode).json({
+  const responseBody: ApiError = {
     error: {
       code,
       details,
       message,
     },
-  });
+  };
+
+  response.status(statusCode).json(responseBody);
 };
