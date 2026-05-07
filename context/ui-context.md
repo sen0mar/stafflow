@@ -82,10 +82,10 @@ If the project uses Tailwind v4, map these variables with `@theme inline`. If th
 | Default border | `--border-default` | `#d6d2ca` |
 | Subtle border | `--border-subtle` | `#e4e0d8` |
 | Strong border | `--border-strong` | `#b8b2a8` |
-| Primary text | `--text-primary` | `#171717` |
-| Secondary text | `--text-secondary` | `#3f3d39` |
-| Muted text | `--text-muted` | `#6e6a64` |
-| Faint text | `--text-faint` | `#9a948b` |
+| Primary text | `--text-primary` | `#080808` |
+| Secondary text | `--text-secondary` | `#1f1d1a` |
+| Muted text | `--text-muted` | `#403b35` |
+| Faint text | `--text-faint` | `#5f574d` |
 | Brand accent | `--accent-primary` | `#d06a1c` |
 | Brand hover | `--accent-primary-hover` | `#df7a24` |
 | Brand active | `--accent-primary-active` | `#b65a18` |
