@@ -52,7 +52,6 @@ export const DashboardPreview = () => (
               <LandingIconWell icon={metric.icon} className="h-9 w-9 rounded-xl" />
               <p className="mt-3 text-[11px] font-medium text-muted">{metric.label}</p>
               <p className="mt-1 text-2xl font-semibold text-primary">{metric.value}</p>
-              <p className="mt-1 text-[11px] text-brand-text">{metric.detail}</p>
             </div>
           ))}
         </div>

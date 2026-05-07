@@ -1,13 +1,12 @@
-import { ArrowRight, Sparkles } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { DashboardPreview } from '@/features/homepage/components/dashboard-preview'
 import { LandingBrandMark } from '@/features/homepage/components/landing-brand-mark'
-import { modules, metrics, valuePoints } from '@/features/homepage/components/landing-data'
+import { modules, valuePoints } from '@/features/homepage/components/landing-data'
 import { LandingIconWell } from '@/features/homepage/components/landing-icon-well'
 import { ReactiveDotGrid } from '@/features/homepage/components/reactive-dot-grid'
 import { Button } from '@/shared/components/ui/button'
 import { ThemeToggle } from '@/shared/components/ui/theme-toggle'
-import { cn } from '@/shared/lib/utils'
 
 export const HomePage = () => (
   <main className="relative min-h-screen overflow-hidden bg-base text-primary">
@@ -33,12 +32,7 @@ export const HomePage = () => (
 
       <section className="mx-auto grid max-w-[1440px] items-center gap-10 px-5 pb-8 pt-5 sm:px-6 lg:grid-cols-[0.82fr_1.18fr] lg:px-8 lg:pb-6 lg:pt-6">
         <div>
-          <div className="inline-flex items-center gap-2 rounded-full border border-default bg-overlay px-4 py-2 text-sm font-medium text-brand-text shadow-soft backdrop-blur">
-            <Sparkles className="h-4 w-4" aria-hidden="true" />
-            All-in-one employee management system
-          </div>
-
-          <h1 className="mt-6 max-w-4xl text-5xl font-semibold leading-[1.04] tracking-normal text-primary sm:text-6xl lg:text-7xl">
+          <h1 className="max-w-4xl text-5xl font-semibold leading-[1.04] tracking-normal text-primary sm:text-6xl lg:text-7xl">
             Manage your workforce <span className="text-brand-text">in one place</span>
           </h1>
           <p className="mt-5 max-w-2xl text-base leading-8 text-secondary sm:text-lg">
@@ -82,27 +76,6 @@ export const HomePage = () => (
             <p className="mt-3 text-sm leading-6 text-secondary">{module.description}</p>
           </article>
         ))}
-      </section>
-
-      <section className="mx-auto max-w-[1440px] px-5 py-5 sm:px-6 lg:px-8">
-        <div className="grid gap-5 rounded-3xl border border-default bg-overlay p-5 shadow-soft backdrop-blur md:grid-cols-2 xl:grid-cols-4">
-          {metrics.map((metric, index) => (
-            <div
-              key={metric.label}
-              className={cn(
-                'flex items-center gap-4 xl:pr-5',
-                index < metrics.length - 1 && 'xl:border-r xl:border-subtle',
-              )}
-            >
-              <LandingIconWell icon={metric.icon} className="shrink-0 rounded-full" />
-              <div>
-                <p className="text-3xl font-semibold text-primary">{metric.value}</p>
-                <p className="mt-1 text-sm font-medium text-secondary">{metric.label}</p>
-                <p className="mt-1 text-xs text-brand-text">{metric.detail}</p>
-              </div>
-            </div>
-          ))}
-        </div>
       </section>
 
       <footer className="mx-auto flex max-w-[1440px] flex-col gap-6 px-5 pb-8 pt-8 text-sm text-muted sm:px-6 md:flex-row md:items-center md:justify-between lg:px-8">
