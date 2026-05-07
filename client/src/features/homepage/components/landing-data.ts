@@ -30,6 +30,11 @@ interface PreviewNavItem {
   icon: LucideIcon
 }
 
+interface LeaveRequestPreview {
+  name: string
+  initials: string
+}
+
 interface ChartPoint {
   x: number
   y: number
@@ -145,7 +150,24 @@ export const previewNavItems: PreviewNavItem[] = [
   },
 ]
 
-export const leaveRequestNames = ['Priya Sharma', 'Rohan Mehta', 'Aayel Verma', 'Karan Singh']
+export const leaveRequestPreviews: LeaveRequestPreview[] = [
+  {
+    name: 'Priya Sharma',
+    initials: 'PS',
+  },
+  {
+    name: 'Rohan Mehta',
+    initials: 'RM',
+  },
+  {
+    name: 'Aayel Verma',
+    initials: 'AV',
+  },
+  {
+    name: 'Karan Singh',
+    initials: 'KS',
+  },
+]
 
 export const chartLabels = ['May 12', 'May 13', 'May 14', 'May 15', 'May 16', 'May 17', 'May 18']
 

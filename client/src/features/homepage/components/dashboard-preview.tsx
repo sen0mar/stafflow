@@ -1,7 +1,8 @@
-import { previewNavItems, leaveRequestNames, metrics } from './landing-data'
+import { previewNavItems, leaveRequestPreviews, metrics } from './landing-data'
 import { AttendancePreviewChart } from './attendance-preview-chart'
 import { LandingBrandMark } from './landing-brand-mark'
 import { LandingIconWell } from './landing-icon-well'
+import { Avatar, AvatarBadge, AvatarFallback } from '@/shared/components/ui/avatar'
 import { cn } from '@/shared/lib/utils'
 
 export const DashboardPreview = () => (
@@ -35,7 +36,12 @@ export const DashboardPreview = () => (
             <p className="mt-1 text-xs font-medium text-muted">Overview of your organization</p>
           </div>
           <div className="flex items-center gap-2 rounded-full border border-default bg-elevated px-2 py-1 shadow-soft">
-            <span className="h-7 w-7 rounded-full bg-brand-soft" />
+            <Avatar size="sm" className="overflow-visible bg-brand-soft ring-2 ring-brand-soft">
+              <AvatarFallback className="bg-brand-soft text-[10px] font-semibold text-brand-text">
+                AD
+              </AvatarFallback>
+              <AvatarBadge className="bg-success ring-elevated" />
+            </Avatar>
             <span className="hidden text-xs font-medium text-secondary sm:inline">Admin</span>
           </div>
         </div>
@@ -76,12 +82,17 @@ export const DashboardPreview = () => (
               <span className="text-xs font-medium text-brand-text">View All</span>
             </div>
             <div className="mt-4 space-y-3">
-              {leaveRequestNames.map((name) => (
-                <div key={name} className="flex items-center justify-between gap-3">
+              {leaveRequestPreviews.map((request) => (
+                <div key={request.name} className="flex items-center justify-between gap-3">
                   <div className="flex min-w-0 items-center gap-3">
-                    <span className="h-8 w-8 shrink-0 rounded-full bg-brand-soft" />
+                    <Avatar className="overflow-visible bg-brand-soft ring-2 ring-brand-soft">
+                      <AvatarFallback className="bg-brand-soft text-xs font-semibold text-brand-text">
+                        {request.initials}
+                      </AvatarFallback>
+                      <AvatarBadge className="bg-success ring-elevated" />
+                    </Avatar>
                     <div className="min-w-0">
-                      <p className="truncate text-xs font-semibold text-primary">{name}</p>
+                      <p className="truncate text-xs font-semibold text-primary">{request.name}</p>
                       <p className="truncate text-[11px] text-muted">Annual Leave</p>
                     </div>
                   </div>
