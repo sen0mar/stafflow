@@ -5,6 +5,13 @@ import { LandingIconWell } from './landing-icon-well'
 import { Avatar, AvatarBadge, AvatarFallback } from '@/shared/components/ui/avatar'
 import { cn } from '@/shared/lib/utils'
 
+const leaveStatusClasses = {
+  Approved: 'bg-success/10 text-success',
+  'In Review': 'bg-info/10 text-info',
+  Pending: 'bg-warning/10 text-warning',
+  Declined: 'bg-error/10 text-error',
+}
+
 export const DashboardPreview = () => (
   <section
     aria-label="Dashboard preview"
@@ -95,8 +102,13 @@ export const DashboardPreview = () => (
                       <p className="truncate text-[11px] text-muted">Annual Leave</p>
                     </div>
                   </div>
-                  <span className="rounded-full bg-brand-soft px-2 py-1 text-[10px] font-medium text-brand-text">
-                    Pending
+                  <span
+                    className={cn(
+                      'shrink-0 rounded-full px-2 py-1 text-[10px] font-medium',
+                      leaveStatusClasses[request.status],
+                    )}
+                  >
+                    {request.status}
                   </span>
                 </div>
               ))}

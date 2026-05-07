@@ -42,9 +42,11 @@ export const AttendancePreviewChart = () => (
           <circle key={`${x}-${y}`} cx={x} cy={y} r="3" fill="var(--chart-secondary)" />
         ))}
       </svg>
-      <div className="absolute inset-x-0 bottom-0 grid grid-cols-7 text-center text-[10px] text-muted">
-        {chartLabels.map((label) => (
-          <span key={label}>{label}</span>
+      <div className="absolute inset-x-0 bottom-0 grid grid-cols-7 text-center text-[9px] font-medium text-muted sm:text-[10px]">
+        {chartLabels.map(({ label, detail }) => (
+          <span key={detail} title={detail}>
+            {label}
+          </span>
         ))}
       </div>
     </div>

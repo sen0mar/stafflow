@@ -33,6 +33,12 @@ interface PreviewNavItem {
 interface LeaveRequestPreview {
   name: string
   initials: string
+  status: 'Approved' | 'In Review' | 'Pending' | 'Declined'
+}
+
+interface ChartLabel {
+  label: string
+  detail: string
 }
 
 interface ChartPoint {
@@ -154,22 +160,34 @@ export const leaveRequestPreviews: LeaveRequestPreview[] = [
   {
     name: 'Priya Sharma',
     initials: 'PS',
+    status: 'Approved',
   },
   {
     name: 'Rohan Mehta',
     initials: 'RM',
+    status: 'In Review',
   },
   {
     name: 'Aayel Verma',
     initials: 'AV',
+    status: 'Pending',
   },
   {
     name: 'Karan Singh',
     initials: 'KS',
+    status: 'Declined',
   },
 ]
 
-export const chartLabels = ['May 12', 'May 13', 'May 14', 'May 15', 'May 16', 'May 17', 'May 18']
+export const chartLabels: ChartLabel[] = [
+  { label: 'May 12', detail: 'May 12' },
+  { label: '13', detail: 'May 13' },
+  { label: '14', detail: 'May 14' },
+  { label: '15', detail: 'May 15' },
+  { label: '16', detail: 'May 16' },
+  { label: '17', detail: 'May 17' },
+  { label: '18', detail: 'May 18' },
+]
 
 export const presentPoints: ChartPoint[] = [
   { x: 8, y: 72, value: '80' },
