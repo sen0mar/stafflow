@@ -12,21 +12,23 @@ export const HomePage = () => (
   <main className="relative min-h-screen overflow-hidden bg-base text-primary">
     <ReactiveDotGrid />
     <div className="relative z-10">
-      <header className="mx-auto flex max-w-[1440px] items-center justify-between px-5 py-5 sm:px-6 lg:px-8">
-        <LandingBrandMark />
-        <div className="flex items-center gap-3">
-          <ThemeToggle />
-          <Button asChild size="lg" className="hidden sm:inline-flex">
-            <Link to="/login">
-              Demo Login
-              <ArrowRight className="h-4 w-4" aria-hidden="true" />
-            </Link>
-          </Button>
-          <Button asChild size="icon" className="sm:hidden" aria-label="Demo Login">
-            <Link to="/login">
-              <ArrowRight className="h-4 w-4" aria-hidden="true" />
-            </Link>
-          </Button>
+      <header className="border-b border-default bg-overlay backdrop-blur">
+        <div className="mx-auto flex max-w-[1440px] items-center justify-between px-5 py-4 sm:px-6 lg:px-8">
+          <LandingBrandMark />
+          <div className="flex items-center gap-3">
+            <ThemeToggle />
+            <Button asChild size="lg" className="hidden sm:inline-flex">
+              <Link to="/login">
+                Demo Login
+                <ArrowRight className="h-4 w-4" aria-hidden="true" />
+              </Link>
+            </Button>
+            <Button asChild size="icon" className="sm:hidden" aria-label="Demo Login">
+              <Link to="/login">
+                <ArrowRight className="h-4 w-4" aria-hidden="true" />
+              </Link>
+            </Button>
+          </div>
         </div>
       </header>
 
@@ -78,19 +80,21 @@ export const HomePage = () => (
         ))}
       </section>
 
-      <footer className="mx-auto flex max-w-[1440px] flex-col gap-6 px-5 pb-8 pt-8 text-sm text-muted sm:px-6 md:flex-row md:items-center md:justify-between lg:px-8">
-        <LandingBrandMark />
-        <p>© 2026 Stafflow. All rights reserved.</p>
-        <div className="flex flex-wrap gap-5">
-          <Link to="/" className="transition hover:text-brand-text">
-            Privacy Policy
-          </Link>
-          <Link to="/" className="transition hover:text-brand-text">
-            Terms of Service
-          </Link>
-          <Link to="/" className="transition hover:text-brand-text">
-            Support
-          </Link>
+      <footer className="border-t border-default bg-overlay backdrop-blur">
+        <div className="mx-auto flex max-w-[1440px] flex-col gap-6 px-5 py-8 text-sm text-muted sm:px-6 md:flex-row md:items-center md:justify-between lg:px-8">
+          <LandingBrandMark />
+          <p>© 2026 Stafflow. All rights reserved.</p>
+          <div className="flex flex-wrap gap-5">
+            <Link to="/" className="transition hover:text-brand-text">
+              Privacy Policy
+            </Link>
+            <Link to="/" className="transition hover:text-brand-text">
+              Terms of Service
+            </Link>
+            <Link to="/" className="transition hover:text-brand-text">
+              Support
+            </Link>
+          </div>
         </div>
       </footer>
     </div>
