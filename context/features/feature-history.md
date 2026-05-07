@@ -14,6 +14,7 @@ Keep entries short. This file should explain what changed, not become a detailed
 - Feature 06: Reactive Homepage Polish — added a canvas-based reactive homepage dot background, tightened first-load hero spacing, and enhanced the dashboard preview with initials avatars.
 - Feature 08: Black/Grey/Orange Theme Test — updated semantic theme tokens with charcoal surfaces, black-to-grey card gradients, professional amber accents, chart colors, shadows, and matching UI documentation.
 - Feature 09: Server Middleware Foundation — composed the Express middleware stack with trust proxy, request IDs, Pino HTTP logging, Helmet, exact-origin credentialed CORS via `CLIENT_URL`, parsers, routes, not-found handling, and global error handling.
+- Feature 10: Server Foundation Cleanup — added shared API response contracts, replaced `HttpError` with `AppError`, limited Render trust proxy to production, tightened Pino redaction, and verified health/error responses locally.
 
 ## Entry Format
 
