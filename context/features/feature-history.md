@@ -15,6 +15,7 @@ Keep entries short. This file should explain what changed, not become a detailed
 - Feature 08: Black/Grey/Orange Theme Test — updated semantic theme tokens with charcoal surfaces, black-to-grey card gradients, professional amber accents, chart colors, shadows, and matching UI documentation.
 - Feature 09: Server Middleware Foundation — composed the Express middleware stack with trust proxy, request IDs, Pino HTTP logging, Helmet, exact-origin credentialed CORS via `CLIENT_URL`, parsers, routes, not-found handling, and global error handling.
 - Feature 10: Server Foundation Cleanup — added shared API response contracts, replaced `HttpError` with `AppError`, limited Render trust proxy to production, tightened Pino redaction, and verified health/error responses locally.
+- Feature 11: Core Prisma Enums Schema — added the initial Stafflow domain enums to the Prisma schema, preserved the PostgreSQL datasource config, and kept audit actions flexible as a future string field.
 
 ## Entry Format
 
