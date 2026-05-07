@@ -6,60 +6,54 @@ This file tracks the current feature branch. After implementation is complete, r
 
 ## Current Phase
 
-- Implementation.
+- Placeholder.
 
 ## Current Goal
 
-- Create the initial Express backend source folder scaffold and align backend tooling with the `server` package boundary.
+- Placeholder.
 
 ## Active Feature
 
-- Feature 07: Backend Server Scaffold
+- Placeholder.
 
 ## Scope
 
-- Add the `server/src` folder structure for backend app composition, config, shared core infrastructure, feature modules, and Prisma client access.
-- Move backend package ownership from `backend` to `server` so TypeScript and dependency imports resolve correctly.
-- Add minimal Prisma 7 schema/config scaffolding required to generate the Prisma client.
+- Placeholder.
 
 ## Out Of Scope
 
-- Implementing API routes, auth/session behavior, Prisma schema changes, migrations, business logic, or deployment wiring.
+- Placeholder.
 
 ## Implementation Checklist
 
-- [x] Requirements are clear.
-- [x] Data model impact is understood.
-- [x] API changes are defined.
-- [x] Frontend changes are defined.
-- [x] Auth/RBAC/policy requirements are defined.
-- [x] Performance risks are considered.
-- [x] Error states are considered.
-- [x] Audit log requirements are considered.
-- [x] Tests or verification steps are defined.
-- [x] Documentation updates are complete.
+- [ ] Requirements are clear.
+- [ ] Data model impact is understood.
+- [ ] API changes are defined.
+- [ ] Frontend changes are defined.
+- [ ] Auth/RBAC/policy requirements are defined.
+- [ ] Performance risks are considered.
+- [ ] Error states are considered.
+- [ ] Audit log requirements are considered.
+- [ ] Tests or verification steps are defined.
+- [ ] Documentation updates are complete.
 
 ## In Progress
 
-- None.
+- Placeholder.
 
 ## Next Up
 
-- Feature 01: Project setup and tooling foundation.
-- Feature 02: Backend foundation, environment validation, Prisma migrations, health check, and demo seed plan.
-- Feature 03: Auth foundation with bcrypt, database sessions, cookies, CSRF, no public registration, and rate limiting.
+- Placeholder.
 
 ## Open Questions
 
-- None.
+- Placeholder.
 
 ## Architecture Decisions
 
 - Current global decisions are documented in `architecture-context.md`.
-- Backend package ownership now follows the documented `server/` boundary instead of the old empty `backend/` workspace.
-- Prisma 7 stores the datasource URL in `prisma.config.ts`; `prisma/schema.prisma` only declares the PostgreSQL provider until models are added.
 - Move project-wide decisions to `architecture-context.md` once confirmed.
 
 ## Session Notes
 
-- User confirmed no new branch is needed for this scaffold. Work continued on the current branch.
+- Placeholder.

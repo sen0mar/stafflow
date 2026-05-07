@@ -6,32 +6,35 @@
 :root {
   color-scheme: light;
 
-  --bg-base: #fbfcff;
-  --bg-base-soft: #f5f7ff;
-  --bg-surface: #ffffff;
+  --bg-base: #f3f2ef;
+  --bg-base-soft: #e7e4df;
+  --bg-surface: #fbfaf8;
   --bg-elevated: #ffffff;
-  --bg-subtle: #f6f7fb;
-  --bg-inset: #f8f9fc;
-  --bg-overlay: rgba(255, 255, 255, 0.82);
-  --bg-dot: rgba(100, 116, 139, 0.28);
+  --bg-subtle: #ebe8e3;
+  --bg-inset: #dedbd5;
+  --bg-overlay: rgba(251, 250, 248, 0.86);
+  --bg-dot: rgba(194, 101, 28, 0.16);
+  --gradient-surface: linear-gradient(145deg, #ffffff 0%, #f1eee8 100%);
+  --gradient-elevated: linear-gradient(145deg, #ffffff 0%, #ebe7df 100%);
+  --gradient-overlay: linear-gradient(145deg, rgba(255, 255, 255, 0.9) 0%, rgba(238, 234, 226, 0.88) 100%);
 
-  --border-default: #e5e7ef;
-  --border-subtle: #eef0f6;
-  --border-strong: #d6dbe8;
+  --border-default: #d6d2ca;
+  --border-subtle: #e4e0d8;
+  --border-strong: #b8b2a8;
 
-  --text-primary: #0f172a;
-  --text-secondary: #334155;
-  --text-muted: #64748b;
-  --text-faint: #94a3b8;
+  --text-primary: #171717;
+  --text-secondary: #3f3d39;
+  --text-muted: #6e6a64;
+  --text-faint: #9a948b;
 
-  --accent-primary: #6d28d9;
-  --accent-primary-hover: #7c3aed;
-  --accent-primary-active: #5b21b6;
-  --accent-primary-text: #6d28d9;
-  --accent-primary-soft: rgba(109, 40, 217, 0.12);
-  --accent-primary-dim: rgba(109, 40, 217, 0.07);
-  --accent-primary-glow: rgba(109, 40, 217, 0.24);
-  --accent-secondary: #2563eb;
+  --accent-primary: #d06a1c;
+  --accent-primary-hover: #df7a24;
+  --accent-primary-active: #b65a18;
+  --accent-primary-text: #9f4d12;
+  --accent-primary-soft: rgba(208, 106, 28, 0.13);
+  --accent-primary-dim: rgba(208, 106, 28, 0.08);
+  --accent-primary-glow: rgba(208, 106, 28, 0.2);
+  --accent-secondary: #525252;
   --accent-teal: #0f766e;
 
   --state-success: #16a34a;
@@ -39,17 +42,17 @@
   --state-error: #dc2626;
   --state-info: #2563eb;
 
-  --chart-primary: #6d28d9;
-  --chart-secondary: #94a3b8;
-  --chart-blue: #2563eb;
+  --chart-primary: #d06a1c;
+  --chart-secondary: #8c8780;
+  --chart-blue: #525252;
   --chart-teal: #0f766e;
 
-  --shadow-card: 0 18px 50px rgba(15, 23, 42, 0.08);
-  --shadow-soft: 0 10px 28px rgba(15, 23, 42, 0.06);
-  --shadow-glow: 0 0 40px rgba(109, 40, 217, 0.18);
+  --shadow-card: 0 18px 50px rgba(23, 23, 23, 0.1);
+  --shadow-soft: 0 10px 28px rgba(23, 23, 23, 0.08);
+  --shadow-glow: 0 0 32px rgba(208, 106, 28, 0.16);
 
-  --gradient-primary: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 55%, #4f46e5 100%);
-  --gradient-hero: radial-gradient(circle at 72% 34%, rgba(109, 40, 217, 0.14), transparent 38%);
+  --gradient-primary: linear-gradient(180deg, #df8a42 0%, #d06a1c 54%, #b65a18 100%);
+  --gradient-hero: radial-gradient(circle at 72% 34%, rgba(208, 106, 28, 0.12), transparent 38%);
 
   --font-geist-sans:
     "Geist", "Geist Sans", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
@@ -63,50 +66,53 @@
 .dark {
   color-scheme: dark;
 
-  --bg-base: #050914;
-  --bg-base-soft: #08111f;
-  --bg-surface: #0b1220;
-  --bg-elevated: #111827;
-  --bg-subtle: #171f2e;
-  --bg-inset: #070d18;
-  --bg-overlay: rgba(5, 9, 20, 0.78);
-  --bg-dot: rgba(124, 58, 237, 0.22);
+  --bg-base: #0e0e0e;
+  --bg-base-soft: #181818;
+  --bg-surface: #141414;
+  --bg-elevated: #202020;
+  --bg-subtle: #2b2b2b;
+  --bg-inset: #101010;
+  --bg-overlay: rgba(20, 20, 20, 0.82);
+  --bg-dot: rgba(217, 119, 38, 0.16);
+  --gradient-surface: linear-gradient(145deg, #111111 0%, #232323 100%);
+  --gradient-elevated: linear-gradient(145deg, #1a1a1a 0%, #2f2f2f 100%);
+  --gradient-overlay: linear-gradient(145deg, rgba(17, 17, 17, 0.9) 0%, rgba(39, 39, 39, 0.84) 100%);
 
-  --border-default: #1f2937;
-  --border-subtle: #2d3748;
-  --border-strong: #3b4560;
+  --border-default: #303030;
+  --border-subtle: #252525;
+  --border-strong: #464646;
 
-  --text-primary: #f8fafc;
-  --text-secondary: #cbd5e1;
-  --text-muted: #94a3b8;
-  --text-faint: #64748b;
+  --text-primary: #f8f8f8;
+  --text-secondary: #d4d4d4;
+  --text-muted: #a3a3a3;
+  --text-faint: #737373;
 
-  --accent-primary: #7c3aed;
-  --accent-primary-hover: #8b5cf6;
-  --accent-primary-active: #6d28d9;
-  --accent-primary-text: #a78bfa;
-  --accent-primary-soft: rgba(124, 58, 237, 0.18);
-  --accent-primary-dim: rgba(124, 58, 237, 0.1);
-  --accent-primary-glow: rgba(124, 58, 237, 0.45);
-  --accent-secondary: #2563eb;
-  --accent-teal: #14b8a6;
+  --accent-primary: #e57922;
+  --accent-primary-hover: #ed8936;
+  --accent-primary-active: #c8661d;
+  --accent-primary-text: #f0a05b;
+  --accent-primary-soft: rgba(229, 121, 34, 0.17);
+  --accent-primary-dim: rgba(229, 121, 34, 0.1);
+  --accent-primary-glow: rgba(229, 121, 34, 0.28);
+  --accent-secondary: #737373;
+  --accent-teal: #2dd4bf;
 
   --state-success: #34d399;
   --state-warning: #f59e0b;
   --state-error: #ef4444;
   --state-info: #60a5fa;
 
-  --chart-primary: #8b5cf6;
-  --chart-secondary: #94a3b8;
-  --chart-blue: #3b82f6;
-  --chart-teal: #14b8a6;
+  --chart-primary: #e57922;
+  --chart-secondary: #737373;
+  --chart-blue: #a3a3a3;
+  --chart-teal: #2dd4bf;
 
   --shadow-card: 0 24px 80px rgba(0, 0, 0, 0.35);
   --shadow-soft: 0 14px 40px rgba(0, 0, 0, 0.24);
-  --shadow-glow: 0 0 48px rgba(124, 58, 237, 0.35);
+  --shadow-glow: 0 0 38px rgba(229, 121, 34, 0.22);
 
-  --gradient-primary: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 55%, #4f46e5 100%);
-  --gradient-hero: radial-gradient(circle at 75% 35%, rgba(124, 58, 237, 0.24), transparent 36%);
+  --gradient-primary: linear-gradient(180deg, #ee9a54 0%, #e57922 50%, #c8661d 100%);
+  --gradient-hero: radial-gradient(circle at 75% 35%, rgba(229, 121, 34, 0.18), transparent 36%);
 }
 
 @theme inline {
@@ -234,6 +240,23 @@
 
   .bg-hero-glow {
     background-image: var(--gradient-hero);
+  }
+
+  .bg-surface,
+  .bg-card {
+    background-color: var(--bg-surface);
+    background-image: var(--gradient-surface);
+  }
+
+  .bg-elevated,
+  .bg-popover {
+    background-color: var(--bg-elevated);
+    background-image: var(--gradient-elevated);
+  }
+
+  .bg-overlay {
+    background-color: var(--bg-overlay);
+    background-image: var(--gradient-overlay);
   }
 
   .dot-grid {

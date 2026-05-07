@@ -12,6 +12,7 @@ Keep entries short. This file should explain what changed, not become a detailed
 - Feature 04: Route Placeholder Scaffold — added public and protected frontend route placeholders, a dashboard app shell with sidebar navigation, an `/app` dashboard redirect, and a future `/auth/me` protected-route integration point.
 - Feature 05: Landing Page Shell — added the Stafflow public homepage with dark/light theme support, a themed dashboard preview, module cards, metrics strip, footer, and a dedicated homepage feature folder.
 - Feature 06: Reactive Homepage Polish — added a canvas-based reactive homepage dot background, tightened first-load hero spacing, and enhanced the dashboard preview with initials avatars.
+- Feature 08: Black/Grey/Orange Theme Test — updated semantic theme tokens with charcoal surfaces, black-to-grey card gradients, professional amber accents, chart colors, shadows, and matching UI documentation.
 
 ## Entry Format
 
