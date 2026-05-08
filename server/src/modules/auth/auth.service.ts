@@ -10,13 +10,27 @@ import {
   verifyPassword,
 } from "../../core/auth/password.service";
 import type { PublicAuthUser } from "../../core/auth/auth.types";
-import type { ChangePasswordInput, LoginInput } from "./auth.schema";
+import type {
+  AcceptInvitationInput,
+  ChangePasswordInput,
+  ForgotPasswordInput,
+  LoginInput,
+  ResetPasswordInput,
+} from "./auth.schema";
 import {
+  acceptInvitationToken,
+  createInvitedUserForAcceptedInvitation,
+  createPasswordResetToken,
   createSession,
+  findActiveUserByEmail,
   findUserByEmailForAuth,
   findUserByIdForAuth,
-  revokeOtherUserSessions,
+  findValidInvitationToken,
+  findValidPasswordResetToken,
+  markInvitationTokenAccepted,
+  markPasswordResetTokenUsed,
   revokeSession,
+  revokeUserSessions,
   updateLastLoginAt,
   updatePasswordHash,
 } from "./auth.repository";
@@ -28,6 +42,17 @@ const invalidCredentialsError = () =>
     message: "Email or password is incorrect.",
     statusCode: 401,
   });
+
+const invalidTokenError = () =>
+  new AppError({
+    code: "INVALID_OR_EXPIRED_TOKEN",
+    message: "This token is invalid or has expired.",
+    statusCode: 400,
+  });
+
+const passwordResetTtlMs = 60 * 60 * 1000;
+
+const getExpiresAt = (ttlMs: number) => new Date(Date.now() + ttlMs);
 
 // Strip service-only fields such as passwordHash before returning API data.
 const toPublicAuthUser = (user: {
@@ -91,11 +116,9 @@ export const logout = async (sessionId: string) => {
 // Changing a password requires the old password and writes a fresh hash.
 export const changePassword = async ({
   currentPassword,
-  currentSessionId,
   newPassword,
   userId,
 }: ChangePasswordInput & {
-  currentSessionId: string;
   userId: string;
 }) => {
   validatePasswordConstraints(newPassword);
@@ -123,7 +146,86 @@ export const changePassword = async ({
   const passwordHash = await hashPassword(newPassword);
 
   await updatePasswordHash({ passwordHash, userId });
-  await revokeOtherUserSessions({ currentSessionId, userId });
+  await revokeUserSessions(userId);
 
   return toPublicAuthUser(user);
+};
+
+// Password reset request is enumeration-safe. Email delivery can use the stored
+// token later without changing the public API shape.
+export const forgotPassword = async ({ email }: ForgotPasswordInput) => {
+  const user = await findActiveUserByEmail(email);
+
+  if (user) {
+    const token = createSessionToken();
+
+    await createPasswordResetToken({
+      expiresAt: getExpiresAt(passwordResetTtlMs),
+      tokenHash: hashSessionToken(token),
+      userId: user.id,
+    });
+  }
+
+  return { success: true as const };
+};
+
+export const resetPassword = async ({
+  newPassword,
+  token,
+}: ResetPasswordInput) => {
+  validatePasswordConstraints(newPassword);
+
+  const resetToken = await findValidPasswordResetToken(hashSessionToken(token));
+
+  if (!resetToken) {
+    throw invalidTokenError();
+  }
+
+  const passwordHash = await hashPassword(newPassword);
+
+  await updatePasswordHash({ passwordHash, userId: resetToken.userId });
+  await markPasswordResetTokenUsed(resetToken.id);
+  await revokeUserSessions(resetToken.userId);
+
+  return toPublicAuthUser(resetToken.user);
+};
+
+export const acceptInvitation = async ({
+  password,
+  token,
+}: AcceptInvitationInput) => {
+  validatePasswordConstraints(password);
+
+  const invitation = await findValidInvitationToken(hashSessionToken(token));
+
+  if (!invitation) {
+    throw invalidTokenError();
+  }
+
+  const passwordHash = await hashPassword(password);
+  const existingUser = invitation.user ?? (await findUserByEmailForAuth(invitation.email));
+  const user =
+    existingUser ??
+    (await createInvitedUserForAcceptedInvitation({
+      email: invitation.email,
+      passwordHash,
+      role: invitation.role,
+    }));
+
+  if (existingUser) {
+    await acceptInvitationToken({
+      passwordHash,
+      tokenId: invitation.id,
+      userId: existingUser.id,
+    });
+  } else {
+    await markInvitationTokenAccepted(invitation.id);
+  }
+
+  await revokeUserSessions(user.id);
+
+  return toPublicAuthUser({
+    ...user,
+    status: "ACTIVE",
+  });
 };

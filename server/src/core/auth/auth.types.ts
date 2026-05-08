@@ -1,5 +1,17 @@
 import type { UserRole, UserStatus } from "@prisma/client";
 
+export type Permission =
+  | "audit-logs:read"
+  | "attendance:manage"
+  | "attendance:self"
+  | "departments:manage"
+  | "employees:manage"
+  | "leave:manage"
+  | "leave:self"
+  | "payslips:manage"
+  | "payslips:self"
+  | "settings:manage";
+
 export interface AuthUser {
   id: string;
   email: string;
@@ -10,6 +22,10 @@ export interface AuthUser {
 }
 
 export interface AuthContext {
+  userId: string;
+  employeeId: string | null;
+  role: UserRole;
+  permissions: Permission[];
   sessionId: string;
   user: AuthUser;
 }

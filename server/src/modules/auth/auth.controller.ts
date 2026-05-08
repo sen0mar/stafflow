@@ -7,8 +7,21 @@ import {
 } from "../../core/auth/session.service";
 import type { ApiSuccess } from "../../core/types/api-response";
 import type { PublicAuthUser } from "../../core/auth/auth.types";
-import { changePasswordSchema, loginSchema } from "./auth.schema";
-import { changePassword, login, logout } from "./auth.service";
+import {
+  acceptInvitationSchema,
+  changePasswordSchema,
+  forgotPasswordSchema,
+  loginSchema,
+  resetPasswordSchema,
+} from "./auth.schema";
+import {
+  acceptInvitation,
+  changePassword,
+  forgotPassword,
+  login,
+  logout,
+  resetPassword,
+} from "./auth.service";
 
 interface AuthResponse {
   user: PublicAuthUser;
@@ -72,11 +85,63 @@ export const changePasswordController: RequestHandler = async (
   const { body } = changePasswordSchema.parse({ body: request.body });
   const user = await changePassword({
     ...body,
-    currentSessionId: request.auth?.sessionId ?? "",
-    userId: request.auth?.user.id ?? "",
+    userId: request.auth?.userId ?? "",
   });
 
-  setCsrfCookie(response);
+  clearSessionCookie(response);
+  clearCsrfCookie(response);
+
+  const responseBody: ApiSuccess<AuthResponse> = {
+    data: {
+      user,
+    },
+  };
+
+  response.status(200).json(responseBody);
+};
+
+export const forgotPasswordController: RequestHandler = async (
+  request,
+  response,
+) => {
+  const { body } = forgotPasswordSchema.parse({ body: request.body });
+  const result = await forgotPassword(body);
+
+  const responseBody: ApiSuccess<{ success: true }> = {
+    data: result,
+  };
+
+  response.status(200).json(responseBody);
+};
+
+export const resetPasswordController: RequestHandler = async (
+  request,
+  response,
+) => {
+  const { body } = resetPasswordSchema.parse({ body: request.body });
+  const user = await resetPassword(body);
+
+  clearSessionCookie(response);
+  clearCsrfCookie(response);
+
+  const responseBody: ApiSuccess<AuthResponse> = {
+    data: {
+      user,
+    },
+  };
+
+  response.status(200).json(responseBody);
+};
+
+export const acceptInvitationController: RequestHandler = async (
+  request,
+  response,
+) => {
+  const { body } = acceptInvitationSchema.parse({ body: request.body });
+  const user = await acceptInvitation(body);
+
+  clearSessionCookie(response);
+  clearCsrfCookie(response);
 
   const responseBody: ApiSuccess<AuthResponse> = {
     data: {
