@@ -15,10 +15,10 @@ const leaveStatusClasses = {
 export const DashboardPreview = () => (
   <section
     aria-label="Dashboard preview"
-    className="relative rounded-3xl border border-strong bg-hero-glow bg-overlay p-3 shadow-card backdrop-blur xl:p-4"
+    className="relative rounded-3xl border border-strong bg-hero-glow bg-overlay p-3 shadow-card backdrop-blur xl:p-4 2xl:p-5"
   >
-    <div className="grid overflow-hidden rounded-[1.25rem] border border-default bg-surface lg:grid-cols-[170px_1fr]">
-      <aside className="hidden border-r border-default bg-inset p-5 lg:block">
+    <div className="grid overflow-hidden rounded-[1.25rem] border border-default bg-surface lg:grid-cols-[170px_1fr] 2xl:grid-cols-[200px_1fr]">
+      <aside className="hidden border-r border-default bg-inset p-5 2xl:p-6 lg:block">
         <LandingBrandMark compact />
         <nav className="mt-8 space-y-2">
           {previewNavItems.map(({ label, icon: Icon }) => (
@@ -36,7 +36,7 @@ export const DashboardPreview = () => (
         </nav>
       </aside>
 
-      <div className="p-4 sm:p-5">
+      <div className="p-4 sm:p-5 2xl:p-6">
         <div className="flex items-start justify-between gap-4">
           <div>
             <h2 className="text-xl font-semibold text-primary sm:text-2xl">Dashboard</h2>

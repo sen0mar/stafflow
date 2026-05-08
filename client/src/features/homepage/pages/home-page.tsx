@@ -13,7 +13,7 @@ export const HomePage = () => (
     <ReactiveDotGrid />
     <div className="relative z-10">
       <header className="border-b border-default bg-overlay backdrop-blur">
-        <div className="mx-auto flex max-w-[1440px] items-center justify-between px-5 py-4 sm:px-6 lg:px-8">
+        <div className="mx-auto flex max-w-[1440px] items-center justify-between px-5 py-4 sm:px-6 lg:px-8 2xl:max-w-[1760px] 2xl:px-10">
           <LandingBrandMark />
           <div className="flex items-center gap-3">
             <ThemeToggle />
@@ -32,7 +32,7 @@ export const HomePage = () => (
         </div>
       </header>
 
-      <section className="mx-auto grid min-h-[calc(100vh-5rem)] max-w-[1440px] items-center gap-10 px-5 pb-8 pt-5 sm:px-6 lg:grid-cols-[0.82fr_1.18fr] lg:px-8 lg:pb-6 lg:pt-6">
+      <section className="mx-auto grid min-h-[calc(100vh-5rem)] max-w-[1440px] items-center gap-10 px-5 pb-8 pt-5 sm:px-6 lg:grid-cols-[0.82fr_1.18fr] lg:px-8 lg:pb-6 lg:pt-6 2xl:max-w-[1760px] 2xl:grid-cols-[0.72fr_1.28fr] 2xl:gap-16 2xl:px-10">
         <div>
           <h1 className="max-w-4xl text-5xl font-semibold leading-[1.04] tracking-normal text-primary sm:text-6xl lg:text-7xl">
             Manage your workforce <span className="text-brand-text">in one place</span>
@@ -67,7 +67,7 @@ export const HomePage = () => (
         <DashboardPreview />
       </section>
 
-      <section className="mx-auto grid max-w-[1440px] gap-5 px-5 py-5 sm:px-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 xl:px-8">
+      <section className="mx-auto grid max-w-[1440px] gap-5 px-5 py-5 sm:px-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 xl:px-8 2xl:max-w-[1760px] 2xl:gap-6 2xl:px-10">
         {modules.map((module) => (
           <article
             key={module.title}
@@ -81,7 +81,7 @@ export const HomePage = () => (
       </section>
 
       <footer className="border-t border-default bg-overlay backdrop-blur">
-        <div className="mx-auto flex max-w-[1440px] flex-col gap-6 px-5 py-8 text-sm text-muted sm:px-6 md:flex-row md:items-center md:justify-between lg:px-8">
+        <div className="mx-auto flex max-w-[1440px] flex-col gap-6 px-5 py-8 text-sm text-muted sm:px-6 md:flex-row md:items-center md:justify-between lg:px-8 2xl:max-w-[1760px] 2xl:px-10">
           <LandingBrandMark />
           <p>© 2026 Stafflow. All rights reserved.</p>
           <div className="flex flex-wrap gap-5">
