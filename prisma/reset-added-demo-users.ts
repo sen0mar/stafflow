@@ -1,11 +1,5 @@
-import { PrismaPg } from "@prisma/adapter-pg";
-import { PrismaClient } from "@prisma/client";
-import dotenv from "dotenv";
+import { prisma } from "./prisma-script-client";
 
-dotenv.config({ path: ".env.local", quiet: true });
-dotenv.config({ quiet: true });
-
-const databaseUrl = process.env.DATABASE_URL;
 const nodeEnv = process.env.NODE_ENV;
 const shouldConfirm = process.argv.includes("--confirm");
 
@@ -18,19 +12,9 @@ const seedUserEmails = [
   "ava.operations.demo@example.com",
 ];
 
-if (!databaseUrl) {
-  throw new Error("DATABASE_URL is required to reset added demo users.");
-}
-
 if (nodeEnv === "production") {
   throw new Error("Refusing to reset users while NODE_ENV=production.");
 }
-
-const adapter = new PrismaPg({
-  connectionString: databaseUrl,
-});
-
-const prisma = new PrismaClient({ adapter });
 
 const main = async () => {
   const addedUsers = await prisma.user.findMany({
