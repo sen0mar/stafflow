@@ -17,6 +17,7 @@ Keep entries short. This file should explain what changed, not become a detailed
 - Feature 10: Server Foundation Cleanup — added shared API response contracts, replaced `HttpError` with `AppError`, limited Render trust proxy to production, tightened Pino redaction, and verified health/error responses locally.
 - Feature 11: Database Schema Foundation — configured the PostgreSQL datasource, added initial Stafflow enums and Prisma models for auth, employees, departments, attendance, leave, payslips, settings, audit logs, password resets, and invitations, and verified early common-lookup indexes without creating migrations.
 - Feature 12: Initial Prisma Migration — created and applied the first Prisma migration, updated Prisma 7 datasource/runtime configuration, generated Prisma Client, and verified the singleton client with a lightweight database query.
+- Feature 13: Demo Seed Data — added Prisma demo seeding for baseline admin and employee accounts, departments, attendance, leave data, demo upload guardrails, and a development-only dry-run reset script for deleting users added after the seed baseline.
 
 ## Entry Format
 
