@@ -5,6 +5,8 @@ import {
   clearSessionCookie,
   setSessionCookie,
 } from "../../core/auth/session.service";
+import { AppError } from "../../core/errors/app-error";
+import { logger } from "../../core/logger/logger";
 import type { ApiSuccess } from "../../core/types/api-response";
 import type { PublicAuthUser } from "../../core/auth/auth.types";
 import {
@@ -27,10 +29,35 @@ interface AuthResponse {
   user: PublicAuthUser;
 }
 
+const failedLoginCodes = new Set(["ACCOUNT_NOT_ACTIVE", "INVALID_CREDENTIALS"]);
+
 // Login sets both cookies but only returns the sanitized user payload.
 export const loginController: RequestHandler = async (request, response) => {
   const { body } = loginSchema.parse({ body: request.body });
-  const result = await login(body);
+  let result: Awaited<ReturnType<typeof login>>;
+
+  try {
+    result = await login(body);
+  } catch (error) {
+    if (
+      error instanceof AppError &&
+      error.code !== undefined &&
+      failedLoginCodes.has(error.code)
+    ) {
+      logger.warn(
+        {
+          email: body.email,
+          ip: request.ip,
+          reason: error.code,
+          requestId: response.locals.requestId,
+          userAgent: request.get("user-agent"),
+        },
+        "Login attempt failed",
+      );
+    }
+
+    throw error;
+  }
 
   setSessionCookie(response, result.token);
   setCsrfCookie(response);
