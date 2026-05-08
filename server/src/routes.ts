@@ -1,6 +1,7 @@
 import { Router } from "express";
 
 import type { ApiSuccess } from "./core/types/api-response";
+import { createAuthRoutes } from "./modules/auth/auth.routes";
 
 interface HealthResponse {
   status: "ok";
@@ -16,6 +17,8 @@ export const createRoutes = (): Router => {
 
     response.status(200).json(responseBody);
   });
+
+  router.use("/auth", createAuthRoutes());
 
   return router;
 };
