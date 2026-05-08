@@ -2,7 +2,24 @@ import type { NextFunction, Request, RequestHandler, Response } from "express";
 
 import { AppError } from "../errors/app-error";
 import { prisma } from "../../prisma/prisma.client";
+import type { Permission } from "./auth.types";
 import { hashSessionToken, sessionCookieName } from "./session.service";
+
+const rolePermissions: Record<string, Permission[]> = {
+  ADMIN: [
+    "audit-logs:read",
+    "attendance:manage",
+    "attendance:self",
+    "departments:manage",
+    "employees:manage",
+    "leave:manage",
+    "leave:self",
+    "payslips:manage",
+    "payslips:self",
+    "settings:manage",
+  ],
+  EMPLOYEE: ["attendance:self", "leave:self", "payslips:self"],
+};
 
 // Attach auth when a valid active session exists, but let public routes continue.
 export const attachAuth: RequestHandler = async (request, _response, next) => {
@@ -47,13 +64,19 @@ export const attachAuth: RequestHandler = async (request, _response, next) => {
   });
 
   if (session) {
+    const employeeId = session.user.employee?.id ?? null;
+
     // Downstream routes should rely on this server-derived identity only.
     request.auth = {
+      employeeId,
+      permissions: rolePermissions[session.user.role] ?? [],
+      role: session.user.role,
       sessionId: session.id,
+      userId: session.user.id,
       user: {
         email: session.user.email,
         employee: session.user.employee,
-        employeeId: session.user.employee?.id ?? null,
+        employeeId,
         id: session.user.id,
         role: session.user.role,
         status: session.user.status,

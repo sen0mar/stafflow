@@ -19,6 +19,7 @@ Keep entries short. This file should explain what changed, not become a detailed
 - Feature 12: Initial Prisma Migration — created and applied the first Prisma migration, updated Prisma 7 datasource/runtime configuration, generated Prisma Client, and verified the singleton client with a lightweight database query.
 - Feature 13: Demo Seed Data — added Prisma demo seeding for baseline admin and employee accounts, departments, attendance, leave data, demo upload guardrails, and a development-only dry-run reset script for deleting users added after the seed baseline.
 - Feature 14: First-Party Auth Backend — added bcrypt password helpers, hashed database sessions with HTTP-only cookies, CSRF-protected auth mutations, `/auth` login/logout/me/change-password routes, auth middleware, and sanitized validation errors.
+- Feature 15: Auth Reset and Invitation Scaffolding — added password reset and invitation acceptance auth endpoints, expanded authenticated request context with role permissions, and invalidated sessions on logout, password reset, invitation acceptance, and password change.
 
 ## Entry Format
 
