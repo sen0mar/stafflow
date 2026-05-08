@@ -19,6 +19,10 @@ export const ProtectedRoute = () => {
     )
   }
 
+  if (currentUserQuery.data === null) {
+    return <Navigate to="/login" replace state={{ from: location }} />
+  }
+
   if (
     currentUserQuery.isError &&
     currentUserQuery.error instanceof ApiClientError &&
