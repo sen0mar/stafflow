@@ -22,8 +22,6 @@ Keep entries short. This file should explain what changed, not become a detailed
 - Feature 15: Auth Reset and Invitation Scaffolding — added password reset and invitation acceptance auth endpoints, expanded authenticated request context with role permissions, and invalidated sessions on logout, password reset, invitation acceptance, and password change.
 - Feature 16: Auth Login Flow — added safe failed-login logging, frontend auth API functions and TanStack Query hooks, a demo-friendly login page without public registration, `/auth/me` route protection, logout wiring, CSRF-aware fetch handling, and themed input fixes.
 
-- Feature 17: Homepage 2K Density — widened the homepage layout at very large breakpoints, gave the dashboard preview more space, and kept existing laptop and mobile layouts unchanged.
-
 ## Entry Format
 
 - Feature 01: Feature Name — concise summary of what was added, changed, verified, or migrated.
