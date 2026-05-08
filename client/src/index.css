@@ -222,6 +222,19 @@
     font: inherit;
   }
 
+  input {
+    color: var(--text-primary);
+  }
+
+  input:-webkit-autofill,
+  input:-webkit-autofill:focus,
+  input:-webkit-autofill:hover {
+    -webkit-text-fill-color: var(--text-primary);
+    caret-color: var(--accent-primary);
+    box-shadow: 0 0 0 1000px var(--bg-elevated) inset;
+    transition: background-color 9999s ease-out;
+  }
+
   ::selection {
     background: var(--accent-primary-soft);
     color: var(--text-primary);

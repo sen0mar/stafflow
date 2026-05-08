@@ -10,6 +10,10 @@ type ApiErrorResponse = {
   }
 }
 
+const csrfCookieName = 'stafflow_csrf'
+const csrfHeaderName = 'x-csrf-token'
+const apiBaseUrl = import.meta.env.VITE_API_URL ?? 'http://localhost:4000'
+
 export class ApiClientError extends Error {
   status: number
   code?: string
@@ -32,6 +36,29 @@ const isJsonBody = (body: RequestOptions['body']) =>
   !(body instanceof Blob) &&
   !(body instanceof URLSearchParams)
 
+const getCookieValue = (name: string) => {
+  const cookie = document.cookie
+    .split('; ')
+    .find((item) => item.startsWith(`${encodeURIComponent(name)}=`))
+
+  return cookie ? decodeURIComponent(cookie.split('=').slice(1).join('=')) : undefined
+}
+
+const getRequestUrl = (input: RequestInfo | URL) => {
+  if (typeof input !== 'string') {
+    return input
+  }
+
+  if (input.startsWith('http://') || input.startsWith('https://')) {
+    return input
+  }
+
+  return `${apiBaseUrl}${input.startsWith('/') ? input : `/${input}`}`
+}
+
+const shouldAttachCsrfToken = (method: string) =>
+  !['GET', 'HEAD', 'OPTIONS'].includes(method.toUpperCase())
+
 export const apiClient = async <TResponse>(
   input: RequestInfo | URL,
   options: RequestOptions = {},
@@ -47,7 +74,14 @@ export const apiClient = async <TResponse>(
     requestHeaders.set('Content-Type', 'application/json')
   }
 
-  const response = await fetch(input, {
+  const method = init.method ?? 'GET'
+  const csrfToken = shouldAttachCsrfToken(method) ? getCookieValue(csrfCookieName) : undefined
+
+  if (csrfToken && !requestHeaders.has(csrfHeaderName)) {
+    requestHeaders.set(csrfHeaderName, csrfToken)
+  }
+
+  const response = await fetch(getRequestUrl(input), {
     ...init,
     body: requestBody,
     credentials: 'include',
