@@ -10,6 +10,10 @@
     "dev:server": "npm --prefix server run dev --if-present",
     "build": "npm run build --workspaces --if-present",
     "lint": "npm run lint --workspaces --if-present",
+    "db:seed": "tsx prisma/seed.ts",
     "typecheck": "npm --prefix client exec -- tsc -b client/tsconfig.json"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
   }
 }
