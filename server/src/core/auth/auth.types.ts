@@ -1,16 +1,8 @@
 import type { UserRole, UserStatus } from "@prisma/client";
 
-export type Permission =
-  | "audit-logs:read"
-  | "attendance:manage"
-  | "attendance:self"
-  | "departments:manage"
-  | "employees:manage"
-  | "leave:manage"
-  | "leave:self"
-  | "payslips:manage"
-  | "payslips:self"
-  | "settings:manage";
+import type { Permission } from "./permissions";
+
+export type { Permission };
 
 export interface AuthUser {
   id: string;

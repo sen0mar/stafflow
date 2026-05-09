@@ -21,6 +21,7 @@ Keep entries short. This file should explain what changed, not become a detailed
 - Feature 14: First-Party Auth Backend — added bcrypt password helpers, hashed database sessions with HTTP-only cookies, CSRF-protected auth mutations, `/auth` login/logout/me/change-password routes, auth middleware, and sanitized validation errors.
 - Feature 15: Auth Reset and Invitation Scaffolding — added password reset and invitation acceptance auth endpoints, expanded authenticated request context with role permissions, and invalidated sessions on logout, password reset, invitation acceptance, and password change.
 - Feature 16: Auth Login Flow — added safe failed-login logging, frontend auth API functions and TanStack Query hooks, a demo-friendly login page without public registration, `/auth/me` route protection, logout wiring, CSRF-aware fetch handling, and themed input fixes.
+- Feature 17: Authorization Primitives — replaced coarse role permissions with typed MVP permission maps, added backend `requirePermission` middleware, seeded feature policy helpers for self-vs-any access, and typed frontend UI-only permission utilities.
 
 ## Entry Format
 
