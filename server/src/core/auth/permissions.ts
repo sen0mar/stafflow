@@ -4,6 +4,8 @@ import type { NextFunction, Request, RequestHandler, Response } from "express";
 import { AppError } from "../errors/app-error";
 
 export type Permission =
+  | "dashboard:read:admin"
+  | "dashboard:read:self"
   | "employees:read:any"
   | "employees:create"
   | "employees:update:any"
@@ -29,6 +31,7 @@ export type Permission =
 
 export const rolePermissions = {
   ADMIN: [
+    "dashboard:read:admin",
     "employees:read:any",
     "employees:create",
     "employees:update:any",
@@ -46,6 +49,7 @@ export const rolePermissions = {
     "auditLogs:read",
   ],
   EMPLOYEE: [
+    "dashboard:read:self",
     "profile:read:self",
     "profile:update:self",
     "attendance:read:self",

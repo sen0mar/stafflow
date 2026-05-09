@@ -1,4 +1,6 @@
 export type Permission =
+  | 'dashboard:read:admin'
+  | 'dashboard:read:self'
   | 'employees:read:any'
   | 'employees:create'
   | 'employees:update:any'
@@ -26,6 +28,7 @@ export type PermissionRole = 'ADMIN' | 'EMPLOYEE'
 
 export const rolePermissions = {
   ADMIN: [
+    'dashboard:read:admin',
     'employees:read:any',
     'employees:create',
     'employees:update:any',
@@ -43,6 +46,7 @@ export const rolePermissions = {
     'auditLogs:read',
   ],
   EMPLOYEE: [
+    'dashboard:read:self',
     'profile:read:self',
     'profile:update:self',
     'attendance:read:self',

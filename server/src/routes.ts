@@ -2,6 +2,7 @@ import { Router } from "express";
 
 import type { ApiSuccess } from "./core/types/api-response";
 import { createAuthRoutes } from "./modules/auth/auth.routes";
+import { createDashboardRoutes } from "./modules/dashboard/dashboard.routes";
 
 interface HealthResponse {
   status: "ok";
@@ -19,6 +20,7 @@ export const createRoutes = (): Router => {
   });
 
   router.use("/auth", createAuthRoutes());
+  router.use("/dashboard", createDashboardRoutes());
 
   return router;
 };
