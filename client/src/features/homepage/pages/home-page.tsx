@@ -3,7 +3,6 @@ import { HeroSection } from '@/features/homepage/components/hero-section'
 import { LandingFooter } from '@/features/homepage/components/landing-footer'
 import { LandingHeader } from '@/features/homepage/components/landing-header'
 import { modules } from '@/features/homepage/components/landing-data'
-import { MetricsStrip } from '@/features/homepage/components/metrics-strip'
 import { ReactiveDotGrid } from '@/features/homepage/components/reactive-dot-grid'
 
 export const HomePage = () => (
@@ -17,7 +16,6 @@ export const HomePage = () => (
           <FeatureCard key={module.title} description={module.description} icon={module.icon} title={module.title} />
         ))}
       </section>
-      <MetricsStrip />
       <LandingFooter />
     </div>
   </main>
