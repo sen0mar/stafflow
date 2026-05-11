@@ -137,6 +137,7 @@ model AttendanceRecord {
 
   @@unique([employeeId, date])
   @@index([employeeId, date])
+  @@index([date])
   @@index([status])
 }
 
