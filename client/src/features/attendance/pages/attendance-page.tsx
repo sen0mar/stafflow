@@ -1,6 +1,5 @@
 import { CalendarCheck, Filter, Search } from 'lucide-react'
 import { useState } from 'react'
-import { Button } from '@/shared/components/ui/button'
 import { Input } from '@/shared/components/ui/input'
 import {
   Select,
@@ -10,6 +9,7 @@ import {
   SelectValue,
 } from '@/shared/components/ui/select'
 import { Skeleton } from '@/shared/components/ui/skeleton'
+import { PaginationControls } from '@/shared/components/data-table/pagination-controls'
 import { PageHeader } from '@/shared/components/layout/page-header'
 import { useCurrentUser } from '@/features/auth/hooks/use-current-user'
 import { useDepartments } from '@/features/departments/hooks/use-departments'
@@ -63,42 +63,6 @@ const EmptyAttendance = ({ isAdmin }: { isAdmin?: boolean }) => (
         ? 'Adjust the filters or wait for employees to start recording attendance.'
         : 'Your clock-in and clock-out history will appear here.'}
     </p>
-  </div>
-)
-
-const PaginationControls = ({
-  page,
-  pageCount,
-  total,
-  onPageChange,
-}: {
-  onPageChange: (page: number) => void
-  page: number
-  pageCount: number
-  total: number
-}) => (
-  <div className="flex flex-col gap-3 border-t border-subtle pt-4 sm:flex-row sm:items-center sm:justify-between">
-    <p className="text-sm text-muted">
-      Page {page} of {pageCount} · {total} records
-    </p>
-    <div className="flex items-center gap-2">
-      <Button
-        type="button"
-        variant="outline"
-        disabled={page <= 1}
-        onClick={() => onPageChange(Math.max(1, page - 1))}
-      >
-        Previous
-      </Button>
-      <Button
-        type="button"
-        variant="outline"
-        disabled={page >= pageCount}
-        onClick={() => onPageChange(page + 1)}
-      >
-        Next
-      </Button>
-    </div>
   </div>
 )
 
@@ -171,6 +135,7 @@ const EmployeeAttendancePage = () => {
           <>
             <AttendanceHistoryTable records={records} />
             <PaginationControls
+              itemLabel="records"
               page={pagination?.page ?? page}
               pageCount={pagination?.pageCount ?? 1}
               total={pagination?.total ?? 0}
@@ -368,6 +333,7 @@ const AdminAttendancePage = () => {
           <>
             <AttendanceHistoryTable isAdmin records={records} onCorrect={openCorrection} />
             <PaginationControls
+              itemLabel="records"
               page={pagination?.page ?? page}
               pageCount={pagination?.pageCount ?? 1}
               total={pagination?.total ?? 0}

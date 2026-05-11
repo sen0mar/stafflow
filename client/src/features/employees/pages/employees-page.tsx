@@ -10,6 +10,7 @@ import {
   SelectValue,
 } from '@/shared/components/ui/select'
 import { Skeleton } from '@/shared/components/ui/skeleton'
+import { PaginationControls } from '@/shared/components/data-table/pagination-controls'
 import { PageHeader } from '@/shared/components/layout/page-header'
 import { useDepartments } from '@/features/departments/hooks/use-departments'
 import type { Employee, EmployeeSort, EmployeeStatus } from '../api/employees.api'
@@ -250,29 +251,13 @@ export const EmployeesPage = () => {
               onEdit={openEditDialog}
               onEnable={handleEnable}
             />
-            <div className="flex flex-col gap-3 border-t border-subtle pt-4 sm:flex-row sm:items-center sm:justify-between">
-              <p className="text-sm text-muted">
-                Page {pagination?.page ?? page} of {pagination?.pageCount ?? 1} · {pagination?.total ?? 0} employees
-              </p>
-              <div className="flex items-center gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  disabled={page <= 1}
-                  onClick={() => setPage((currentPage) => Math.max(1, currentPage - 1))}
-                >
-                  Previous
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  disabled={!pagination || page >= pagination.pageCount}
-                  onClick={() => setPage((currentPage) => currentPage + 1)}
-                >
-                  Next
-                </Button>
-              </div>
-            </div>
+            <PaginationControls
+              itemLabel="employees"
+              page={pagination?.page ?? page}
+              pageCount={pagination?.pageCount ?? 1}
+              total={pagination?.total ?? 0}
+              onPageChange={setPage}
+            />
           </>
         ) : null}
       </section>

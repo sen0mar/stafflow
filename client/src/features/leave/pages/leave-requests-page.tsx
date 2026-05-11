@@ -1,6 +1,7 @@
 import { CalendarDays, Filter, Plus, Search } from 'lucide-react'
 import { useState } from 'react'
 import { PageHeader } from '@/shared/components/layout/page-header'
+import { PaginationControls } from '@/shared/components/data-table/pagination-controls'
 import { Button } from '@/shared/components/ui/button'
 import {
   DropdownMenu,
@@ -96,34 +97,6 @@ const EmptyState = ({ text }: { text: string }) => (
     <CalendarDays className="mx-auto h-10 w-10 text-muted" aria-hidden="true" />
     <h2 className="mt-4 text-lg font-semibold text-primary">No leave records found</h2>
     <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-muted">{text}</p>
-  </div>
-)
-
-const PaginationControls = ({
-  label,
-  page,
-  pageCount,
-  total,
-  onPageChange,
-}: {
-  label: string
-  onPageChange: (page: number) => void
-  page: number
-  pageCount: number
-  total: number
-}) => (
-  <div className="flex flex-col gap-3 border-t border-subtle pt-4 sm:flex-row sm:items-center sm:justify-between">
-    <p className="text-sm text-muted">
-      Page {page} of {pageCount} · {total} {label}
-    </p>
-    <div className="flex items-center gap-2">
-      <Button type="button" variant="outline" disabled={page <= 1} onClick={() => onPageChange(Math.max(1, page - 1))}>
-        Previous
-      </Button>
-      <Button type="button" variant="outline" disabled={page >= pageCount} onClick={() => onPageChange(page + 1)}>
-        Next
-      </Button>
-    </div>
   </div>
 )
 
@@ -332,7 +305,7 @@ const EmployeeLeavePage = () => {
               onCancel={(request) => cancelRequest.mutate(request.id)}
             />
             <PaginationControls
-              label="requests"
+              itemLabel="requests"
               page={pagination?.page ?? page}
               pageCount={pagination?.pageCount ?? 1}
               total={pagination?.total ?? 0}
@@ -594,7 +567,7 @@ const AdminLeavePage = () => {
               onReject={(request) => openReview('reject', request)}
             />
             <PaginationControls
-              label="requests"
+              itemLabel="requests"
               page={pagination?.page ?? page}
               pageCount={pagination?.pageCount ?? 1}
               total={pagination?.total ?? 0}
