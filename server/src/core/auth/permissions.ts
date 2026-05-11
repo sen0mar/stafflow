@@ -15,6 +15,7 @@ export type Permission =
   | "attendance:read:any"
   | "attendance:update:any"
   | "leave:read:any"
+  | "leave:types:manage"
   | "leave:approve:any"
   | "leave:reject:any"
   | "payslips:read:any"
@@ -42,6 +43,7 @@ export const rolePermissions = {
     "attendance:read:any",
     "attendance:update:any",
     "leave:read:any",
+    "leave:types:manage",
     "leave:approve:any",
     "leave:reject:any",
     "payslips:read:any",
