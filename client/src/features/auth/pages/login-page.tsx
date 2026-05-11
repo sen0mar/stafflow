@@ -74,7 +74,7 @@ export const LoginPage = () => {
         <section className="grid flex-1 items-center gap-8 py-10 lg:grid-cols-[0.95fr_1.05fr]">
           <div className="hidden lg:block">
             <div className="max-w-md">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand text-primary-foreground shadow-glow">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand text-white shadow-glow">
                 <BriefcaseBusiness className="h-6 w-6" aria-hidden="true" />
               </div>
               <h1 className="mt-6 text-4xl font-semibold tracking-normal text-primary">Sign in to Stafflow</h1>

@@ -30,7 +30,7 @@ const SidebarContent = ({
   <div className="flex min-h-full w-full flex-col">
     <div className="mb-6 flex items-center justify-between gap-3 px-2">
       <div className="flex min-w-0 items-center gap-3">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand text-primary-foreground shadow-glow">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand text-white shadow-glow">
           <BarChart3 className="h-5 w-5" aria-hidden="true" />
         </div>
         <div className="min-w-0">

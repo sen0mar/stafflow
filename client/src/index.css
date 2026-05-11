@@ -222,8 +222,19 @@
     font: inherit;
   }
 
-  input {
-    color: var(--text-primary);
+  input,
+  select,
+  textarea {
+    -webkit-text-fill-color: var(--text-primary) !important;
+    caret-color: var(--accent-primary);
+    color: var(--text-primary) !important;
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    -webkit-text-fill-color: var(--text-muted) !important;
+    color: var(--text-muted);
+    opacity: 1;
   }
 
   input:-webkit-autofill,

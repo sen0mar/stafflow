@@ -7,7 +7,7 @@ interface LandingBrandMarkProps {
 
 export const LandingBrandMark = ({ compact = false }: LandingBrandMarkProps) => (
   <Link to="/" className="flex items-center gap-3 text-primary" aria-label="Stafflow home">
-    <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-brand text-primary-foreground shadow-glow">
+    <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-brand text-white shadow-glow">
       <Users className="h-5 w-5" aria-hidden="true" />
     </span>
     <span className="leading-tight">
