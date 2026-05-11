@@ -21,7 +21,7 @@ const csrfCookieOptions: CookieOptions = {
   httpOnly: false,
   maxAge: sessionTtlMs,
   path: "/",
-  sameSite: "lax",
+  sameSite: env.NODE_ENV === "production" ? "none" : "lax",
   secure: env.NODE_ENV === "production",
 };
 
@@ -52,7 +52,7 @@ export const clearCsrfCookie = (response: Response) => {
   response.clearCookie(csrfCookieName, {
     httpOnly: false,
     path: "/",
-    sameSite: "lax",
+    sameSite: env.NODE_ENV === "production" ? "none" : "lax",
     secure: env.NODE_ENV === "production",
   });
 };
