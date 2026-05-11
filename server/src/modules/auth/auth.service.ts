@@ -9,6 +9,7 @@ import {
   validatePasswordConstraints,
   verifyPassword,
 } from "../../core/auth/password.service";
+import { env } from "../../config/env";
 import type { PublicAuthUser } from "../../core/auth/auth.types";
 import type {
   AcceptInvitationInput,
@@ -51,6 +52,10 @@ const invalidTokenError = () =>
   });
 
 const passwordResetTtlMs = 60 * 60 * 1000;
+const protectedDemoEmails = new Set([
+  "admin.demo@example.com",
+  "employee.demo@example.com",
+]);
 
 const getExpiresAt = (ttlMs: number) => new Date(Date.now() + ttlMs);
 
@@ -140,6 +145,14 @@ export const changePassword = async ({
       code: "CURRENT_PASSWORD_INVALID",
       message: "Current password is incorrect.",
       statusCode: 401,
+    });
+  }
+
+  if (env.DEMO_MODE && protectedDemoEmails.has(user.email)) {
+    throw new AppError({
+      code: "DEMO_ACCOUNT_PROTECTED",
+      message: "Password changes are disabled for demo accounts.",
+      statusCode: 403,
     });
   }
 

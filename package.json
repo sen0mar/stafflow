@@ -10,6 +10,7 @@
     "dev:server": "npm --prefix server run dev --if-present",
     "build": "npm run build --workspaces --if-present",
     "lint": "npm run lint --workspaces --if-present",
+    "db:bootstrap-demo-auth": "tsx prisma/bootstrap-demo-auth.ts",
     "db:seed": "tsx prisma/seed.ts",
     "db:reset-added-users": "tsx prisma/reset-added-demo-users.ts",
     "typecheck": "npm --prefix client exec -- tsc -b client/tsconfig.json"
