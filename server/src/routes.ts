@@ -6,6 +6,10 @@ import { createAuthRoutes } from "./modules/auth/auth.routes";
 import { createDashboardRoutes } from "./modules/dashboard/dashboard.routes";
 import { createDepartmentRoutes } from "./modules/departments/departments.routes";
 import { createEmployeeRoutes } from "./modules/employees/employees.routes";
+import {
+  createLeaveRequestRoutes,
+  createLeaveTypeRoutes,
+} from "./modules/leave/leave.routes";
 import { createUserRoutes } from "./modules/users/users.routes";
 
 interface HealthResponse {
@@ -28,6 +32,8 @@ export const createRoutes = (): Router => {
   router.use("/dashboard", createDashboardRoutes());
   router.use("/departments", createDepartmentRoutes());
   router.use("/employees", createEmployeeRoutes());
+  router.use("/leave-requests", createLeaveRequestRoutes());
+  router.use("/leave-types", createLeaveTypeRoutes());
   router.use("/users", createUserRoutes());
 
   return router;
