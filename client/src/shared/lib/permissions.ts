@@ -5,6 +5,7 @@ export type Permission =
   | 'employees:create'
   | 'employees:update:any'
   | 'employees:delete'
+  | 'departments:read'
   | 'departments:manage'
   | 'attendance:read:any'
   | 'attendance:update:any'
@@ -33,6 +34,7 @@ export const rolePermissions = {
     'employees:create',
     'employees:update:any',
     'employees:delete',
+    'departments:read',
     'departments:manage',
     'attendance:read:any',
     'attendance:update:any',
@@ -47,6 +49,7 @@ export const rolePermissions = {
   ],
   EMPLOYEE: [
     'dashboard:read:self',
+    'departments:read',
     'profile:read:self',
     'profile:update:self',
     'attendance:read:self',
