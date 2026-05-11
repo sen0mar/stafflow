@@ -25,6 +25,7 @@ Keep entries short. This file should explain what changed, not become a detailed
 - Feature 18: Reusable UI Foundations — split the protected app shell and homepage into reusable layout/landing components, added dashboard card/status/empty/loading foundations, and replaced the dashboard placeholder with a responsive reference-style dashboard.
 - Feature 19: Dashboard API and Role-Based UI — added protected admin and employee dashboard summary endpoints, wired TanStack Query dashboard hooks, replaced static dashboard data with role-aware API-backed views, and polished dashboard previews, sorting, priority indicators, and card alignment.
 - Feature 20: Production Demo Auth Bootstrap — added a guarded Prisma bootstrap for the two production demo auth accounts, protected demo account password changes in demo mode, and verified the bootstrap against the production demo database.
+- Feature 21: Department CRUD — added authenticated department read APIs, admin-only create/update/delete with CSRF, conflict and safe-delete handling, audit logs, a paginated department management UI, query invalidation, and corrected shared foreground tokens for badges and buttons.
 
 ## Entry Format
 

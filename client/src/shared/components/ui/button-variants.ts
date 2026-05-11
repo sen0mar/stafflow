@@ -6,14 +6,14 @@ export const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          'bg-brand text-primary-foreground shadow-glow hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 active:brightness-95',
+          'bg-brand text-white shadow-glow hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 active:brightness-95',
         destructive:
-          'bg-error text-destructive-foreground shadow-soft hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 active:brightness-95',
+          'bg-error text-white shadow-soft hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 active:brightness-95',
         outline:
-          'border border-default bg-surface text-primary shadow-soft hover:-translate-y-0.5 hover:bg-subtle active:translate-y-0',
+          'border border-default bg-surface [color:var(--text-primary)] shadow-soft hover:-translate-y-0.5 hover:bg-subtle active:translate-y-0',
         secondary:
-          'border border-default bg-elevated text-primary shadow-soft hover:-translate-y-0.5 hover:bg-subtle active:translate-y-0',
-        ghost: 'text-primary hover:bg-subtle hover:text-primary',
+          'border border-default bg-elevated [color:var(--text-primary)] shadow-soft hover:-translate-y-0.5 hover:bg-subtle active:translate-y-0',
+        ghost: '[color:var(--text-primary)] hover:bg-subtle hover:[color:var(--text-primary)]',
         link: 'text-brand underline-offset-4 hover:underline',
       },
       size: {
