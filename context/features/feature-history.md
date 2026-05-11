@@ -27,6 +27,7 @@ Keep entries short. This file should explain what changed, not become a detailed
 - Feature 20: Production Demo Auth Bootstrap — added a guarded Prisma bootstrap for the two production demo auth accounts, protected demo account password changes in demo mode, and verified the bootstrap against the production demo database.
 - Feature 21: Department CRUD — added authenticated department read APIs, admin-only create/update/delete with CSRF, conflict and safe-delete handling, audit logs, a paginated department management UI, query invalidation, and corrected shared foreground tokens for badges and buttons.
 - Feature 22: Production Deployment Fixes — added Vercel SPA rewrites, production-safe API origin resolution, cross-site secure auth cookies, and response-backed CSRF handling for Vercel-to-Render deployments.
+- Feature 23: Employee Management — added admin employee CRUD, invite-token account creation, self-profile APIs, soft-disable/session revocation, audit logs, paginated employee UI, detail/profile pages, and employee query/form components.
 
 ## Entry Format
 
