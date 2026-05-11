@@ -24,7 +24,7 @@ export const sessionCookieOptions: CookieOptions = {
   httpOnly: true,
   maxAge: sessionTtlMs,
   path: "/",
-  sameSite: "lax",
+  sameSite: env.NODE_ENV === "production" ? "none" : "lax",
   secure: env.NODE_ENV === "production",
 };
 
@@ -38,7 +38,7 @@ export const clearSessionCookie = (response: Response) => {
   response.clearCookie(sessionCookieName, {
     httpOnly: true,
     path: "/",
-    sameSite: "lax",
+    sameSite: env.NODE_ENV === "production" ? "none" : "lax",
     secure: env.NODE_ENV === "production",
   });
 };

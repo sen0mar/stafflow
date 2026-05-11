@@ -26,6 +26,7 @@ import {
 } from "./auth.service";
 
 interface AuthResponse {
+  csrfToken?: string;
   user: PublicAuthUser;
 }
 
@@ -60,10 +61,11 @@ export const loginController: RequestHandler = async (request, response) => {
   }
 
   setSessionCookie(response, result.token);
-  setCsrfCookie(response);
+  const csrfToken = setCsrfCookie(response);
 
   const responseBody: ApiSuccess<AuthResponse> = {
     data: {
+      csrfToken,
       user: result.user,
     },
   };
@@ -88,10 +90,11 @@ export const logoutController: RequestHandler = async (request, response) => {
 
 // /me doubles as a lightweight way for the frontend to refresh its CSRF cookie.
 export const meController: RequestHandler = async (request, response) => {
-  setCsrfCookie(response);
+  const csrfToken = setCsrfCookie(response);
 
   const responseBody: ApiSuccess<AuthResponse> = {
     data: {
+      csrfToken,
       user: {
         email: request.auth?.user.email ?? "",
         employee: request.auth?.user.employee ?? null,

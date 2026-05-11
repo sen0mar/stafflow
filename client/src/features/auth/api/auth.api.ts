@@ -1,4 +1,4 @@
-import { apiClient } from '@/shared/lib/api-client'
+import { apiClient, clearApiCsrfToken, setApiCsrfToken } from '@/shared/lib/api-client'
 
 export type AuthRole = 'ADMIN' | 'EMPLOYEE'
 export type AuthStatus = 'ACTIVE' | 'DISABLED' | 'INVITED'
@@ -24,6 +24,7 @@ export interface LoginInput {
 
 interface AuthResponse {
   data: {
+    csrfToken?: string
     user: AuthUser
   }
 }
@@ -36,6 +37,7 @@ interface LogoutResponse {
 
 export const getCurrentUser = async () => {
   const response = await apiClient<AuthResponse>('/auth/me')
+  setApiCsrfToken(response.data.csrfToken)
 
   return response.data.user
 }
@@ -48,6 +50,7 @@ export const login = async (input: LoginInput) => {
     },
     method: 'POST',
   })
+  setApiCsrfToken(response.data.csrfToken)
 
   return response.data.user
 }
@@ -56,6 +59,7 @@ export const logout = async () => {
   const response = await apiClient<LogoutResponse>('/auth/logout', {
     method: 'POST',
   })
+  clearApiCsrfToken()
 
   return response.data
 }

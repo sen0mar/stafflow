@@ -12,7 +12,36 @@ type ApiErrorResponse = {
 
 const csrfCookieName = 'stafflow_csrf'
 const csrfHeaderName = 'x-csrf-token'
-const apiBaseUrl = import.meta.env.VITE_API_URL ?? 'http://localhost:4000'
+
+const getApiBaseUrl = () => {
+  const configuredApiUrl = import.meta.env.VITE_API_URL
+
+  if (configuredApiUrl) {
+    return configuredApiUrl.replace(/\/$/, '')
+  }
+
+  if (import.meta.env.DEV) {
+    return 'http://localhost:4000'
+  }
+
+  if (window.location.hostname.startsWith('app.')) {
+    return `${window.location.protocol}//${window.location.hostname.replace(/^app\./, 'api.')}`
+  }
+
+  return window.location.origin
+}
+
+const apiBaseUrl = getApiBaseUrl()
+
+let csrfToken: string | undefined
+
+export const setApiCsrfToken = (token: string | undefined) => {
+  csrfToken = token
+}
+
+export const clearApiCsrfToken = () => {
+  csrfToken = undefined
+}
 
 export class ApiClientError extends Error {
   status: number
@@ -75,10 +104,12 @@ export const apiClient = async <TResponse>(
   }
 
   const method = init.method ?? 'GET'
-  const csrfToken = shouldAttachCsrfToken(method) ? getCookieValue(csrfCookieName) : undefined
+  const requestCsrfToken = shouldAttachCsrfToken(method)
+    ? csrfToken ?? getCookieValue(csrfCookieName)
+    : undefined
 
-  if (csrfToken && !requestHeaders.has(csrfHeaderName)) {
-    requestHeaders.set(csrfHeaderName, csrfToken)
+  if (requestCsrfToken && !requestHeaders.has(csrfHeaderName)) {
+    requestHeaders.set(csrfHeaderName, requestCsrfToken)
   }
 
   const response = await fetch(getRequestUrl(input), {

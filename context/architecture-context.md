@@ -238,7 +238,10 @@ Recommended domain setup:
 - Use `app.<domain>` for the Vercel frontend.
 - Use `api.<domain>` for the Render backend.
 - Configure CORS to allow only the exact frontend origin.
+- Configure the Vercel frontend with `VITE_API_URL` pointing at the Render API origin unless production uses the documented `app.<domain>` and `api.<domain>` sibling-subdomain pattern.
 - Configure frontend `fetch` with `credentials: "include"`.
+- Production auth cookies use `SameSite=None; Secure` so credentialed Vercel-to-Render requests can carry the HTTP-only session cookie.
+- Auth responses may include a non-secret CSRF token for state-changing requests; the session token must remain HTTP-only and never be returned in JSON.
 - Configure Express `trust proxy` correctly on Render so secure cookies and client IPs work as intended.
 
 Environment variables must be validated at server startup. Missing required variables should fail fast.
