@@ -6,6 +6,7 @@ import {
   LayoutDashboard,
   ScrollText,
   Settings,
+  UserRound,
   UsersRound,
   type LucideIcon,
 } from 'lucide-react'
@@ -15,10 +16,12 @@ export interface AppNavItem {
   path: string
   icon: LucideIcon
   adminOnly?: boolean
+  requiresEmployeeProfile?: boolean
 }
 
 export const appNavItems: AppNavItem[] = [
   { label: 'Dashboard', path: '/app/dashboard', icon: LayoutDashboard },
+  { label: 'Profile', path: '/app/profile', icon: UserRound, requiresEmployeeProfile: true },
   { label: 'Employees', path: '/app/employees', icon: UsersRound, adminOnly: true },
   { label: 'Departments', path: '/app/departments', icon: Building2, adminOnly: true },
   { label: 'Attendance', path: '/app/attendance', icon: CalendarCheck },

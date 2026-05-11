@@ -7,6 +7,8 @@ import { AuditLogsPage } from '@/features/audit-logs/pages/audit-logs-page'
 import { LoginPage } from '@/features/auth/pages/login-page'
 import { DashboardPage } from '@/features/dashboard/pages/dashboard-page'
 import { DepartmentsPage } from '@/features/departments/pages/departments-page'
+import { EmployeeDetailsPage } from '@/features/employees/pages/employee-details-page'
+import { EmployeeProfilePage } from '@/features/employees/pages/employee-profile-page'
 import { EmployeesPage } from '@/features/employees/pages/employees-page'
 import { HomePage } from '@/features/homepage/pages/home-page'
 import { LeaveRequestsPage } from '@/features/leave/pages/leave-requests-page'
@@ -40,6 +42,14 @@ export const appRouter = createBrowserRouter([
           {
             path: 'employees',
             element: <EmployeesPage />,
+          },
+          {
+            path: 'employees/:id',
+            element: <EmployeeDetailsPage />,
+          },
+          {
+            path: 'profile',
+            element: <EmployeeProfilePage />,
           },
           {
             path: 'departments',

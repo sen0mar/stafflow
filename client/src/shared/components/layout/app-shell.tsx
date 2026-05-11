@@ -12,7 +12,11 @@ export const AppShell = () => {
   const currentUserQuery = useCurrentUser()
   const logoutMutation = useLogout()
   const user = currentUserQuery.data
-  const visibleNavItems = appNavItems.filter((item) => !item.adminOnly || user?.role === 'ADMIN')
+  const visibleNavItems = appNavItems.filter(
+    (item) =>
+      (!item.adminOnly || user?.role === 'ADMIN') &&
+      (!item.requiresEmployeeProfile || Boolean(user?.employee)),
+  )
 
   const handleLogout = () => {
     logoutMutation.mutate(undefined, {
