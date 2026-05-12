@@ -446,12 +446,18 @@ const main = async () => {
     where: { id: "demo-attendance-settings" },
     update: {
       workdayMinutes: 480,
+      workdayStart: "09:00",
+      workdayEnd: "17:00",
+      weeklyWorkingDays: [1, 2, 3, 4, 5],
       lateGracePeriodMinutes: 10,
       allowEmployeeClockIn: true,
     },
     create: {
       id: "demo-attendance-settings",
       workdayMinutes: 480,
+      workdayStart: "09:00",
+      workdayEnd: "17:00",
+      weeklyWorkingDays: [1, 2, 3, 4, 5],
       lateGracePeriodMinutes: 10,
       allowEmployeeClockIn: true,
     },
@@ -462,11 +468,15 @@ const main = async () => {
     update: {
       defaultAnnualAllowanceDays: 20,
       allowNegativeBalance: false,
+      policyText:
+        "Annual leave is requested in full-day increments and reviewed by an admin before approval.",
     },
     create: {
       id: "demo-leave-settings",
       defaultAnnualAllowanceDays: 20,
       allowNegativeBalance: false,
+      policyText:
+        "Annual leave is requested in full-day increments and reviewed by an admin before approval.",
     },
   });
 
