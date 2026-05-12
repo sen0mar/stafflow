@@ -31,6 +31,7 @@ Keep entries short. This file should explain what changed, not become a detailed
 - Feature 24: Attendance Management — added employee clock-in/out with confirmation, self attendance history, admin attendance filtering and corrections, audited correction logs, and an attendance date index migration.
 - Feature 25: Leave Management — added leave type management, employee leave requests, admin approval/rejection with reversible reviews, simple balance updates, audit logs, cancellation hiding, and role-specific leave notes.
 - Feature 26: Bulk Pagination Navigation — added a shared compact pagination control with first/last and ±10 page skips, and reused it across employee, department, attendance, and leave list screens.
+- Feature 27: Payslip R2 Storage — added private Cloudflare R2 payslip PDF upload, replacement, deletion, preview, and signed download flows with backend ownership checks, demo upload blocking, audit logs, env validation, and quieter development server logging.
 
 ## Entry Format
 

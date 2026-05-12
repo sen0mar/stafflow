@@ -17,8 +17,9 @@ import { employeesKeys } from '../api/employees.keys'
 const getErrorMessage = (error: unknown, fallback: string) =>
   error instanceof ApiClientError ? error.message : fallback
 
-export const useEmployees = (params: EmployeeListParams) =>
+export const useEmployees = (params: EmployeeListParams, enabled = true) =>
   useQuery({
+    enabled,
     queryFn: () => getEmployees(params),
     queryKey: employeesKeys.list(params),
   })
