@@ -14,6 +14,9 @@ const formatZodIssues = (error: ZodError) =>
     path: issue.path,
   }));
 
+const shouldLogError = (statusCode: number) =>
+  statusCode >= 500 || env.NODE_ENV === "production";
+
 export const globalErrorHandler: ErrorRequestHandler = (
   error,
   _request,
@@ -39,14 +42,16 @@ export const globalErrorHandler: ErrorRequestHandler = (
       ? error.details
       : undefined;
 
-  logger.error(
-    {
-      err: error,
-      requestId: response.locals.requestId,
-      statusCode,
-    },
-    "Request failed",
-  );
+  if (shouldLogError(statusCode)) {
+    logger[statusCode >= 500 ? "error" : "warn"](
+      {
+        ...(statusCode >= 500 ? { err: error } : { code }),
+        requestId: response.locals.requestId,
+        statusCode,
+      },
+      "Request failed",
+    );
+  }
 
   const responseBody: ApiError = {
     error: {

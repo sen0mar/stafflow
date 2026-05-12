@@ -10,6 +10,7 @@ import {
   createLeaveRequestRoutes,
   createLeaveTypeRoutes,
 } from "./modules/leave/leave.routes";
+import { createPayslipRoutes } from "./modules/payslips/payslips.routes";
 import { createUserRoutes } from "./modules/users/users.routes";
 
 interface HealthResponse {
@@ -34,6 +35,7 @@ export const createRoutes = (): Router => {
   router.use("/employees", createEmployeeRoutes());
   router.use("/leave-requests", createLeaveRequestRoutes());
   router.use("/leave-types", createLeaveTypeRoutes());
+  router.use("/payslips", createPayslipRoutes());
   router.use("/users", createUserRoutes());
 
   return router;
