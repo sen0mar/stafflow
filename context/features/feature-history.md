@@ -32,6 +32,7 @@ Keep entries short. This file should explain what changed, not become a detailed
 - Feature 25: Leave Management — added leave type management, employee leave requests, admin approval/rejection with reversible reviews, simple balance updates, audit logs, cancellation hiding, and role-specific leave notes.
 - Feature 26: Bulk Pagination Navigation — added a shared compact pagination control with first/last and ±10 page skips, and reused it across employee, department, attendance, and leave list screens.
 - Feature 27: Payslip R2 Storage — added private Cloudflare R2 payslip PDF upload, replacement, deletion, preview, and signed download flows with backend ownership checks, demo upload blocking, audit logs, env validation, and quieter development server logging.
+- Feature 28: Basic Settings — added admin-only company, attendance, and leave settings APIs with audited mutations, a Prisma migration for basic settings fields, seeded defaults, and an editable settings page with a backend-driven demo notice.
 
 ## Entry Format
 

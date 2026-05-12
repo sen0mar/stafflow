@@ -11,6 +11,7 @@ import {
   createLeaveTypeRoutes,
 } from "./modules/leave/leave.routes";
 import { createPayslipRoutes } from "./modules/payslips/payslips.routes";
+import { createSettingsRoutes } from "./modules/settings/settings.routes";
 import { createUserRoutes } from "./modules/users/users.routes";
 
 interface HealthResponse {
@@ -36,6 +37,7 @@ export const createRoutes = (): Router => {
   router.use("/leave-requests", createLeaveRequestRoutes());
   router.use("/leave-types", createLeaveTypeRoutes());
   router.use("/payslips", createPayslipRoutes());
+  router.use("/settings", createSettingsRoutes());
   router.use("/users", createUserRoutes());
 
   return router;

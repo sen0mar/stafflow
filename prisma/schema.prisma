@@ -233,6 +233,9 @@ model CompanySettings {
 model AttendanceSettings {
   id                     String   @id @default(cuid())
   workdayMinutes         Int      @default(480)
+  workdayStart           String   @default("09:00")
+  workdayEnd             String   @default("17:00")
+  weeklyWorkingDays      Int[]    @default([1, 2, 3, 4, 5])
   lateGracePeriodMinutes Int      @default(0)
   allowEmployeeClockIn   Boolean  @default(true)
   createdAt              DateTime @default(now())
@@ -243,6 +246,7 @@ model LeaveSettings {
   id                         String   @id @default(cuid())
   defaultAnnualAllowanceDays Decimal  @default(0) @db.Decimal(5, 2)
   allowNegativeBalance       Boolean  @default(false)
+  policyText                 String?  @db.Text
   createdAt                  DateTime @default(now())
   updatedAt                  DateTime @updatedAt
 }
