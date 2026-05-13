@@ -3,14 +3,14 @@ import { useEffect, useRef } from 'react'
 interface Dot {
   x: number
   y: number
-  phase: number
 }
 
 const dotSpacing = 16
 const dotRadius = 1
 const pushRadius = 126
-const maxPush = 16
-const rippleStrength = 7
+const maxPush = 18
+const pointerEase = 0.16
+const influenceEase = 0.08
 
 const getCssVariable = (name: string) =>
   getComputedStyle(document.documentElement).getPropertyValue(name).trim()
@@ -39,14 +39,14 @@ export const ReactiveDotGrid = () => {
     ).matches
     const pointer = { x: 0, y: 0, active: false }
     const easedPointer = { x: 0, y: 0, active: false }
-    let animationTime = 0
+    let pointerInfluence = 0
 
     const buildDots = () => {
       dots = []
 
       for (let y = dotSpacing / 2; y < height + dotSpacing; y += dotSpacing) {
         for (let x = dotSpacing / 2; x < width + dotSpacing; x += dotSpacing) {
-          dots.push({ x, y, phase: (x * 0.08 + y * 0.12) % (Math.PI * 2) })
+          dots.push({ x, y })
         }
       }
     }
@@ -76,10 +76,13 @@ export const ReactiveDotGrid = () => {
       context.fillStyle = dotColor
 
       if (!prefersReducedMotion) {
-        animationTime += 0.018
-        easedPointer.x += (pointer.x - easedPointer.x) * 0.18
-        easedPointer.y += (pointer.y - easedPointer.y) * 0.18
-        easedPointer.active = pointer.active
+        const targetInfluence = pointer.active ? 1 : 0
+
+        easedPointer.x += (pointer.x - easedPointer.x) * pointerEase
+        easedPointer.y += (pointer.y - easedPointer.y) * pointerEase
+        pointerInfluence +=
+          (targetInfluence - pointerInfluence) * influenceEase
+        easedPointer.active = pointerInfluence > 0.01
       }
 
       dots.forEach(drawDot)
@@ -117,17 +120,12 @@ export const ReactiveDotGrid = () => {
         if (distance < pushRadius) {
           const safeDistance = Math.max(distance, 1)
           const falloff = 1 - distance / pushRadius
-          const force = falloff * falloff * maxPush
-          const ripple =
-            Math.sin(animationTime * 5 + dot.phase + distance * 0.08) *
-            falloff *
-            rippleStrength
-          const tangentX = -deltaY / safeDistance
-          const tangentY = deltaX / safeDistance
+          const easedFalloff = falloff * falloff * (3 - 2 * falloff)
+          const force = easedFalloff * maxPush * pointerInfluence
 
-          drawX += (deltaX / safeDistance) * force + tangentX * ripple
-          drawY += (deltaY / safeDistance) * force + tangentY * ripple
-          radius += falloff * 0.55
+          drawX += (deltaX / safeDistance) * force
+          drawY += (deltaY / safeDistance) * force
+          radius += easedFalloff * 0.18 * pointerInfluence
         }
       }
 
