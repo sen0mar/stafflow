@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { ApiClientError } from '@/shared/lib/api-client'
+import { getSafeErrorMessage } from '@/shared/lib/api-errors'
 import {
   createEmployee,
   disableEmployee,
@@ -13,9 +13,6 @@ import {
   type EmployeeListParams,
 } from '../api/employees.api'
 import { employeesKeys } from '../api/employees.keys'
-
-const getErrorMessage = (error: unknown, fallback: string) =>
-  error instanceof ApiClientError ? error.message : fallback
 
 export const useEmployees = (params: EmployeeListParams, enabled = true) =>
   useQuery({
@@ -43,7 +40,7 @@ export const useCreateEmployee = () => {
   return useMutation({
     mutationFn: createEmployee,
     onError: (error) => {
-      toast.error(getErrorMessage(error, 'Employee could not be created.'))
+      toast.error(getSafeErrorMessage(error, 'Employee could not be created.'))
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: employeesKeys.lists() })
@@ -58,7 +55,7 @@ export const useUpdateEmployee = () => {
   return useMutation({
     mutationFn: updateEmployee,
     onError: (error) => {
-      toast.error(getErrorMessage(error, 'Employee could not be updated.'))
+      toast.error(getSafeErrorMessage(error, 'Employee could not be updated.'))
     },
     onSuccess: async (employee) => {
       await Promise.all([
@@ -77,7 +74,7 @@ export const useUpdateEmployeeStatus = () => {
   return useMutation({
     mutationFn: updateEmployeeStatus,
     onError: (error) => {
-      toast.error(getErrorMessage(error, 'Employee status could not be updated.'))
+      toast.error(getSafeErrorMessage(error, 'Employee status could not be updated.'))
     },
     onSuccess: async (employee) => {
       await Promise.all([
@@ -95,7 +92,7 @@ export const useDisableEmployee = () => {
   return useMutation({
     mutationFn: disableEmployee,
     onError: (error) => {
-      toast.error(getErrorMessage(error, 'Employee could not be disabled.'))
+      toast.error(getSafeErrorMessage(error, 'Employee could not be disabled.'))
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: employeesKeys.lists() })
@@ -110,7 +107,7 @@ export const useUpdateSelfProfile = () => {
   return useMutation({
     mutationFn: updateSelfProfile,
     onError: (error) => {
-      toast.error(getErrorMessage(error, 'Profile could not be updated.'))
+      toast.error(getSafeErrorMessage(error, 'Profile could not be updated.'))
     },
     onSuccess: async (employee) => {
       await Promise.all([

@@ -1,6 +1,5 @@
 import { Eye, Filter, ScrollText, X } from 'lucide-react'
 import { useCallback, useState } from 'react'
-import { Navigate } from 'react-router-dom'
 import { FilterSelect } from '@/shared/components/data-table/filter-select'
 import { Badge } from '@/shared/components/ui/badge'
 import { Button } from '@/shared/components/ui/button'
@@ -15,6 +14,12 @@ import { Input } from '@/shared/components/ui/input'
 import { Label } from '@/shared/components/ui/label'
 import { SearchInput } from '@/shared/components/data-table/search-input'
 import { Skeleton } from '@/shared/components/ui/skeleton'
+import {
+  EmptyState,
+  QueryStateError,
+  TableSkeleton,
+  UnauthorizedState,
+} from '@/shared/components/layout/page-state'
 import {
   Table,
   TableBody,
@@ -129,21 +134,15 @@ const getOldNewMetadata = (metadata: unknown) => {
 }
 
 const AuditLogsLoading = () => (
-  <div className="space-y-3 rounded-lg border border-default bg-surface p-4 shadow-soft">
-    {Array.from({ length: 6 }, (_item, index) => (
-      <Skeleton key={index} className="h-12 w-full" />
-    ))}
-  </div>
+  <TableSkeleton />
 )
 
 const AuditLogsEmpty = () => (
-  <div className="rounded-lg border border-dashed border-default bg-surface px-6 py-12 text-center shadow-soft">
-    <ScrollText className="mx-auto h-10 w-10 text-muted" aria-hidden="true" />
-    <h2 className="mt-4 text-lg font-semibold text-primary">No audit logs found</h2>
-    <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-muted">
-      Adjust the filters or perform a sensitive action that creates an audit record.
-    </p>
-  </div>
+  <EmptyState
+    icon={ScrollText}
+    title="No audit logs found"
+    description="Adjust the filters or perform a sensitive action that creates an audit record."
+  />
 )
 
 interface AuditLogDetailsDialogProps {
@@ -357,7 +356,7 @@ export const AuditLogsPage = () => {
   }, [updateQuery])
 
   if (currentUserQuery.isSuccess && !canReadAuditLogs) {
-    return <Navigate to="/app/dashboard" replace />
+    return <UnauthorizedState description="Audit logs are available to admins only." />
   }
 
   const clearFilters = () => {
@@ -380,7 +379,7 @@ export const AuditLogsPage = () => {
         description="Review sensitive business and security activity recorded separately from technical logs."
       />
 
-      <section className="space-y-4 rounded-lg border border-default bg-surface p-4 shadow-soft">
+      <section className="space-y-4 rounded-2xl border border-default bg-surface p-4 shadow-soft">
         <div className="grid gap-3 xl:grid-cols-[1fr_1fr_1fr_1fr_0.8fr_0.8fr_auto]">
           <div className="space-y-2">
             <Label htmlFor="audit-actor">Actor user ID</Label>
@@ -459,9 +458,11 @@ export const AuditLogsPage = () => {
 
         {auditLogsQuery.isLoading || currentUserQuery.isLoading ? <AuditLogsLoading /> : null}
         {auditLogsQuery.isError ? (
-          <div className="rounded-lg border border-default bg-inset p-6 text-sm text-muted">
-            Audit logs could not be loaded. Refresh the page or try again later.
-          </div>
+          <QueryStateError
+            error={auditLogsQuery.error}
+            title="Audit logs could not be loaded"
+            description="Refresh the page or try again later."
+          />
         ) : null}
         {auditLogsQuery.data && auditLogs.length === 0 ? <AuditLogsEmpty /> : null}
         {auditLogs.length > 0 ? (

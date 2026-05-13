@@ -10,7 +10,11 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from '@/shared/components/ui/dropdown-menu'
-import { Skeleton } from '@/shared/components/ui/skeleton'
+import {
+  EmptyState as SharedEmptyState,
+  QueryStateError,
+  TableSkeleton,
+} from '@/shared/components/layout/page-state'
 import {
   Table,
   TableBody,
@@ -80,20 +84,12 @@ const getLeaveTypePayload = (values: LeaveTypeFormValues) => ({
 const getPreview = (value: string, maxLength = 72) =>
   value.length > maxLength ? `${value.slice(0, maxLength).trim()}...` : value
 
-const LoadingTable = () => (
-  <div className="space-y-3 rounded-2xl border border-default bg-surface p-4 shadow-soft">
-    {Array.from({ length: 6 }, (_item, index) => (
-      <Skeleton key={index} className="h-12 w-full" />
-    ))}
-  </div>
-)
-
 const EmptyState = ({ text }: { text: string }) => (
-  <div className="rounded-2xl border border-dashed border-default bg-surface px-6 py-12 text-center shadow-soft">
-    <CalendarDays className="mx-auto h-10 w-10 text-muted" aria-hidden="true" />
-    <h2 className="mt-4 text-lg font-semibold text-primary">No leave records found</h2>
-    <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-muted">{text}</p>
-  </div>
+  <SharedEmptyState
+    icon={CalendarDays}
+    title="No leave requests found"
+    description={text}
+  />
 )
 
 const LeaveNotePreview = ({ label, value }: { label: string; value: string | null }) => {
@@ -283,11 +279,13 @@ const EmployeeLeavePage = () => {
           />
         </div>
 
-        {selfRequestsQuery.isLoading ? <LoadingTable /> : null}
+        {selfRequestsQuery.isLoading ? <TableSkeleton /> : null}
         {selfRequestsQuery.isError ? (
-          <div className="rounded-xl border border-default bg-inset p-6 text-sm text-muted">
-            Leave requests could not be loaded. Refresh the page or try again later.
-          </div>
+          <QueryStateError
+            error={selfRequestsQuery.error}
+            title="Leave requests could not be loaded"
+            description="Refresh the page or try again later."
+          />
         ) : null}
         {selfRequestsQuery.data && requests.length === 0 ? <EmptyState text="Your submitted leave requests will appear here." /> : null}
         {requests.length > 0 ? (
@@ -357,7 +355,7 @@ const LeaveTypeManagement = () => {
           Create type
         </Button>
       </div>
-      {leaveTypesQuery.isLoading ? <LoadingTable /> : null}
+      {leaveTypesQuery.isLoading ? <TableSkeleton /> : null}
       {leaveTypes.length > 0 ? (
         <div className="rounded-2xl border border-default bg-surface p-2 shadow-soft">
           <Table>
@@ -516,11 +514,13 @@ const AdminLeavePage = () => {
           />
         </TableToolbar>
 
-        {leaveRequestsQuery.isLoading ? <LoadingTable /> : null}
+        {leaveRequestsQuery.isLoading ? <TableSkeleton /> : null}
         {leaveRequestsQuery.isError ? (
-          <div className="rounded-xl border border-default bg-inset p-6 text-sm text-muted">
-            Leave requests could not be loaded. Refresh the page or try again later.
-          </div>
+          <QueryStateError
+            error={leaveRequestsQuery.error}
+            title="Leave requests could not be loaded"
+            description="Refresh the page or try again later."
+          />
         ) : null}
         {leaveRequestsQuery.data && requests.length === 0 ? <EmptyState text="Adjust filters or wait for employees to submit requests." /> : null}
         {requests.length > 0 ? (
@@ -564,7 +564,7 @@ export const LeaveRequestsPage = () => {
   const currentUserQuery = useCurrentUser()
 
   if (currentUserQuery.isLoading) {
-    return <LoadingTable />
+    return <TableSkeleton />
   }
 
   if (currentUserQuery.data?.role === 'ADMIN') {

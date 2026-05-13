@@ -4,9 +4,9 @@ import { FilterSelect } from '@/shared/components/data-table/filter-select'
 import { Button } from '@/shared/components/ui/button'
 import { SearchInput } from '@/shared/components/data-table/search-input'
 import { TableToolbar } from '@/shared/components/data-table/table-toolbar'
-import { Skeleton } from '@/shared/components/ui/skeleton'
 import { PaginationControls } from '@/shared/components/data-table/pagination-controls'
 import { PageHeader } from '@/shared/components/layout/page-header'
+import { EmptyState, QueryStateError, TableSkeleton } from '@/shared/components/layout/page-state'
 import { useTableQueryState } from '@/shared/hooks/use-table-query-state'
 import { useDepartments } from '@/features/departments/hooks/use-departments'
 import type { Employee, EmployeeSort, EmployeeStatus } from '../api/employees.api'
@@ -29,24 +29,6 @@ type StatusFilter = EmployeeStatus | typeof allValue
 const toIsoDate = (value?: string) => (value ? new Date(`${value}T00:00:00.000Z`).toISOString() : null)
 const getNullableValue = (value?: string | null) => (value && value.trim() ? value.trim() : null)
 const getDepartmentValue = (value?: string | null) => (value && value !== 'unassigned' ? value : null)
-
-const EmployeesLoading = () => (
-  <div className="space-y-3 rounded-2xl border border-default bg-surface p-4 shadow-soft">
-    {Array.from({ length: 6 }, (_item, index) => (
-      <Skeleton key={index} className="h-12 w-full" />
-    ))}
-  </div>
-)
-
-const EmployeesEmpty = () => (
-  <div className="rounded-2xl border border-dashed border-default bg-surface px-6 py-12 text-center shadow-soft">
-    <UsersRound className="mx-auto h-10 w-10 text-muted" aria-hidden="true" />
-    <h2 className="mt-4 text-lg font-semibold text-primary">No employees found</h2>
-    <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-muted">
-      Create the first employee, or adjust the current search and filters.
-    </p>
-  </div>
-)
 
 export const EmployeesPage = () => {
   const tableState = useTableQueryState()
@@ -222,13 +204,21 @@ export const EmployeesPage = () => {
           />
         </TableToolbar>
 
-        {employeesQuery.isLoading ? <EmployeesLoading /> : null}
+        {employeesQuery.isLoading ? <TableSkeleton /> : null}
         {employeesQuery.isError ? (
-          <div className="rounded-xl border border-default bg-inset p-6 text-sm text-muted">
-            Employees could not be loaded. Refresh the page or try again later.
-          </div>
+          <QueryStateError
+            error={employeesQuery.error}
+            title="Employees could not be loaded"
+            description="Refresh the page or try again later."
+          />
         ) : null}
-        {employeesQuery.data && employees.length === 0 ? <EmployeesEmpty /> : null}
+        {employeesQuery.data && employees.length === 0 ? (
+          <EmptyState
+            icon={UsersRound}
+            title="No employees found"
+            description="Create the first employee, or adjust the current search and filters."
+          />
+        ) : null}
         {employees.length > 0 ? (
           <>
             <EmployeeTable

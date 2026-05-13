@@ -7,6 +7,7 @@ import { Button } from '@/shared/components/ui/button'
 import { Input } from '@/shared/components/ui/input'
 import { Label } from '@/shared/components/ui/label'
 import { ThemeToggle } from '@/shared/components/ui/theme-toggle'
+import { getSafeErrorMessage } from '@/shared/lib/api-errors'
 import { useLogin } from '../hooks/use-login'
 
 const demoPassword = 'StafflowDemo'
@@ -37,7 +38,9 @@ export const LoginPage = () => {
   const loginMutation = useLogin()
   const [email, setEmail] = useState<string>(demoAccounts[0].email)
   const [password, setPassword] = useState<string>(demoPassword)
-  const redirectTo = (location.state as LocationState | null)?.from?.pathname ?? '/app/dashboard'
+  const searchRedirect = new URLSearchParams(location.search).get('from')
+  const safeSearchRedirect = searchRedirect?.startsWith('/app') ? searchRedirect : undefined
+  const redirectTo = (location.state as LocationState | null)?.from?.pathname ?? safeSearchRedirect ?? '/app/dashboard'
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -46,7 +49,7 @@ export const LoginPage = () => {
       { email, password },
       {
         onError: (error) => {
-          toast.error(error instanceof Error ? error.message : 'Unable to sign in.')
+          toast.error(getSafeErrorMessage(error, 'Unable to sign in.'))
         },
         onSuccess: () => {
           navigate(redirectTo, { replace: true })

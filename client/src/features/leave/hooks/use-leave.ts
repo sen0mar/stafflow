@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { dashboardKeys } from '@/features/dashboard/api/dashboard.keys'
-import { ApiClientError } from '@/shared/lib/api-client'
+import { getSafeErrorMessage } from '@/shared/lib/api-errors'
 import {
   approveLeaveRequest,
   cancelLeaveRequest,
@@ -19,9 +19,6 @@ import {
   type SelfLeaveRequestListParams,
 } from '../api/leave.api'
 import { leaveKeys } from '../api/leave.keys'
-
-const getErrorMessage = (error: unknown, fallback: string) =>
-  error instanceof ApiClientError ? error.message : fallback
 
 const invalidateLeaveViews = async (queryClient: ReturnType<typeof useQueryClient>) => {
   await Promise.all([
@@ -62,7 +59,7 @@ export const useCreateLeaveType = () => {
   return useMutation({
     mutationFn: createLeaveType,
     onError: (error) => {
-      toast.error(getErrorMessage(error, 'Leave type could not be created.'))
+      toast.error(getSafeErrorMessage(error, 'Leave type could not be created.'))
     },
     onSuccess: async () => {
       await invalidateLeaveViews(queryClient)
@@ -77,7 +74,7 @@ export const useUpdateLeaveType = () => {
   return useMutation({
     mutationFn: updateLeaveType,
     onError: (error) => {
-      toast.error(getErrorMessage(error, 'Leave type could not be updated.'))
+      toast.error(getSafeErrorMessage(error, 'Leave type could not be updated.'))
     },
     onSuccess: async () => {
       await invalidateLeaveViews(queryClient)
@@ -92,7 +89,7 @@ export const useDeleteLeaveType = () => {
   return useMutation({
     mutationFn: deleteLeaveType,
     onError: (error) => {
-      toast.error(getErrorMessage(error, 'Leave type could not be deleted.'))
+      toast.error(getSafeErrorMessage(error, 'Leave type could not be deleted.'))
     },
     onSuccess: async () => {
       await invalidateLeaveViews(queryClient)
@@ -107,7 +104,7 @@ export const useCreateLeaveRequest = () => {
   return useMutation({
     mutationFn: createLeaveRequest,
     onError: (error) => {
-      toast.error(getErrorMessage(error, 'Leave request could not be submitted.'))
+      toast.error(getSafeErrorMessage(error, 'Leave request could not be submitted.'))
     },
     onSuccess: async () => {
       await invalidateLeaveViews(queryClient)
@@ -122,7 +119,7 @@ export const useCancelLeaveRequest = () => {
   return useMutation({
     mutationFn: cancelLeaveRequest,
     onError: (error) => {
-      toast.error(getErrorMessage(error, 'Leave request could not be cancelled.'))
+      toast.error(getSafeErrorMessage(error, 'Leave request could not be cancelled.'))
     },
     onSuccess: async () => {
       await invalidateLeaveViews(queryClient)
@@ -137,7 +134,7 @@ export const useApproveLeaveRequest = () => {
   return useMutation({
     mutationFn: approveLeaveRequest,
     onError: (error) => {
-      toast.error(getErrorMessage(error, 'Leave request could not be approved.'))
+      toast.error(getSafeErrorMessage(error, 'Leave request could not be approved.'))
     },
     onSuccess: async (leaveRequest) => {
       await Promise.all([
@@ -155,7 +152,7 @@ export const useRejectLeaveRequest = () => {
   return useMutation({
     mutationFn: rejectLeaveRequest,
     onError: (error) => {
-      toast.error(getErrorMessage(error, 'Leave request could not be rejected.'))
+      toast.error(getSafeErrorMessage(error, 'Leave request could not be rejected.'))
     },
     onSuccess: async (leaveRequest) => {
       await Promise.all([

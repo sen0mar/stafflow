@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { ApiClientError } from '@/shared/lib/api-client'
+import { getSafeErrorMessage } from '@/shared/lib/api-errors'
 import {
   createDepartment,
   deleteDepartment,
@@ -10,9 +10,6 @@ import {
   type DepartmentListParams,
 } from '../api/departments.api'
 import { departmentsKeys } from '../api/departments.keys'
-
-const getErrorMessage = (error: unknown, fallback: string) =>
-  error instanceof ApiClientError ? error.message : fallback
 
 export const useDepartments = (params: DepartmentListParams) =>
   useQuery({
@@ -33,7 +30,7 @@ export const useCreateDepartment = () => {
   return useMutation({
     mutationFn: createDepartment,
     onError: (error) => {
-      toast.error(getErrorMessage(error, 'Department could not be created.'))
+      toast.error(getSafeErrorMessage(error, 'Department could not be created.'))
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: departmentsKeys.lists() })
@@ -48,7 +45,7 @@ export const useUpdateDepartment = () => {
   return useMutation({
     mutationFn: updateDepartment,
     onError: (error) => {
-      toast.error(getErrorMessage(error, 'Department could not be updated.'))
+      toast.error(getSafeErrorMessage(error, 'Department could not be updated.'))
     },
     onSuccess: async (department) => {
       await Promise.all([
@@ -66,7 +63,7 @@ export const useDeleteDepartment = () => {
   return useMutation({
     mutationFn: deleteDepartment,
     onError: (error) => {
-      toast.error(getErrorMessage(error, 'Department could not be deleted.'))
+      toast.error(getSafeErrorMessage(error, 'Department could not be deleted.'))
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: departmentsKeys.lists() })

@@ -9,9 +9,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/shared/components/ui/select'
-import { Skeleton } from '@/shared/components/ui/skeleton'
 import { PaginationControls } from '@/shared/components/data-table/pagination-controls'
 import { PageHeader } from '@/shared/components/layout/page-header'
+import { EmptyState, QueryStateError, TableSkeleton } from '@/shared/components/layout/page-state'
 import { getRolePermissions, hasPermission } from '@/shared/lib/permissions'
 import { useCurrentUser } from '@/features/auth/hooks/use-current-user'
 import type { Department } from '../api/departments.api'
@@ -48,24 +48,16 @@ const getMutationPayload = (values: DepartmentFormValues) => ({
   name: values.name.trim(),
 })
 
-const DepartmentsLoading = () => (
-  <div className="space-y-3 rounded-2xl border border-default bg-surface p-4 shadow-soft">
-    {Array.from({ length: 6 }, (_item, index) => (
-      <Skeleton key={index} className="h-12 w-full" />
-    ))}
-  </div>
-)
-
 const DepartmentsEmpty = ({ canManage }: { canManage: boolean }) => (
-  <div className="rounded-2xl border border-dashed border-default bg-surface px-6 py-12 text-center shadow-soft">
-    <Building2 className="mx-auto h-10 w-10 text-muted" aria-hidden="true" />
-    <h2 className="mt-4 text-lg font-semibold text-primary">No departments found</h2>
-    <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-muted">
-      {canManage
+  <EmptyState
+    icon={Building2}
+    title="No departments found"
+    description={
+      canManage
         ? 'Create the first department, or adjust the current search and status filters.'
-        : 'No departments match the current search and status filters.'}
-    </p>
-  </div>
+        : 'No departments match the current search and status filters.'
+    }
+  />
 )
 
 export const DepartmentsPage = () => {
@@ -192,11 +184,13 @@ export const DepartmentsPage = () => {
           </Select>
         </div>
 
-        {departmentsQuery.isLoading ? <DepartmentsLoading /> : null}
+        {departmentsQuery.isLoading ? <TableSkeleton /> : null}
         {departmentsQuery.isError ? (
-          <div className="rounded-xl border border-default bg-inset p-6 text-sm text-muted">
-            Departments could not be loaded. Refresh the page or try again later.
-          </div>
+          <QueryStateError
+            error={departmentsQuery.error}
+            title="Departments could not be loaded"
+            description="Refresh the page or try again later."
+          />
         ) : null}
         {departmentsQuery.data && departments.length === 0 ? <DepartmentsEmpty canManage={canManage} /> : null}
         {departments.length > 0 ? (

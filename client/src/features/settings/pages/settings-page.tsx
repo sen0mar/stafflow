@@ -34,7 +34,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/shared/components/ui/select'
-import { Skeleton } from '@/shared/components/ui/skeleton'
+import { FormSkeleton, QueryStateError } from '@/shared/components/layout/page-state'
 import { Textarea } from '@/shared/components/ui/textarea'
 import { cn } from '@/shared/lib/cn'
 import type {
@@ -100,14 +100,6 @@ const getLeaveDefaults = (settings?: LeaveSettings): LeaveSettingsFormValues => 
   defaultAnnualAllowanceDays: settings?.defaultAnnualAllowanceDays ?? 0,
   policyText: settings?.policyText ?? '',
 })
-
-const SettingsSkeleton = () => (
-  <div className="space-y-4">
-    <Skeleton className="h-28 rounded-2xl" />
-    <Skeleton className="h-64 rounded-2xl" />
-    <Skeleton className="h-64 rounded-2xl" />
-  </div>
-)
 
 type PendingSettingsSave =
   | {
@@ -213,6 +205,7 @@ export const SettingsPage = () => {
   const [pendingSave, setPendingSave] = useState<PendingSettingsSave | null>(null)
   const isLoading = companyQuery.isLoading || attendanceQuery.isLoading || leaveQuery.isLoading
   const hasError = companyQuery.isError || attendanceQuery.isError || leaveQuery.isError
+  const firstError = companyQuery.error ?? attendanceQuery.error ?? leaveQuery.error
   const demoMode = Boolean(
     companyQuery.data?.demoMode || attendanceQuery.data?.demoMode || leaveQuery.data?.demoMode,
   )
@@ -292,17 +285,16 @@ export const SettingsPage = () => {
   }, [leaveForm, leaveQuery.data])
 
   if (isLoading) {
-    return <SettingsSkeleton />
+    return <FormSkeleton />
   }
 
   if (hasError) {
     return (
-      <Card className="border-default bg-surface">
-        <CardHeader>
-          <CardTitle>Settings unavailable</CardTitle>
-          <CardDescription>Refresh the page or sign in with an admin account.</CardDescription>
-        </CardHeader>
-      </Card>
+      <QueryStateError
+        error={firstError}
+        title="Settings unavailable"
+        description="Refresh the page or sign in with an admin account."
+      />
     )
   }
 

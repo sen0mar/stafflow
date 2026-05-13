@@ -49,6 +49,7 @@ export const login = async (input: LoginInput) => {
       password: input.password,
     },
     method: 'POST',
+    skipUnauthorizedHandler: true,
   })
   setApiCsrfToken(response.data.csrfToken)
 

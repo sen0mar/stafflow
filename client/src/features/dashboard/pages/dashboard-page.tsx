@@ -20,6 +20,7 @@ import {
   DropdownMenuTrigger,
 } from '@/shared/components/ui/dropdown-menu'
 import { PageHeader } from '@/shared/components/layout/page-header'
+import { QueryStateError } from '@/shared/components/layout/page-state'
 import { formatDate } from '@/shared/lib/dates'
 import { useCurrentUser } from '@/features/auth/hooks/use-current-user'
 import { AttendanceChart } from '../components/attendance-chart'
@@ -131,14 +132,12 @@ const DashboardLoading = () => (
   </div>
 )
 
-const DashboardError = () => (
-  <SectionCard title="Dashboard unavailable" description="The dashboard summary could not be loaded.">
-    <EmptyState
-      icon={Inbox}
-      title="Unable to load dashboard"
-      description="Please refresh the page or try again after a moment."
-    />
-  </SectionCard>
+const DashboardError = ({ error }: { error: unknown }) => (
+  <QueryStateError
+    error={error}
+    title="Dashboard unavailable"
+    description="The dashboard summary could not be loaded. Please refresh the page or try again after a moment."
+  />
 )
 
 const AttendanceRecordPreview = ({ record }: { record: EmployeeRecentAttendanceItem }) => (
@@ -185,7 +184,7 @@ const AdminDashboard = () => {
       />
 
       {dashboardQuery.isLoading ? <DashboardLoading /> : null}
-      {dashboardQuery.isError ? <DashboardError /> : null}
+      {dashboardQuery.isError ? <DashboardError error={dashboardQuery.error} /> : null}
       {summary ? (
         <>
           <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4" aria-label="Dashboard metrics">
@@ -349,7 +348,7 @@ const EmployeeDashboard = () => {
       />
 
       {dashboardQuery.isLoading ? <DashboardLoading /> : null}
-      {dashboardQuery.isError ? <DashboardError /> : null}
+      {dashboardQuery.isError ? <DashboardError error={dashboardQuery.error} /> : null}
       {summary ? (
         <>
           <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4" aria-label="Self-service dashboard metrics">
@@ -516,6 +515,10 @@ const EmployeeDashboard = () => {
 
 export const DashboardPage = () => {
   const currentUserQuery = useCurrentUser()
+
+  if (currentUserQuery.isLoading) {
+    return <DashboardLoading />
+  }
 
   return currentUserQuery.data?.role === 'ADMIN' ? <AdminDashboard /> : <EmployeeDashboard />
 }
