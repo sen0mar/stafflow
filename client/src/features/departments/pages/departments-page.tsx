@@ -88,8 +88,8 @@ export const DepartmentsPage = () => {
   const createDepartment = useCreateDepartment()
   const updateDepartment = useUpdateDepartment()
   const deleteDepartment = useDeleteDepartment()
-  const departments = departmentsQuery.data?.items ?? []
-  const pagination = departmentsQuery.data?.pagination
+  const departments = departmentsQuery.data?.data ?? []
+  const pagination = departmentsQuery.data?.meta
 
   const openCreateDialog = () => {
     setEditingDepartment(null)
@@ -209,9 +209,7 @@ export const DepartmentsPage = () => {
             />
             <PaginationControls
               itemLabel="departments"
-              page={pagination?.page ?? page}
-              pageCount={pagination?.pageCount ?? 1}
-              total={pagination?.total ?? 0}
+              meta={pagination ?? { limit: pageSize, page, total: 0, totalPages: 1 }}
               onPageChange={setPage}
             />
           </>

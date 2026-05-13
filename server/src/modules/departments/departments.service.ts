@@ -1,6 +1,10 @@
 import { Prisma } from "@prisma/client";
 
 import { AppError } from "../../core/errors/app-error";
+import {
+  getPaginationParams,
+  toPaginatedResult,
+} from "../../core/pagination/pagination";
 import type {
   CreateDepartmentInput,
   ListDepartmentsInput,
@@ -31,21 +35,6 @@ const toDepartmentDto = (department: NonNullable<Awaited<ReturnType<typeof findD
   isActive: department.isActive,
   name: department.name,
   updatedAt: department.updatedAt.toISOString(),
-});
-
-const getPagination = ({
-  page,
-  pageSize,
-  total,
-}: {
-  page: number;
-  pageSize: number;
-  total: number;
-}) => ({
-  page,
-  pageCount: Math.max(1, Math.ceil(total / pageSize)),
-  pageSize,
-  total,
 });
 
 const assertDepartmentExists = async (id: string) => {
@@ -106,17 +95,18 @@ const withDepartmentWriteErrors = async <T>(operation: () => Promise<T>) => {
 
 export const getDepartments = async (input: ListDepartmentsInput) => {
   const page = input.page;
-  const pageSize = input.pageSize;
+  const limit = input.pageSize;
   const { items, total } = await listDepartments({
     ...input,
-    skip: (page - 1) * pageSize,
-    take: pageSize,
+    ...getPaginationParams({ limit, page }),
   });
 
-  return {
-    items: items.map(toDepartmentDto),
-    pagination: getPagination({ page, pageSize, total }),
-  };
+  return toPaginatedResult({
+    data: items.map(toDepartmentDto),
+    limit,
+    page,
+    total,
+  });
 };
 
 export const getDepartment = async (id: string) => {

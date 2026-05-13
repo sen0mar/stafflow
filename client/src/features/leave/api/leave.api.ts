@@ -1,4 +1,5 @@
 import { apiClient } from '@/shared/lib/api-client'
+import type { PaginatedResponse, PaginationMeta } from '@/shared/types/pagination'
 
 export type LeaveRequestStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'CANCELLED'
 
@@ -65,12 +66,7 @@ export interface LeaveBalance {
   year: number
 }
 
-export interface Pagination {
-  page: number
-  pageCount: number
-  pageSize: number
-  total: number
-}
+export type Pagination = PaginationMeta
 
 export interface LeaveTypeListParams {
   isActive?: boolean
@@ -94,13 +90,13 @@ export interface SelfLeaveRequestListParams {
 }
 
 export interface LeaveTypeListResponse {
-  items: LeaveType[]
-  pagination: Pagination
+  data: LeaveType[]
+  meta: Pagination
 }
 
 export interface LeaveRequestListResponse {
-  items: LeaveRequest[]
-  pagination: Pagination
+  data: LeaveRequest[]
+  meta: Pagination
 }
 
 export interface SelfLeaveRequestListResponse extends LeaveRequestListResponse {
@@ -152,11 +148,11 @@ export const getLeaveTypes = async (params: LeaveTypeListParams) => {
     searchParams.set('isActive', String(params.isActive))
   }
 
-  const response = await apiClient<ApiResponse<LeaveTypeListResponse>>(
+  const response = await apiClient<PaginatedResponse<LeaveType>>(
     `/leave-types?${searchParams.toString()}`,
   )
 
-  return response.data
+  return response
 }
 
 export const createLeaveType = async (input: CreateLeaveTypeInput) => {
@@ -193,11 +189,11 @@ export const getSelfLeaveRequests = async (params: SelfLeaveRequestListParams) =
     searchParams.set('status', params.status)
   }
 
-  const response = await apiClient<ApiResponse<SelfLeaveRequestListResponse>>(
+  const response = await apiClient<SelfLeaveRequestListResponse>(
     `/leave-requests/me?${searchParams.toString()}`,
   )
 
-  return response.data
+  return response
 }
 
 export const createLeaveRequest = async (input: CreateLeaveRequestInput) => {
@@ -233,11 +229,11 @@ export const getLeaveRequests = async (params: LeaveRequestListParams) => {
     searchParams.set('status', params.status)
   }
 
-  const response = await apiClient<ApiResponse<LeaveRequestListResponse>>(
+  const response = await apiClient<LeaveRequestListResponse>(
     `/leave-requests?${searchParams.toString()}`,
   )
 
-  return response.data
+  return response
 }
 
 export const getLeaveRequest = async (id: string) => {

@@ -1,7 +1,6 @@
 import { z } from "zod";
 
-const pageSchema = z.coerce.number().int().min(1).default(1);
-const limitSchema = z.coerce.number().int().min(1).max(100).default(10);
+import { limitQuerySchema, pageQuerySchema } from "../../core/pagination/pagination";
 const optionalDateTimeSchema = z
   .string()
   .datetime()
@@ -17,8 +16,8 @@ export const attendanceIdSchema = z.object({
 export const listSelfAttendanceSchema = z.object({
   query: z.object({
     from: z.string().datetime().optional(),
-    limit: limitSchema,
-    page: pageSchema,
+    limit: limitQuerySchema,
+    page: pageQuerySchema,
     status: z.enum(["PRESENT", "ABSENT", "LATE", "PARTIAL"]).optional(),
     to: z.string().datetime().optional(),
   }),
@@ -29,8 +28,8 @@ export const listAttendanceSchema = z.object({
     departmentId: z.string().trim().optional(),
     employeeId: z.string().trim().optional(),
     from: z.string().datetime().optional(),
-    limit: limitSchema,
-    page: pageSchema,
+    limit: limitQuerySchema,
+    page: pageQuerySchema,
     status: z.enum(["PRESENT", "ABSENT", "LATE", "PARTIAL"]).optional(),
     to: z.string().datetime().optional(),
   }),

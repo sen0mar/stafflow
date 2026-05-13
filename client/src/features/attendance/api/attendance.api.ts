@@ -1,4 +1,5 @@
 import { apiClient } from '@/shared/lib/api-client'
+import type { PaginatedResponse } from '@/shared/types/pagination'
 
 export type AttendanceStatus = 'PRESENT' | 'ABSENT' | 'LATE' | 'PARTIAL'
 export type AttendanceSource = 'SELF' | 'ADMIN' | 'SYSTEM'
@@ -46,15 +47,7 @@ export interface SelfAttendanceListParams {
   to?: string
 }
 
-export interface AttendanceListResponse {
-  items: AttendanceRecord[]
-  pagination: {
-    page: number
-    pageCount: number
-    pageSize: number
-    total: number
-  }
-}
+export type AttendanceListResponse = PaginatedResponse<AttendanceRecord>
 
 export interface UpdateAttendanceInput {
   clockInAt?: string | null
@@ -97,11 +90,11 @@ export const getSelfTodayAttendance = async () => {
 export const getSelfAttendanceHistory = async (params: SelfAttendanceListParams) => {
   const searchParams = new URLSearchParams()
   appendCommonParams(searchParams, params)
-  const response = await apiClient<ApiResponse<AttendanceListResponse>>(
+  const response = await apiClient<AttendanceListResponse>(
     `/attendance/me/history?${searchParams.toString()}`,
   )
 
-  return response.data
+  return response
 }
 
 export const clockIn = async () => {
@@ -132,11 +125,11 @@ export const getAttendanceRecords = async (params: AttendanceListParams) => {
     searchParams.set('departmentId', params.departmentId)
   }
 
-  const response = await apiClient<ApiResponse<AttendanceListResponse>>(
+  const response = await apiClient<AttendanceListResponse>(
     `/attendance?${searchParams.toString()}`,
   )
 
-  return response.data
+  return response
 }
 
 export const getAttendanceRecord = async (id: string) => {

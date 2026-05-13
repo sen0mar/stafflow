@@ -1,13 +1,6 @@
 import { Edit3 } from 'lucide-react'
+import { DataTable, type DataTableColumn } from '@/shared/components/data-table/data-table'
 import { Button } from '@/shared/components/ui/button'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/shared/components/ui/table'
 import { formatDate } from '@/shared/lib/dates'
 import type { AttendanceRecord } from '../api/attendance.api'
 import { AttendanceStatusBadge } from './attendance-status-badge'
@@ -23,39 +16,59 @@ export const AttendanceHistoryTable = ({
   isAdmin = false,
   onCorrect,
   records,
-}: AttendanceHistoryTableProps) => (
-  <Table>
-    <TableHeader>
-      <TableRow>
-        {isAdmin ? <TableHead>Employee</TableHead> : null}
-        <TableHead>Date</TableHead>
-        <TableHead>Clock In</TableHead>
-        <TableHead>Clock Out</TableHead>
-        <TableHead>Total</TableHead>
-        <TableHead>Status</TableHead>
-        <TableHead>Source</TableHead>
-        {isAdmin ? <TableHead className="w-12"><span className="sr-only">Actions</span></TableHead> : null}
-      </TableRow>
-    </TableHeader>
-    <TableBody>
-      {records.map((record) => (
-        <TableRow key={record.id}>
-          {isAdmin ? (
-            <TableCell>
+}: AttendanceHistoryTableProps) => {
+  const columns: DataTableColumn<AttendanceRecord>[] = [
+    ...(isAdmin
+      ? [{
+          header: 'Employee',
+          id: 'employee',
+          render: (record: AttendanceRecord) => (
+            <div>
               <p className="font-medium text-primary">{record.employee.fullName}</p>
               <p className="mt-1 text-xs text-muted">
                 {record.employee.employeeCode} · {record.employee.department?.name ?? 'Unassigned'}
               </p>
-            </TableCell>
-          ) : null}
-          <TableCell className="font-medium text-primary">{formatDate(record.date, 'MMM d, yyyy')}</TableCell>
-          <TableCell>{record.clockInAt ? formatDate(record.clockInAt, 'p') : 'Not recorded'}</TableCell>
-          <TableCell>{record.clockOutAt ? formatDate(record.clockOutAt, 'p') : 'Not recorded'}</TableCell>
-          <TableCell>{formatMinutes(record.totalMinutes)}</TableCell>
-          <TableCell><AttendanceStatusBadge status={record.status} /></TableCell>
-          <TableCell>{record.source}</TableCell>
-          {isAdmin ? (
-            <TableCell>
+            </div>
+          ),
+        }]
+      : []),
+    {
+      className: 'font-medium text-primary',
+      header: 'Date',
+      id: 'date',
+      render: (record) => formatDate(record.date, 'MMM d, yyyy'),
+    },
+    {
+      header: 'Clock In',
+      id: 'clockIn',
+      render: (record) => record.clockInAt ? formatDate(record.clockInAt, 'p') : 'Not recorded',
+    },
+    {
+      header: 'Clock Out',
+      id: 'clockOut',
+      render: (record) => record.clockOutAt ? formatDate(record.clockOutAt, 'p') : 'Not recorded',
+    },
+    {
+      header: 'Total',
+      id: 'total',
+      render: (record) => formatMinutes(record.totalMinutes),
+    },
+    {
+      header: 'Status',
+      id: 'status',
+      render: (record) => <AttendanceStatusBadge status={record.status} />,
+    },
+    {
+      header: 'Source',
+      id: 'source',
+      render: (record) => record.source,
+    },
+    ...(isAdmin
+      ? [{
+          className: 'w-12',
+          header: <span className="sr-only">Actions</span>,
+          id: 'actions',
+          render: (record: AttendanceRecord) => (
               <Button
                 type="button"
                 variant="ghost"
@@ -65,10 +78,10 @@ export const AttendanceHistoryTable = ({
               >
                 <Edit3 className="h-4 w-4" aria-hidden="true" />
               </Button>
-            </TableCell>
-          ) : null}
-        </TableRow>
-      ))}
-    </TableBody>
-  </Table>
-)
+          ),
+        }]
+      : []),
+  ]
+
+  return <DataTable columns={columns} getRowKey={(record) => record.id} items={records} />
+}

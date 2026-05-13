@@ -1,7 +1,6 @@
 import { z } from "zod";
 
-const pageSchema = z.coerce.number().int().min(1).default(1);
-const limitSchema = z.coerce.number().int().min(1).max(100).default(10);
+import { limitQuerySchema, pageQuerySchema } from "../../core/pagination/pagination";
 const optionalNoteSchema = z
   .string()
   .trim()
@@ -19,8 +18,8 @@ export const leaveIdSchema = z.object({
 export const listLeaveTypesSchema = z.object({
   query: z.object({
     isActive: z.coerce.boolean().optional(),
-    limit: limitSchema.default(100),
-    page: pageSchema,
+    limit: limitQuerySchema.default(100),
+    page: pageQuerySchema,
     search: z.string().trim().optional(),
   }),
 });
@@ -53,8 +52,8 @@ export const updateLeaveTypeSchema = z.object({
 
 export const listSelfLeaveRequestsSchema = z.object({
   query: z.object({
-    limit: limitSchema,
-    page: pageSchema,
+    limit: limitQuerySchema,
+    page: pageQuerySchema,
     status: z
       .enum(["PENDING", "APPROVED", "REJECTED"])
       .optional(),
@@ -65,8 +64,8 @@ export const listLeaveRequestsSchema = z.object({
   query: z.object({
     employeeId: z.string().trim().optional(),
     leaveTypeId: z.string().trim().optional(),
-    limit: limitSchema,
-    page: pageSchema,
+    limit: limitQuerySchema,
+    page: pageQuerySchema,
     status: z
       .enum(["PENDING", "APPROVED", "REJECTED"])
       .optional(),

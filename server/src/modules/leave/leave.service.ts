@@ -2,6 +2,11 @@ import { Prisma } from "@prisma/client";
 
 import type { AuthContext } from "../../core/auth/auth.types";
 import { AppError } from "../../core/errors/app-error";
+import {
+  getPaginationMeta,
+  getPaginationParams,
+  toPaginatedResult,
+} from "../../core/pagination/pagination";
 import { getSelfLeaveEmployeeId } from "./leave.policy";
 import {
   approveLeaveRequestWithBalance,
@@ -44,21 +49,6 @@ interface AuditContext {
 }
 
 const millisecondsPerDay = 86_400_000;
-
-const getPagination = ({
-  page,
-  pageSize,
-  total,
-}: {
-  page: number;
-  pageSize: number;
-  total: number;
-}) => ({
-  page,
-  pageCount: Math.max(1, Math.ceil(total / pageSize)),
-  pageSize,
-  total,
-});
 
 const atUtcMidnight = (value: string) => {
   const [year, month, day] = value.split("-").map(Number);
@@ -274,17 +264,18 @@ const withLeaveTypeWriteErrors = async <T>(operation: () => Promise<T>) => {
 
 export const getLeaveTypes = async (input: ListLeaveTypesInput) => {
   const page = input.page;
-  const pageSize = input.limit;
+  const limit = input.limit;
   const { items, total } = await listLeaveTypes({
     ...input,
-    skip: (page - 1) * pageSize,
-    take: pageSize,
+    ...getPaginationParams({ limit, page }),
   });
 
-  return {
-    items: items.map(toLeaveTypeDto),
-    pagination: getPagination({ page, pageSize, total }),
-  };
+  return toPaginatedResult({
+    data: items.map(toLeaveTypeDto),
+    limit,
+    page,
+    total,
+  });
 };
 
 export const createNewLeaveType = async (
@@ -383,12 +374,11 @@ export const getSelfLeaveRequests = async (
 ) => {
   const employeeId = getSelfLeaveEmployeeId(auth);
   const page = input.page;
-  const pageSize = input.limit;
+  const limit = input.limit;
   const { items, total } = await listSelfLeaveRequests({
     ...input,
     employeeId,
-    skip: (page - 1) * pageSize,
-    take: pageSize,
+    ...getPaginationParams({ limit, page }),
   });
   const balances = await listLeaveBalancesForEmployee({
     employeeId,
@@ -397,24 +387,25 @@ export const getSelfLeaveRequests = async (
 
   return {
     balances: balances.map(toLeaveBalanceDto),
-    items: items.map(toLeaveRequestDto),
-    pagination: getPagination({ page, pageSize, total }),
+    data: items.map(toLeaveRequestDto),
+    meta: getPaginationMeta({ limit, page, total }),
   };
 };
 
 export const getLeaveRequestList = async (input: ListLeaveRequestsInput) => {
   const page = input.page;
-  const pageSize = input.limit;
+  const limit = input.limit;
   const { items, total } = await listLeaveRequests({
     ...input,
-    skip: (page - 1) * pageSize,
-    take: pageSize,
+    ...getPaginationParams({ limit, page }),
   });
 
-  return {
-    items: items.map(toLeaveRequestDto),
-    pagination: getPagination({ page, pageSize, total }),
-  };
+  return toPaginatedResult({
+    data: items.map(toLeaveRequestDto),
+    limit,
+    page,
+    total,
+  });
 };
 
 export const getLeaveRequestDetail = async (id: string) => {

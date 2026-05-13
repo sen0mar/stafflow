@@ -1,4 +1,5 @@
 import { apiClient } from '@/shared/lib/api-client'
+import type { PaginatedResponse, PaginationMeta } from '@/shared/types/pagination'
 
 export interface AuditLogActor {
   email: string
@@ -20,12 +21,7 @@ export interface AuditLog {
   userAgent: string | null
 }
 
-export interface Pagination {
-  page: number
-  pageCount: number
-  pageSize: number
-  total: number
-}
+export type Pagination = PaginationMeta
 
 export interface AuditLogListParams {
   action?: string
@@ -39,8 +35,8 @@ export interface AuditLogListParams {
 }
 
 export interface AuditLogListResponse {
-  items: AuditLog[]
-  pagination: Pagination
+  data: AuditLog[]
+  meta: Pagination
 }
 
 interface ApiResponse<TData> {
@@ -73,11 +69,11 @@ const getAuditLogSearchParams = (params: AuditLogListParams) => {
 
 export const getAuditLogs = async (params: AuditLogListParams) => {
   const searchParams = getAuditLogSearchParams(params)
-  const response = await apiClient<ApiResponse<AuditLogListResponse>>(
+  const response = await apiClient<PaginatedResponse<AuditLog>>(
     `/audit-logs?${searchParams.toString()}`,
   )
 
-  return response.data
+  return response
 }
 
 export const getAuditLog = async (id: string) => {

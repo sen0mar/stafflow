@@ -1,4 +1,5 @@
 import { apiClient } from '@/shared/lib/api-client'
+import type { PaginatedResponse } from '@/shared/types/pagination'
 
 export type EmployeeStatus = 'ACTIVE' | 'INACTIVE' | 'TERMINATED'
 export type AccountStatus = 'ACTIVE' | 'DISABLED' | 'INVITED'
@@ -48,13 +49,8 @@ export interface EmployeeListParams {
 }
 
 export interface EmployeeListResponse {
-  items: Employee[]
-  pagination: {
-    page: number
-    pageCount: number
-    pageSize: number
-    total: number
-  }
+  data: Employee[]
+  meta: PaginatedResponse<Employee>['meta']
 }
 
 export interface CreateEmployeeInput {
@@ -120,11 +116,11 @@ const getEmployeeListSearchParams = (params: EmployeeListParams) => {
 
 export const getEmployees = async (params: EmployeeListParams) => {
   const searchParams = getEmployeeListSearchParams(params)
-  const response = await apiClient<ApiResponse<EmployeeListResponse>>(
+  const response = await apiClient<EmployeeListResponse>(
     `/employees?${searchParams.toString()}`,
   )
 
-  return response.data
+  return response
 }
 
 export const getEmployee = async (id: string) => {

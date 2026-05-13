@@ -1,4 +1,5 @@
 import { apiClient } from '@/shared/lib/api-client'
+import type { PaginatedResponse } from '@/shared/types/pagination'
 
 export interface Department {
   createdAt: string
@@ -31,16 +32,6 @@ interface ApiResponse<TData> {
   data: TData
 }
 
-interface DepartmentListResponse {
-  items: Department[]
-  pagination: {
-    page: number
-    pageCount: number
-    pageSize: number
-    total: number
-  }
-}
-
 const getDepartmentListSearchParams = (params: DepartmentListParams) => {
   const searchParams = new URLSearchParams({
     page: String(params.page),
@@ -60,11 +51,11 @@ const getDepartmentListSearchParams = (params: DepartmentListParams) => {
 
 export const getDepartments = async (params: DepartmentListParams) => {
   const searchParams = getDepartmentListSearchParams(params)
-  const response = await apiClient<ApiResponse<DepartmentListResponse>>(
+  const response = await apiClient<PaginatedResponse<Department>>(
     `/departments?${searchParams.toString()}`,
   )
 
-  return response.data
+  return response
 }
 
 export const getDepartment = async (id: string) => {

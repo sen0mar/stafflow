@@ -1,7 +1,6 @@
 import { z } from "zod";
 
-const pageSchema = z.coerce.number().int().min(1).default(1);
-const pageSizeSchema = z.coerce.number().int().min(1).max(100).default(10);
+import { limitQuerySchema, pageQuerySchema } from "../../core/pagination/pagination";
 
 export const departmentIdSchema = z.object({
   params: z.object({
@@ -21,8 +20,8 @@ export const listDepartmentsSchema = z.object({
 
         return value === "true";
       }),
-    page: pageSchema,
-    pageSize: pageSizeSchema,
+    page: pageQuerySchema,
+    pageSize: limitQuerySchema,
     search: z.string().trim().optional(),
   }),
 });

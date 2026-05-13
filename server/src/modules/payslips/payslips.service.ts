@@ -5,6 +5,10 @@ import type { Express } from "express";
 import type { AuthContext } from "../../core/auth/auth.types";
 import { AppError } from "../../core/errors/app-error";
 import { logger } from "../../core/logger/logger";
+import {
+  getPaginationParams,
+  toPaginatedResult,
+} from "../../core/pagination/pagination";
 import { assertValidPayslipPdf } from "../../core/storage/file-validation";
 import {
   createPayslipObjectKey,
@@ -38,21 +42,6 @@ interface AuditContext {
   ipAddress?: string;
   userAgent?: string;
 }
-
-const getPagination = ({
-  page,
-  pageSize,
-  total,
-}: {
-  page: number;
-  pageSize: number;
-  total: number;
-}) => ({
-  page,
-  pageCount: Math.max(1, Math.ceil(total / pageSize)),
-  pageSize,
-  total,
-});
 
 const getFullName = (firstName: string, lastName: string) =>
   `${firstName} ${lastName}`;
@@ -168,17 +157,18 @@ const deleteReplacedObject = async (objectKey: string | null, newObjectKey: stri
 
 export const getPayslipList = async (input: ListPayslipsInput) => {
   const page = input.page;
-  const pageSize = input.limit;
+  const limit = input.limit;
   const { items, total } = await listPayslips({
     ...input,
-    skip: (page - 1) * pageSize,
-    take: pageSize,
+    ...getPaginationParams({ limit, page }),
   });
 
-  return {
-    items: items.map(toPayslipDto),
-    pagination: getPagination({ page, pageSize, total }),
-  };
+  return toPaginatedResult({
+    data: items.map(toPayslipDto),
+    limit,
+    page,
+    total,
+  });
 };
 
 export const getSelfPayslipList = async (
@@ -187,18 +177,19 @@ export const getSelfPayslipList = async (
 ) => {
   const employeeId = getSelfPayslipEmployeeId(auth);
   const page = input.page;
-  const pageSize = input.limit;
+  const limit = input.limit;
   const { items, total } = await listSelfPayslips({
     ...input,
     employeeId,
-    skip: (page - 1) * pageSize,
-    take: pageSize,
+    ...getPaginationParams({ limit, page }),
   });
 
-  return {
-    items: items.map(toPayslipDto),
-    pagination: getPagination({ page, pageSize, total }),
-  };
+  return toPaginatedResult({
+    data: items.map(toPayslipDto),
+    limit,
+    page,
+    total,
+  });
 };
 
 export const getPayslipDetail = async (auth: AuthContext, id: string) => {

@@ -37,9 +37,8 @@ export const listLeaveTypesController: RequestHandler = async (
 ) => {
   const { query } = listLeaveTypesSchema.parse({ query: request.query });
   const leaveTypes = await getLeaveTypes(query);
-  const responseBody: ApiSuccess<typeof leaveTypes> = { data: leaveTypes };
 
-  response.status(200).json(responseBody);
+  response.status(200).json(leaveTypes);
 };
 
 export const createLeaveTypeController: RequestHandler = async (
@@ -91,9 +90,8 @@ export const listSelfLeaveRequestsController: RequestHandler = async (
 ) => {
   const { query } = listSelfLeaveRequestsSchema.parse({ query: request.query });
   const leaveRequests = await getSelfLeaveRequests(request.auth!, query);
-  const responseBody: ApiSuccess<typeof leaveRequests> = { data: leaveRequests };
 
-  response.status(200).json(responseBody);
+  response.status(200).json(leaveRequests);
 };
 
 export const createLeaveRequestController: RequestHandler = async (
@@ -124,9 +122,8 @@ export const listLeaveRequestsController: RequestHandler = async (
 ) => {
   const { query } = listLeaveRequestsSchema.parse({ query: request.query });
   const leaveRequests = await getLeaveRequestList(query);
-  const responseBody: ApiSuccess<typeof leaveRequests> = { data: leaveRequests };
 
-  response.status(200).json(responseBody);
+  response.status(200).json(leaveRequests);
 };
 
 export const getLeaveRequestController: RequestHandler = async (

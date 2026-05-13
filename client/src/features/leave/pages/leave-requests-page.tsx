@@ -1,20 +1,15 @@
 import { CalendarDays, Filter, Plus, Search } from 'lucide-react'
 import { useState } from 'react'
 import { PageHeader } from '@/shared/components/layout/page-header'
+import { FilterSelect } from '@/shared/components/data-table/filter-select'
 import { PaginationControls } from '@/shared/components/data-table/pagination-controls'
+import { TableToolbar } from '@/shared/components/data-table/table-toolbar'
 import { Button } from '@/shared/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from '@/shared/components/ui/dropdown-menu'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/shared/components/ui/select'
 import { Skeleton } from '@/shared/components/ui/skeleton'
 import {
   Table,
@@ -26,6 +21,7 @@ import {
 } from '@/shared/components/ui/table'
 import { useCurrentUser } from '@/features/auth/hooks/use-current-user'
 import { useEmployees } from '@/features/employees/hooks/use-employees'
+import { useTableQueryState } from '@/shared/hooks/use-table-query-state'
 import type { LeaveRequest, LeaveRequestStatus, LeaveType } from '../api/leave.api'
 import { LeaveRequestForm } from '../components/leave-request-form'
 import { LeaveReviewDialog } from '../components/leave-review-dialog'
@@ -212,8 +208,9 @@ const LeaveRequestsTable = ({
 )
 
 const EmployeeLeavePage = () => {
-  const [page, setPage] = useState(1)
-  const [status, setStatus] = useState<StatusFilter>('all')
+  const tableState = useTableQueryState()
+  const page = tableState.getNumber('page', 1)
+  const status = tableState.getString('status', 'all') as StatusFilter
   const selfRequestsQuery = useSelfLeaveRequests({
     limit: pageSize,
     page,
@@ -222,9 +219,12 @@ const EmployeeLeavePage = () => {
   const leaveTypesQuery = useLeaveTypes({ isActive: true, limit: 100, page: 1 })
   const createRequest = useCreateLeaveRequest()
   const cancelRequest = useCancelLeaveRequest()
-  const requests = getVisibleRequests(selfRequestsQuery.data?.items ?? [])
+  const requests = getVisibleRequests(selfRequestsQuery.data?.data ?? [])
   const balances = selfRequestsQuery.data?.balances ?? []
-  const pagination = selfRequestsQuery.data?.pagination
+  const pagination = selfRequestsQuery.data?.meta
+  const setPage = (nextPage: number) => {
+    tableState.updateQuery({ page: nextPage === 1 ? undefined : nextPage })
+  }
 
   const handleSubmit = (values: LeaveRequestFormValues) => {
     createRequest.mutate(getRequestPayload(values))
@@ -245,7 +245,7 @@ const EmployeeLeavePage = () => {
         </div>
         <LeaveRequestForm
           isSubmitting={createRequest.isPending}
-          leaveTypes={leaveTypesQuery.data?.items ?? []}
+          leaveTypes={leaveTypesQuery.data?.data ?? []}
           onSubmit={handleSubmit}
         />
       </section>
@@ -270,23 +270,17 @@ const EmployeeLeavePage = () => {
             <h2 className="text-lg font-semibold text-primary">My requests</h2>
             <p className="mt-1 text-sm text-muted">Recent leave request activity.</p>
           </div>
-          <Select
+          <FilterSelect
+            className="w-full sm:w-44"
             value={status}
-            onValueChange={(value) => {
-              setStatus(value as StatusFilter)
-              setPage(1)
-            }}
-          >
-            <SelectTrigger className="w-full sm:w-44">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All statuses</SelectItem>
-              <SelectItem value="PENDING">Pending</SelectItem>
-              <SelectItem value="APPROVED">Approved</SelectItem>
-              <SelectItem value="REJECTED">Rejected</SelectItem>
-            </SelectContent>
-          </Select>
+            onValueChange={(value) => tableState.updateQuery({ status: value }, { resetPage: true })}
+            options={[
+              { label: 'All statuses', value: 'all' },
+              { label: 'Pending', value: 'PENDING' },
+              { label: 'Approved', value: 'APPROVED' },
+              { label: 'Rejected', value: 'REJECTED' },
+            ]}
+          />
         </div>
 
         {selfRequestsQuery.isLoading ? <LoadingTable /> : null}
@@ -306,9 +300,7 @@ const EmployeeLeavePage = () => {
             />
             <PaginationControls
               itemLabel="requests"
-              page={pagination?.page ?? page}
-              pageCount={pagination?.pageCount ?? 1}
-              total={pagination?.total ?? 0}
+              meta={pagination ?? { limit: pageSize, page, total: 0, totalPages: 1 }}
               onPageChange={setPage}
             />
           </>
@@ -325,7 +317,7 @@ const LeaveTypeManagement = () => {
   const createLeaveType = useCreateLeaveType()
   const updateLeaveType = useUpdateLeaveType()
   const deleteLeaveType = useDeleteLeaveType()
-  const leaveTypes = leaveTypesQuery.data?.items ?? []
+  const leaveTypes = leaveTypesQuery.data?.data ?? []
 
   const openCreate = () => {
     setEditingLeaveType(null)
@@ -426,10 +418,11 @@ const LeaveTypeManagement = () => {
 }
 
 const AdminLeavePage = () => {
-  const [page, setPage] = useState(1)
-  const [employeeId, setEmployeeId] = useState('all')
-  const [leaveTypeId, setLeaveTypeId] = useState('all')
-  const [status, setStatus] = useState<StatusFilter>('all')
+  const tableState = useTableQueryState()
+  const page = tableState.getNumber('page', 1)
+  const employeeId = tableState.getString('employeeId', 'all')
+  const leaveTypeId = tableState.getString('leaveTypeId', 'all')
+  const status = tableState.getString('status', 'all') as StatusFilter
   const [reviewAction, setReviewAction] = useState<'approve' | 'reject' | null>(null)
   const [reviewRequest, setReviewRequest] = useState<LeaveRequest | null>(null)
   const leaveRequestsQuery = useLeaveRequests({
@@ -448,10 +441,12 @@ const AdminLeavePage = () => {
   })
   const approveRequest = useApproveLeaveRequest()
   const rejectRequest = useRejectLeaveRequest()
-  const requests = getVisibleRequests(leaveRequestsQuery.data?.items ?? [])
-  const pagination = leaveRequestsQuery.data?.pagination
+  const requests = getVisibleRequests(leaveRequestsQuery.data?.data ?? [])
+  const pagination = leaveRequestsQuery.data?.meta
 
-  const resetPage = () => setPage(1)
+  const setPage = (nextPage: number) => {
+    tableState.updateQuery({ page: nextPage === 1 ? undefined : nextPage })
+  }
   const openReview = (action: 'approve' | 'reject', request: LeaveRequest) => {
     setReviewAction(action)
     setReviewRequest(request)
@@ -490,65 +485,36 @@ const AdminLeavePage = () => {
       />
 
       <section className="space-y-4 rounded-2xl border border-default bg-surface p-4 shadow-soft">
-        <div className="grid gap-3 lg:grid-cols-[1fr_1fr_0.8fr]">
-          <Select
+        <TableToolbar className="lg:grid-cols-[1fr_1fr_0.8fr]">
+          <FilterSelect
+            icon={<Search className="h-4 w-4 text-muted" aria-hidden="true" />}
             value={employeeId}
-            onValueChange={(value) => {
-              setEmployeeId(value)
-              resetPage()
-            }}
-          >
-            <SelectTrigger className="w-full">
-              <Search className="h-4 w-4 text-muted" aria-hidden="true" />
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All employees</SelectItem>
-              {employeesQuery.data?.items.map((employee) => (
-                <SelectItem key={employee.id} value={employee.id}>
-                  {employee.fullName}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Select
+            onValueChange={(value) => tableState.updateQuery({ employeeId: value }, { resetPage: true })}
+            options={[
+              { label: 'All employees', value: 'all' },
+              ...(employeesQuery.data?.data.map((employee) => ({ label: employee.fullName, value: employee.id })) ?? []),
+            ]}
+          />
+          <FilterSelect
+            icon={<Filter className="h-4 w-4 text-muted" aria-hidden="true" />}
             value={leaveTypeId}
-            onValueChange={(value) => {
-              setLeaveTypeId(value)
-              resetPage()
-            }}
-          >
-            <SelectTrigger className="w-full">
-              <Filter className="h-4 w-4 text-muted" aria-hidden="true" />
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All leave types</SelectItem>
-              {leaveTypesQuery.data?.items.map((leaveType) => (
-                <SelectItem key={leaveType.id} value={leaveType.id}>
-                  {leaveType.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Select
+            onValueChange={(value) => tableState.updateQuery({ leaveTypeId: value }, { resetPage: true })}
+            options={[
+              { label: 'All leave types', value: 'all' },
+              ...(leaveTypesQuery.data?.data.map((leaveType) => ({ label: leaveType.name, value: leaveType.id })) ?? []),
+            ]}
+          />
+          <FilterSelect
             value={status}
-            onValueChange={(value) => {
-              setStatus(value as StatusFilter)
-              resetPage()
-            }}
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All statuses</SelectItem>
-              <SelectItem value="PENDING">Pending</SelectItem>
-              <SelectItem value="APPROVED">Approved</SelectItem>
-              <SelectItem value="REJECTED">Rejected</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+            onValueChange={(value) => tableState.updateQuery({ status: value }, { resetPage: true })}
+            options={[
+              { label: 'All statuses', value: 'all' },
+              { label: 'Pending', value: 'PENDING' },
+              { label: 'Approved', value: 'APPROVED' },
+              { label: 'Rejected', value: 'REJECTED' },
+            ]}
+          />
+        </TableToolbar>
 
         {leaveRequestsQuery.isLoading ? <LoadingTable /> : null}
         {leaveRequestsQuery.isError ? (
@@ -568,9 +534,7 @@ const AdminLeavePage = () => {
             />
             <PaginationControls
               itemLabel="requests"
-              page={pagination?.page ?? page}
-              pageCount={pagination?.pageCount ?? 1}
-              total={pagination?.total ?? 0}
+              meta={pagination ?? { limit: pageSize, page, total: 0, totalPages: 1 }}
               onPageChange={setPage}
             />
           </>
