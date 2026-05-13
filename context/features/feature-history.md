@@ -33,6 +33,7 @@ Keep entries short. This file should explain what changed, not become a detailed
 - Feature 26: Bulk Pagination Navigation — added a shared compact pagination control with first/last and ±10 page skips, and reused it across employee, department, attendance, and leave list screens.
 - Feature 27: Payslip R2 Storage — added private Cloudflare R2 payslip PDF upload, replacement, deletion, preview, and signed download flows with backend ownership checks, demo upload blocking, audit logs, env validation, and quieter development server logging.
 - Feature 28: Basic Settings — added admin-only company, attendance, and leave settings APIs with audited mutations, a Prisma migration for basic settings fields, seeded defaults, and an editable settings page with a backend-driven demo notice.
+- Feature 29: Settings Save Confirmations — added confirmation dialogs before company, attendance, and leave settings saves, preserving validation before confirmation and audited mutations after confirmation.
 
 ## Entry Format
 

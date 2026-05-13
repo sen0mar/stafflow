@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { AlertTriangle, Building2, CalendarClock, FileText, type LucideIcon } from 'lucide-react'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Button } from '@/shared/components/ui/button'
 import {
@@ -10,6 +10,14 @@ import {
   CardHeader,
   CardTitle,
 } from '@/shared/components/ui/card'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/shared/components/ui/dialog'
 import {
   Form,
   FormControl,
@@ -101,6 +109,80 @@ const SettingsSkeleton = () => (
   </div>
 )
 
+type PendingSettingsSave =
+  | {
+      type: 'company'
+      values: CompanySettingsFormValues
+    }
+  | {
+      type: 'attendance'
+      values: AttendanceSettingsFormValues
+    }
+  | {
+      type: 'leave'
+      values: LeaveSettingsFormValues
+    }
+
+const confirmationContent = {
+  attendance: {
+    buttonLabel: 'Save attendance',
+    description: 'These attendance defaults will be used by admin and employee attendance workflows.',
+    title: 'Save attendance settings?',
+  },
+  company: {
+    buttonLabel: 'Save company',
+    description: 'This will update the company identity and regional defaults used across Stafflow.',
+    title: 'Save company settings?',
+  },
+  leave: {
+    buttonLabel: 'Save leave',
+    description: 'This will update the default leave policy and balance behavior.',
+    title: 'Save leave settings?',
+  },
+} satisfies Record<PendingSettingsSave['type'], {
+  buttonLabel: string
+  description: string
+  title: string
+}>
+
+interface SettingsSaveConfirmDialogProps {
+  isSubmitting: boolean
+  onConfirm: () => void
+  onOpenChange: (open: boolean) => void
+  pendingSave: PendingSettingsSave | null
+}
+
+const SettingsSaveConfirmDialog = ({
+  isSubmitting,
+  onConfirm,
+  onOpenChange,
+  pendingSave,
+}: SettingsSaveConfirmDialogProps) => {
+  const content = pendingSave ? confirmationContent[pendingSave.type] : confirmationContent.company
+
+  return (
+    <Dialog open={Boolean(pendingSave)} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <div className="mb-2 flex h-10 w-10 items-center justify-center rounded-xl bg-brand-soft text-brand">
+            <AlertTriangle className="h-5 w-5" aria-hidden="true" />
+          </div>
+          <DialogTitle>{content.title}</DialogTitle>
+          <DialogDescription>{content.description}</DialogDescription>
+        </DialogHeader>
+        <DialogFooter>
+          <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            Cancel
+          </Button>
+          <Button type="button" disabled={isSubmitting} onClick={onConfirm}>
+            {isSubmitting ? 'Saving...' : content.buttonLabel}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
 interface SectionHeaderProps {
   description: string
   icon: LucideIcon
@@ -128,6 +210,7 @@ export const SettingsPage = () => {
   const updateCompanyMutation = useUpdateCompanySettings()
   const updateAttendanceMutation = useUpdateAttendanceSettings()
   const updateLeaveMutation = useUpdateLeaveSettings()
+  const [pendingSave, setPendingSave] = useState<PendingSettingsSave | null>(null)
   const isLoading = companyQuery.isLoading || attendanceQuery.isLoading || leaveQuery.isLoading
   const hasError = companyQuery.isError || attendanceQuery.isError || leaveQuery.isError
   const demoMode = Boolean(
@@ -150,6 +233,45 @@ export const SettingsPage = () => {
     defaultValues: getLeaveDefaults(leaveQuery.data),
     resolver: zodResolver(leaveSettingsFormSchema),
   })
+  const isConfirmingSave =
+    updateCompanyMutation.isPending ||
+    updateAttendanceMutation.isPending ||
+    updateLeaveMutation.isPending
+
+  const handleConfirmSave = () => {
+    if (!pendingSave) {
+      return
+    }
+
+    if (pendingSave.type === 'company') {
+      updateCompanyMutation.mutate(pendingSave.values, {
+        onSuccess: () => setPendingSave(null),
+      })
+
+      return
+    }
+
+    if (pendingSave.type === 'attendance') {
+      updateAttendanceMutation.mutate(pendingSave.values, {
+        onSuccess: () => setPendingSave(null),
+      })
+
+      return
+    }
+
+    updateLeaveMutation.mutate(
+      {
+        ...pendingSave.values,
+        policyText:
+          pendingSave.values.policyText.trim().length > 0
+            ? pendingSave.values.policyText.trim()
+            : null,
+      },
+      {
+        onSuccess: () => setPendingSave(null),
+      },
+    )
+  }
 
   useEffect(() => {
     if (companyQuery.data) {
@@ -216,7 +338,9 @@ export const SettingsPage = () => {
           <Form {...companyForm}>
             <form
               className="grid gap-4 lg:grid-cols-[1fr_1fr_120px_auto] lg:items-end"
-              onSubmit={companyForm.handleSubmit((values) => updateCompanyMutation.mutate(values))}
+              onSubmit={companyForm.handleSubmit((values) =>
+                setPendingSave({ type: 'company', values }),
+              )}
             >
               <FormField
                 control={companyForm.control}
@@ -286,7 +410,9 @@ export const SettingsPage = () => {
           <Form {...attendanceForm}>
             <form
               className="space-y-5"
-              onSubmit={attendanceForm.handleSubmit((values) => updateAttendanceMutation.mutate(values))}
+              onSubmit={attendanceForm.handleSubmit((values) =>
+                setPendingSave({ type: 'attendance', values }),
+              )}
             >
               <div className="grid gap-4 md:grid-cols-3">
                 <FormField
@@ -431,10 +557,7 @@ export const SettingsPage = () => {
             <form
               className="space-y-5"
               onSubmit={leaveForm.handleSubmit((values) =>
-                updateLeaveMutation.mutate({
-                  ...values,
-                  policyText: values.policyText.trim().length > 0 ? values.policyText.trim() : null,
-                }),
+                setPendingSave({ type: 'leave', values }),
               )}
             >
               <div className="grid gap-4 md:grid-cols-2">
@@ -502,6 +625,16 @@ export const SettingsPage = () => {
           </Form>
         </CardContent>
       </Card>
+      <SettingsSaveConfirmDialog
+        isSubmitting={isConfirmingSave}
+        pendingSave={pendingSave}
+        onConfirm={handleConfirmSave}
+        onOpenChange={(open) => {
+          if (!open && !isConfirmingSave) {
+            setPendingSave(null)
+          }
+        }}
+      />
     </div>
   )
 }
