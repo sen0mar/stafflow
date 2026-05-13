@@ -51,7 +51,6 @@ Frontend route guards are only UX. Backend RBAC and ownership checks are the sec
 - Vercel deployment logs: check frontend build/deploy status, runtime errors, and API origin configuration.
 - Neon usage monitoring: check connection, storage, compute, and query usage for abnormal public-demo activity.
 - Cloudflare R2 usage checks: check object count, storage growth, and request volume; unexpected growth means disable uploads and rotate credentials if needed.
-- Upstash usage checks: check rate-limit request volume, denied requests, and quota exhaustion.
 
 ## Deferred
 

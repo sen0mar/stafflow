@@ -27,9 +27,8 @@ Public registration is intentionally disabled: accounts are admin-created or see
 - Database: PostgreSQL on Neon with Prisma ORM and Prisma migrations
 - Auth: first-party email/password sessions with HTTP-only cookies
 - Storage: Cloudflare R2 for private payslip PDFs
-- Rate limiting: Upstash Redis
 - Logging: Pino and Pino HTTP
-- Deployment targets: Vercel frontend, Render backend, Neon database, Cloudflare R2, Upstash Redis
+- Deployment targets: Vercel frontend, Render backend, Neon database, Cloudflare R2
 
 ## Architecture summary
 
@@ -40,7 +39,6 @@ flowchart LR
   API --> Prisma["Prisma repositories"]
   Prisma --> Postgres["Neon PostgreSQL"]
   API --> R2["Cloudflare R2 private payslips"]
-  API --> Redis["Upstash rate limits"]
   API --> Logs["Pino technical logs"]
   API --> Audit["AuditLog business records"]
 ```
@@ -154,7 +152,6 @@ npm run db:bootstrap-demo-auth
 - Deploy the Express API to Render.
 - Use Neon PostgreSQL for the database.
 - Use Cloudflare R2 for private payslip PDFs.
-- Use Upstash Redis for distributed rate limiting.
 - Set `CLIENT_URL` to the exact frontend origin and configure the frontend API URL for the Render API origin.
 - Keep production cookies secure and cross-site compatible for the deployed frontend/API origins.
 
