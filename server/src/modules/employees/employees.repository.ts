@@ -1,5 +1,6 @@
 import type { EmploymentStatus, Prisma, UserStatus } from "@prisma/client";
 
+import { createAuditLog } from "../audit-logs/audit-log.service";
 import { prisma } from "../../prisma/prisma.client";
 import type {
   CreateEmployeeInput,
@@ -157,19 +158,15 @@ export const createEmployeeAuditLog = ({
   tx?: Prisma.TransactionClient;
   userAgent?: string;
 }) =>
-  tx.auditLog.create({
-    data: {
-      action,
-      actorUserId,
-      entityId,
-      entityType: "Employee",
-      ipAddress,
-      metadata,
-      userAgent,
-    },
-    select: {
-      id: true,
-    },
+  createAuditLog({
+    action,
+    actorUserId,
+    entityId,
+    entityType: "Employee",
+    ipAddress,
+    metadata,
+    tx,
+    userAgent,
   });
 
 export const createUserAuditLogForEmployee = ({
@@ -189,19 +186,15 @@ export const createUserAuditLogForEmployee = ({
   tx?: Prisma.TransactionClient;
   userAgent?: string;
 }) =>
-  tx.auditLog.create({
-    data: {
-      action,
-      actorUserId,
-      entityId,
-      entityType: "User",
-      ipAddress,
-      metadata,
-      userAgent,
-    },
-    select: {
-      id: true,
-    },
+  createAuditLog({
+    action,
+    actorUserId,
+    entityId,
+    entityType: "User",
+    ipAddress,
+    metadata,
+    tx,
+    userAgent,
   });
 
 export const createInvitedEmployeeAccount = async ({

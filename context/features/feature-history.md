@@ -35,6 +35,7 @@ Keep entries short. This file should explain what changed, not become a detailed
 - Feature 28: Basic Settings — added admin-only company, attendance, and leave settings APIs with audited mutations, a Prisma migration for basic settings fields, seeded defaults, and an editable settings page with a backend-driven demo notice.
 - Feature 29: Settings Save Confirmations — added confirmation dialogs before company, attendance, and leave settings saves, preserving validation before confirmation and audited mutations after confirmation.
 - Feature 30: Codebase Cleanup — added route-level lazy loading with route fallbacks, server ESLint coverage, removed unused starter SVG assets, and reduced the initial client JS chunk below the Vite warning threshold.
+- Feature 31: Audit Logs — added admin-only audit log APIs and UI with filters, pagination, detail previews, centralized redacted audit writes, password change/reset completion audit events, and an audit log created-at index migration.
 
 ## Entry Format
 

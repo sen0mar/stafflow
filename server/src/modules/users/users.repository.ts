@@ -1,6 +1,7 @@
 import type { Prisma, UserRole, UserStatus } from "@prisma/client";
 
 import { prisma } from "../../prisma/prisma.client";
+import { createAuditLog } from "../audit-logs/audit-log.service";
 
 export const publicUserSelect = {
   createdAt: true,
@@ -71,19 +72,14 @@ export const createUserAuditLog = ({
   metadata?: Prisma.InputJsonValue;
   userAgent?: string;
 }) =>
-  prisma.auditLog.create({
-    data: {
-      action,
-      actorUserId,
-      entityId,
-      entityType: "User",
-      ipAddress,
-      metadata,
-      userAgent,
-    },
-    select: {
-      id: true,
-    },
+  createAuditLog({
+    action,
+    actorUserId,
+    entityId,
+    entityType: "User",
+    ipAddress,
+    metadata,
+    userAgent,
   });
 
 export type PublicUserRecord = NonNullable<

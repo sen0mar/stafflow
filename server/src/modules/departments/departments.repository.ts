@@ -1,6 +1,7 @@
 import type { Prisma } from "@prisma/client";
 
 import { prisma } from "../../prisma/prisma.client";
+import { createAuditLog } from "../audit-logs/audit-log.service";
 import type {
   CreateDepartmentInput,
   ListDepartmentsInput,
@@ -127,19 +128,14 @@ export const createDepartmentAuditLog = ({
   metadata?: Prisma.InputJsonValue;
   userAgent?: string;
 }) =>
-  prisma.auditLog.create({
-    data: {
-      action,
-      actorUserId,
-      entityId,
-      entityType: "Department",
-      ipAddress,
-      metadata,
-      userAgent,
-    },
-    select: {
-      id: true,
-    },
+  createAuditLog({
+    action,
+    actorUserId,
+    entityId,
+    entityType: "Department",
+    ipAddress,
+    metadata,
+    userAgent,
   });
 
 export type DepartmentRecord = Awaited<ReturnType<typeof findDepartmentById>>;

@@ -1,6 +1,7 @@
 import { Prisma } from "@prisma/client";
 
 import { prisma } from "../../prisma/prisma.client";
+import { createAuditLog } from "../audit-logs/audit-log.service";
 import type {
   CreateLeaveRequestInput,
   CreateLeaveTypeInput,
@@ -423,24 +424,22 @@ export const approveLeaveRequestWithBalance = ({
       where: { id: entityId },
     });
 
-    await tx.auditLog.create({
-      data: {
-        action: "LEAVE_REQUEST_APPROVED",
-        actorUserId,
-        entityId,
-        entityType: "LeaveRequest",
-        ipAddress,
-        metadata: {
-          employeeId: current.employeeId,
-          fromStatus: current.status,
-          leaveTypeId: current.leaveTypeId,
-          reviewNote,
-          toStatus: "APPROVED",
-          totalDays: current.totalDays.toString(),
-        },
-        userAgent,
+    await createAuditLog({
+      action: "LEAVE_REQUEST_APPROVED",
+      actorUserId,
+      entityId,
+      entityType: "LeaveRequest",
+      ipAddress,
+      metadata: {
+        employeeId: current.employeeId,
+        fromStatus: current.status,
+        leaveTypeId: current.leaveTypeId,
+        reviewNote,
+        toStatus: "APPROVED",
+        totalDays: current.totalDays.toString(),
       },
-      select: { id: true },
+      tx,
+      userAgent,
     });
 
     return leaveRequest;
@@ -475,24 +474,22 @@ export const rejectLeaveRequestWithAuditLog = ({
       where: { id: entityId },
     });
 
-    await tx.auditLog.create({
-      data: {
-        action: "LEAVE_REQUEST_REJECTED",
-        actorUserId,
-        entityId,
-        entityType: "LeaveRequest",
-        ipAddress,
-        metadata: {
-          employeeId: current.employeeId,
-          fromStatus: current.status,
-          leaveTypeId: current.leaveTypeId,
-          reviewNote,
-          toStatus: "REJECTED",
-          totalDays: current.totalDays.toString(),
-        },
-        userAgent,
+    await createAuditLog({
+      action: "LEAVE_REQUEST_REJECTED",
+      actorUserId,
+      entityId,
+      entityType: "LeaveRequest",
+      ipAddress,
+      metadata: {
+        employeeId: current.employeeId,
+        fromStatus: current.status,
+        leaveTypeId: current.leaveTypeId,
+        reviewNote,
+        toStatus: "REJECTED",
+        totalDays: current.totalDays.toString(),
       },
-      select: { id: true },
+      tx,
+      userAgent,
     });
 
     return leaveRequest;
@@ -561,25 +558,23 @@ export const rejectApprovedLeaveRequestWithBalance = ({
       where: { id: entityId },
     });
 
-    await tx.auditLog.create({
-      data: {
-        action: "LEAVE_REQUEST_APPROVAL_REVERSED",
-        actorUserId,
-        entityId,
-        entityType: "LeaveRequest",
-        ipAddress,
-        metadata: {
-          balanceAdjusted: Boolean(existingBalance),
-          employeeId: current.employeeId,
-          fromStatus: current.status,
-          leaveTypeId: current.leaveTypeId,
-          reviewNote,
-          toStatus: "REJECTED",
-          totalDays: current.totalDays.toString(),
-        },
-        userAgent,
+    await createAuditLog({
+      action: "LEAVE_REQUEST_APPROVAL_REVERSED",
+      actorUserId,
+      entityId,
+      entityType: "LeaveRequest",
+      ipAddress,
+      metadata: {
+        balanceAdjusted: Boolean(existingBalance),
+        employeeId: current.employeeId,
+        fromStatus: current.status,
+        leaveTypeId: current.leaveTypeId,
+        reviewNote,
+        toStatus: "REJECTED",
+        totalDays: current.totalDays.toString(),
       },
-      select: { id: true },
+      tx,
+      userAgent,
     });
 
     return leaveRequest;
@@ -600,15 +595,12 @@ export const createLeaveTypeAuditLog = ({
   metadata?: Prisma.InputJsonValue;
   userAgent?: string;
 }) =>
-  prisma.auditLog.create({
-    data: {
-      action,
-      actorUserId,
-      entityId,
-      entityType: "LeaveType",
-      ipAddress,
-      metadata,
-      userAgent,
-    },
-    select: { id: true },
+  createAuditLog({
+    action,
+    actorUserId,
+    entityId,
+    entityType: "LeaveType",
+    ipAddress,
+    metadata,
+    userAgent,
   });
