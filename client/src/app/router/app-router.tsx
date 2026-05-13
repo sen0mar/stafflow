@@ -1,28 +1,29 @@
 import { Navigate, createBrowserRouter } from 'react-router-dom'
 import { ProtectedRoute } from './protected-route'
+import { RouteFallback } from './route-fallback'
 import { AppShell } from '@/shared/components/layout/app-shell'
 import { NotFoundPage } from '@/shared/components/layout/not-found-page'
-import { AttendancePage } from '@/features/attendance/pages/attendance-page'
-import { AuditLogsPage } from '@/features/audit-logs/pages/audit-logs-page'
-import { LoginPage } from '@/features/auth/pages/login-page'
-import { DashboardPage } from '@/features/dashboard/pages/dashboard-page'
-import { DepartmentsPage } from '@/features/departments/pages/departments-page'
-import { EmployeeDetailsPage } from '@/features/employees/pages/employee-details-page'
-import { EmployeeProfilePage } from '@/features/employees/pages/employee-profile-page'
-import { EmployeesPage } from '@/features/employees/pages/employees-page'
-import { HomePage } from '@/features/homepage/pages/home-page'
-import { LeaveRequestsPage } from '@/features/leave/pages/leave-requests-page'
-import { PayslipsPage } from '@/features/payslips/pages/payslips-page'
-import { SettingsPage } from '@/features/settings/pages/settings-page'
+
+const routeFallbackElement = <RouteFallback />
 
 export const appRouter = createBrowserRouter([
   {
     path: '/',
-    element: <HomePage />,
+    hydrateFallbackElement: routeFallbackElement,
+    lazy: async () => {
+      const { HomePage } = await import('@/features/homepage/pages/home-page')
+
+      return { Component: HomePage }
+    },
   },
   {
     path: '/login',
-    element: <LoginPage />,
+    hydrateFallbackElement: routeFallbackElement,
+    lazy: async () => {
+      const { LoginPage } = await import('@/features/auth/pages/login-page')
+
+      return { Component: LoginPage }
+    },
   },
   {
     path: '/app',
@@ -37,43 +38,113 @@ export const appRouter = createBrowserRouter([
           },
           {
             path: 'dashboard',
-            element: <DashboardPage />,
+            hydrateFallbackElement: routeFallbackElement,
+            lazy: async () => {
+              const { DashboardPage } = await import(
+                '@/features/dashboard/pages/dashboard-page'
+              )
+
+              return { Component: DashboardPage }
+            },
           },
           {
             path: 'employees',
-            element: <EmployeesPage />,
+            hydrateFallbackElement: routeFallbackElement,
+            lazy: async () => {
+              const { EmployeesPage } = await import(
+                '@/features/employees/pages/employees-page'
+              )
+
+              return { Component: EmployeesPage }
+            },
           },
           {
             path: 'employees/:id',
-            element: <EmployeeDetailsPage />,
+            hydrateFallbackElement: routeFallbackElement,
+            lazy: async () => {
+              const { EmployeeDetailsPage } = await import(
+                '@/features/employees/pages/employee-details-page'
+              )
+
+              return { Component: EmployeeDetailsPage }
+            },
           },
           {
             path: 'profile',
-            element: <EmployeeProfilePage />,
+            hydrateFallbackElement: routeFallbackElement,
+            lazy: async () => {
+              const { EmployeeProfilePage } = await import(
+                '@/features/employees/pages/employee-profile-page'
+              )
+
+              return { Component: EmployeeProfilePage }
+            },
           },
           {
             path: 'departments',
-            element: <DepartmentsPage />,
+            hydrateFallbackElement: routeFallbackElement,
+            lazy: async () => {
+              const { DepartmentsPage } = await import(
+                '@/features/departments/pages/departments-page'
+              )
+
+              return { Component: DepartmentsPage }
+            },
           },
           {
             path: 'attendance',
-            element: <AttendancePage />,
+            hydrateFallbackElement: routeFallbackElement,
+            lazy: async () => {
+              const { AttendancePage } = await import(
+                '@/features/attendance/pages/attendance-page'
+              )
+
+              return { Component: AttendancePage }
+            },
           },
           {
             path: 'leave-requests',
-            element: <LeaveRequestsPage />,
+            hydrateFallbackElement: routeFallbackElement,
+            lazy: async () => {
+              const { LeaveRequestsPage } = await import(
+                '@/features/leave/pages/leave-requests-page'
+              )
+
+              return { Component: LeaveRequestsPage }
+            },
           },
           {
             path: 'payslips',
-            element: <PayslipsPage />,
+            hydrateFallbackElement: routeFallbackElement,
+            lazy: async () => {
+              const { PayslipsPage } = await import(
+                '@/features/payslips/pages/payslips-page'
+              )
+
+              return { Component: PayslipsPage }
+            },
           },
           {
             path: 'settings',
-            element: <SettingsPage />,
+            hydrateFallbackElement: routeFallbackElement,
+            lazy: async () => {
+              const { SettingsPage } = await import(
+                '@/features/settings/pages/settings-page'
+              )
+
+              return { Component: SettingsPage }
+            },
           },
           {
             path: 'audit-logs',
-            element: <AuditLogsPage />,
+            hydrateFallbackElement: routeFallbackElement,
+            lazy: async () => {
+              const { AuditLogsPage } = await import(
+                '@/features/audit-logs/pages/audit-logs-page'
+              )
+
+              return { Component: AuditLogsPage }
+            },
           },
         ],
       },
