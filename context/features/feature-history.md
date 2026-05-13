@@ -41,6 +41,7 @@ Keep entries short. This file should explain what changed, not become a detailed
 - Feature 34: Testing and CI Guardrails — added strict client TypeScript, Prettier formatting, Vitest unit/component/integration tests for security-critical flows, guarded database smoke scripts, and GitHub Actions CI.
 - Feature 35: Custom Domain Branding Cleanup — updated the app document title, homepage brand mark, and favicon so the deployed Stafflow experience no longer exposes starter-template branding.
 - Feature 36: Portfolio Demo Safety Hardening — added a demo safety and monitoring checklist, regression coverage for absent public registration, employee authorization boundaries, employee payslip isolation, admin audit logs, and demo upload blocking.
+- Feature 37: Recruiter README Polish — added a root project README with overview, stack, architecture, security, setup, deployment, screenshots, and QA notes, and replaced the client starter README with a project pointer.
 
 ## Entry Format
 
