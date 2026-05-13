@@ -5,28 +5,25 @@ import {
   ChevronRight,
 } from 'lucide-react'
 import { Button } from '@/shared/components/ui/button'
+import type { PaginationMeta } from '@/shared/types/pagination'
 
 const bulkSkipSize = 10
 
 interface PaginationControlsProps {
   itemLabel: string
+  meta: PaginationMeta
   onPageChange: (page: number) => void
-  page: number
-  pageCount: number
-  total: number
 }
 
 const clampPage = (page: number, pageCount: number) => Math.min(Math.max(page, 1), Math.max(pageCount, 1))
 
 export const PaginationControls = ({
   itemLabel,
+  meta,
   onPageChange,
-  page,
-  pageCount,
-  total,
 }: PaginationControlsProps) => {
-  const currentPage = clampPage(page, pageCount)
-  const safePageCount = Math.max(pageCount, 1)
+  const currentPage = clampPage(meta.page, meta.totalPages)
+  const safePageCount = Math.max(meta.totalPages, 1)
   const canMoveBackward = currentPage > 1
   const canMoveForward = currentPage < safePageCount
   const previousBulkPage = clampPage(currentPage - bulkSkipSize, safePageCount)
@@ -35,7 +32,7 @@ export const PaginationControls = ({
   return (
     <div className="flex flex-col gap-3 border-t border-subtle pt-4 lg:flex-row lg:items-center lg:justify-between">
       <p className="text-sm text-muted">
-        Page {currentPage} of {safePageCount} · {total} {itemLabel}
+        Page {currentPage} of {safePageCount} · {meta.total} {itemLabel}
       </p>
       <div className="flex flex-wrap items-center gap-2">
         <Button

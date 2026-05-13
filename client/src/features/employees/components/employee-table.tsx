@@ -1,5 +1,6 @@
 import { Edit3, Eye, MoreHorizontal, Power, PowerOff } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import { DataTable, type DataTableColumn } from '@/shared/components/data-table/data-table'
 import { Button } from '@/shared/components/ui/button'
 import {
   DropdownMenu,
@@ -7,14 +8,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/shared/components/ui/dropdown-menu'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/shared/components/ui/table'
 import { formatDate } from '@/shared/lib/dates'
 import type { Employee } from '../api/employees.api'
 import { EmployeeStatusBadge } from './employee-status-badge'
@@ -31,36 +24,44 @@ export const EmployeeTable = ({
   onDisable,
   onEdit,
   onEnable,
-}: EmployeeTableProps) => (
-  <Table>
-    <TableHeader>
-      <TableRow>
-        <TableHead>Employee</TableHead>
-        <TableHead>Department</TableHead>
-        <TableHead>Status</TableHead>
-        <TableHead>Account</TableHead>
-        <TableHead>Hire date</TableHead>
-        <TableHead className="w-12"><span className="sr-only">Actions</span></TableHead>
-      </TableRow>
-    </TableHeader>
-    <TableBody>
-      {employees.map((employee) => (
-        <TableRow key={employee.id}>
-          <TableCell>
+}: EmployeeTableProps) => {
+  const columns: DataTableColumn<Employee>[] = [
+    {
+      header: 'Employee',
+      id: 'employee',
+      render: (employee) => (
             <div className="min-w-0">
               <p className="font-medium text-primary">{employee.fullName}</p>
               <p className="mt-1 text-xs text-muted">{employee.employeeCode} · {employee.jobTitle || 'No job title'}</p>
             </div>
-          </TableCell>
-          <TableCell>{employee.department?.name ?? 'Unassigned'}</TableCell>
-          <TableCell><EmployeeStatusBadge status={employee.status} /></TableCell>
-          <TableCell>
-            {employee.account ? <EmployeeStatusBadge status={employee.account.status} type="account" /> : 'No account'}
-          </TableCell>
-          <TableCell>
-            {employee.hireDate ? formatDate(employee.hireDate, 'MMM d, yyyy') : 'Not provided'}
-          </TableCell>
-          <TableCell>
+      ),
+    },
+    {
+      header: 'Department',
+      id: 'department',
+      render: (employee) => employee.department?.name ?? 'Unassigned',
+    },
+    {
+      header: 'Status',
+      id: 'status',
+      render: (employee) => <EmployeeStatusBadge status={employee.status} />,
+    },
+    {
+      header: 'Account',
+      id: 'account',
+      render: (employee) =>
+        employee.account ? <EmployeeStatusBadge status={employee.account.status} type="account" /> : 'No account',
+    },
+    {
+      header: 'Hire date',
+      id: 'hireDate',
+      render: (employee) => employee.hireDate ? formatDate(employee.hireDate, 'MMM d, yyyy') : 'Not provided',
+    },
+    {
+      className: 'w-12',
+      header: <span className="sr-only">Actions</span>,
+      id: 'actions',
+      render: (employee) => (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button type="button" variant="ghost" size="icon" aria-label={`Open actions for ${employee.fullName}`}>
@@ -91,9 +92,9 @@ export const EmployeeTable = ({
                 )}
               </DropdownMenuContent>
             </DropdownMenu>
-          </TableCell>
-        </TableRow>
-      ))}
-    </TableBody>
-  </Table>
-)
+      ),
+    },
+  ]
+
+  return <DataTable columns={columns} getRowKey={(employee) => employee.id} items={employees} />
+}

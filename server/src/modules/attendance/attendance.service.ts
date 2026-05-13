@@ -3,6 +3,10 @@ import type { AttendanceStatus } from "@prisma/client";
 import type { AuthContext } from "../../core/auth/auth.types";
 import { AppError } from "../../core/errors/app-error";
 import {
+  getPaginationParams,
+  toPaginatedResult,
+} from "../../core/pagination/pagination";
+import {
   createClockInRecord,
   findActiveAttendanceRecordForDay,
   findAttendanceRecordById,
@@ -34,21 +38,6 @@ interface ZonedDay {
   month: number;
   year: number;
 }
-
-const getPagination = ({
-  page,
-  pageSize,
-  total,
-}: {
-  page: number;
-  pageSize: number;
-  total: number;
-}) => ({
-  page,
-  pageCount: Math.max(1, Math.ceil(total / pageSize)),
-  pageSize,
-  total,
-});
 
 const toIso = (date: Date | null) => date?.toISOString() ?? null;
 
@@ -179,33 +168,35 @@ export const getSelfAttendanceHistory = async (
 ) => {
   const employeeId = getSelfAttendanceEmployeeId(auth);
   const page = input.page;
-  const pageSize = input.limit;
+  const limit = input.limit;
   const { items, total } = await listSelfAttendanceRecords({
     ...input,
     employeeId,
-    skip: (page - 1) * pageSize,
-    take: pageSize,
+    ...getPaginationParams({ limit, page }),
   });
 
-  return {
-    items: items.map(toAttendanceDto),
-    pagination: getPagination({ page, pageSize, total }),
-  };
+  return toPaginatedResult({
+    data: items.map(toAttendanceDto),
+    limit,
+    page,
+    total,
+  });
 };
 
 export const getAttendanceList = async (input: ListAttendanceInput) => {
   const page = input.page;
-  const pageSize = input.limit;
+  const limit = input.limit;
   const { items, total } = await listAttendanceRecords({
     ...input,
-    skip: (page - 1) * pageSize,
-    take: pageSize,
+    ...getPaginationParams({ limit, page }),
   });
 
-  return {
-    items: items.map(toAttendanceDto),
-    pagination: getPagination({ page, pageSize, total }),
-  };
+  return toPaginatedResult({
+    data: items.map(toAttendanceDto),
+    limit,
+    page,
+    total,
+  });
 };
 
 export const getAttendanceDetail = async (id: string) => {

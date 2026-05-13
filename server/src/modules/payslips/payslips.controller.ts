@@ -28,9 +28,8 @@ export const listSelfPayslipsController: RequestHandler = async (
 ) => {
   const { query } = listSelfPayslipsSchema.parse({ query: request.query });
   const payslips = await getSelfPayslipList(request.auth!, query);
-  const responseBody: ApiSuccess<typeof payslips> = { data: payslips };
 
-  response.status(200).json(responseBody);
+  response.status(200).json(payslips);
 };
 
 export const listPayslipsController: RequestHandler = async (
@@ -39,9 +38,8 @@ export const listPayslipsController: RequestHandler = async (
 ) => {
   const { query } = listPayslipsSchema.parse({ query: request.query });
   const payslips = await getPayslipList(query);
-  const responseBody: ApiSuccess<typeof payslips> = { data: payslips };
 
-  response.status(200).json(responseBody);
+  response.status(200).json(payslips);
 };
 
 export const getPayslipController: RequestHandler = async (

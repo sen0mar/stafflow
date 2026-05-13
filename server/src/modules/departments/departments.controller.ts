@@ -27,11 +27,8 @@ export const listDepartmentsController: RequestHandler = async (
 ) => {
   const { query } = listDepartmentsSchema.parse({ query: request.query });
   const departments = await getDepartments(query);
-  const responseBody: ApiSuccess<typeof departments> = {
-    data: departments,
-  };
 
-  response.status(200).json(responseBody);
+  response.status(200).json(departments);
 };
 
 export const getDepartmentController: RequestHandler = async (

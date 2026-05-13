@@ -1,4 +1,5 @@
 import { apiClient } from '@/shared/lib/api-client'
+import type { PaginatedResponse, PaginationMeta } from '@/shared/types/pagination'
 
 export interface PayslipEmployee {
   department: {
@@ -31,12 +32,7 @@ export interface Payslip {
   year: number
 }
 
-export interface Pagination {
-  page: number
-  pageCount: number
-  pageSize: number
-  total: number
-}
+export type Pagination = PaginationMeta
 
 export interface PayslipListParams {
   employeeId?: string
@@ -55,8 +51,8 @@ export interface SelfPayslipListParams {
 }
 
 export interface PayslipListResponse {
-  items: Payslip[]
-  pagination: Pagination
+  data: Payslip[]
+  meta: Pagination
 }
 
 export interface UploadPayslipInput {
@@ -100,20 +96,20 @@ const getPayslipSearchParams = (params: PayslipListParams | SelfPayslipListParam
 
 export const getPayslips = async (params: PayslipListParams) => {
   const searchParams = getPayslipSearchParams(params)
-  const response = await apiClient<ApiResponse<PayslipListResponse>>(
+  const response = await apiClient<PaginatedResponse<Payslip>>(
     `/payslips?${searchParams.toString()}`,
   )
 
-  return response.data
+  return response
 }
 
 export const getSelfPayslips = async (params: SelfPayslipListParams) => {
   const searchParams = getPayslipSearchParams(params)
-  const response = await apiClient<ApiResponse<PayslipListResponse>>(
+  const response = await apiClient<PaginatedResponse<Payslip>>(
     `/payslips/me?${searchParams.toString()}`,
   )
 
-  return response.data
+  return response
 }
 
 export const uploadPayslip = async ({ employeeId, file, month, year }: UploadPayslipInput) => {

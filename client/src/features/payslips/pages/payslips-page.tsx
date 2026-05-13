@@ -1,14 +1,8 @@
-import { Download, Eye, FileText, Plus, Search, Trash2 } from 'lucide-react'
-import { useState } from 'react'
+import { Download, Eye, FileText, Plus, Trash2 } from 'lucide-react'
+import { useCallback, useState } from 'react'
+import { FilterSelect } from '@/shared/components/data-table/filter-select'
+import { SearchInput } from '@/shared/components/data-table/search-input'
 import { Button } from '@/shared/components/ui/button'
-import { Input } from '@/shared/components/ui/input'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/shared/components/ui/select'
 import { Skeleton } from '@/shared/components/ui/skeleton'
 import {
   Table,
@@ -22,6 +16,7 @@ import { PaginationControls } from '@/shared/components/data-table/pagination-co
 import { PageHeader } from '@/shared/components/layout/page-header'
 import { useCurrentUser } from '@/features/auth/hooks/use-current-user'
 import { useEmployees } from '@/features/employees/hooks/use-employees'
+import { useTableQueryState } from '@/shared/hooks/use-table-query-state'
 import { getRolePermissions, hasPermission } from '@/shared/lib/permissions'
 import type { Payslip } from '../api/payslips.api'
 import { PayslipPreviewDialog } from '../components/payslip-preview-dialog'
@@ -190,10 +185,11 @@ const PayslipsTable = ({
 )
 
 export const PayslipsPage = () => {
-  const [page, setPage] = useState(1)
-  const [search, setSearch] = useState('')
-  const [month, setMonth] = useState<MonthFilter>('all')
-  const [year, setYear] = useState<YearFilter>('all')
+  const tableState = useTableQueryState()
+  const page = tableState.getNumber('page', 1)
+  const search = tableState.getString('search')
+  const month = tableState.getString('month', 'all') as MonthFilter
+  const year = tableState.getString('year', 'all') as YearFilter
   const [uploadOpen, setUploadOpen] = useState(false)
   const [previewPayslip, setPreviewPayslip] = useState<Payslip | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
@@ -231,15 +227,17 @@ export const PayslipsPage = () => {
   const downloadPayslip = useDownloadPayslip()
   const previewPayslipMutation = usePreviewPayslip()
   const activeQuery = canReadAny ? adminPayslipsQuery : selfPayslipsQuery
-  const payslips = activeQuery.data?.items ?? []
-  const pagination = activeQuery.data?.pagination
+  const payslips = activeQuery.data?.data ?? []
+  const pagination = activeQuery.data?.meta
+  const { updateQuery } = tableState
 
-  const resetToFirstPage = () => setPage(1)
-
-  const handleSearchChange = (value: string) => {
-    setSearch(value)
-    resetToFirstPage()
+  const setPage = (nextPage: number) => {
+    updateQuery({ page: nextPage === 1 ? undefined : nextPage })
   }
+
+  const handleSearchChange = useCallback((value: string) => {
+    updateQuery({ search: value.trim() || undefined }, { resetPage: true })
+  }, [updateQuery])
 
   const handleUpload = (values: PayslipUploadValues) => {
     uploadPayslip.mutate(values, {
@@ -298,57 +296,36 @@ export const PayslipsPage = () => {
       <section className="space-y-4 rounded-2xl border border-default bg-surface p-4 shadow-soft">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           {canReadAny ? (
-            <div className="relative w-full lg:max-w-sm">
-              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" aria-hidden="true" />
-              <Input
-                className="pl-9"
+            <div className="w-full lg:max-w-sm">
+              <SearchInput
+                key={search}
                 placeholder="Search employee or file"
                 value={search}
-                onChange={(event) => handleSearchChange(event.target.value)}
+                onDebouncedChange={handleSearchChange}
               />
             </div>
           ) : (
             <div className="text-sm text-muted">Private payroll documents</div>
           )}
           <div className="grid gap-3 sm:grid-cols-2 lg:flex">
-            <Select
+            <FilterSelect
+              className="w-full lg:w-40"
               value={month}
-              onValueChange={(value) => {
-                setMonth(value as MonthFilter)
-                resetToFirstPage()
-              }}
-            >
-              <SelectTrigger className="w-full lg:w-40">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All months</SelectItem>
-                {months.map((monthName, index) => (
-                  <SelectItem key={monthName} value={String(index + 1)}>
-                    {monthName}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select
+              onValueChange={(value) => tableState.updateQuery({ month: value }, { resetPage: true })}
+              options={[
+                { label: 'All months', value: 'all' },
+                ...months.map((monthName, index) => ({ label: monthName, value: String(index + 1) })),
+              ]}
+            />
+            <FilterSelect
+              className="w-full lg:w-36"
               value={year}
-              onValueChange={(value) => {
-                setYear(value as YearFilter)
-                resetToFirstPage()
-              }}
-            >
-              <SelectTrigger className="w-full lg:w-36">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All years</SelectItem>
-                {years.map((yearValue) => (
-                  <SelectItem key={yearValue} value={String(yearValue)}>
-                    {yearValue}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              onValueChange={(value) => tableState.updateQuery({ year: value }, { resetPage: true })}
+              options={[
+                { label: 'All years', value: 'all' },
+                ...years.map((yearValue) => ({ label: yearValue, value: String(yearValue) })),
+              ]}
+            />
           </div>
         </div>
 
@@ -374,9 +351,7 @@ export const PayslipsPage = () => {
             />
             <PaginationControls
               itemLabel="payslips"
-              page={pagination?.page ?? page}
-              pageCount={pagination?.pageCount ?? 1}
-              total={pagination?.total ?? 0}
+              meta={pagination ?? { limit: pageSize, page, total: 0, totalPages: 1 }}
               onPageChange={setPage}
             />
           </>
@@ -384,7 +359,7 @@ export const PayslipsPage = () => {
       </section>
 
       <PayslipUploadDialog
-        employees={employeesQuery.data?.items ?? []}
+        employees={employeesQuery.data?.data ?? []}
         isLoadingEmployees={employeesQuery.isLoading}
         isSubmitting={uploadPayslip.isPending}
         open={uploadOpen}

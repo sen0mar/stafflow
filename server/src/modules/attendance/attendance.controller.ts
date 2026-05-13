@@ -41,11 +41,8 @@ export const listSelfAttendanceController: RequestHandler = async (
 ) => {
   const { query } = listSelfAttendanceSchema.parse({ query: request.query });
   const attendance = await getSelfAttendanceHistory(request.auth!, query);
-  const responseBody: ApiSuccess<typeof attendance> = {
-    data: attendance,
-  };
 
-  response.status(200).json(responseBody);
+  response.status(200).json(attendance);
 };
 
 export const clockInController: RequestHandler = async (request, response) => {
@@ -72,11 +69,8 @@ export const listAttendanceController: RequestHandler = async (
 ) => {
   const { query } = listAttendanceSchema.parse({ query: request.query });
   const attendance = await getAttendanceList(query);
-  const responseBody: ApiSuccess<typeof attendance> = {
-    data: attendance,
-  };
 
-  response.status(200).json(responseBody);
+  response.status(200).json(attendance);
 };
 
 export const getAttendanceController: RequestHandler = async (

@@ -1,7 +1,6 @@
 import { z } from "zod";
 
-const pageSchema = z.coerce.number().int().min(1).default(1);
-const limitSchema = z.coerce.number().int().min(1).max(100).default(10);
+import { limitQuerySchema, pageQuerySchema } from "../../core/pagination/pagination";
 
 export const auditLogIdSchema = z.object({
   params: z.object({
@@ -18,8 +17,8 @@ export const listAuditLogsSchema = z.object({
       createdAtTo: z.string().datetime().optional(),
       entityId: z.string().trim().min(1).optional(),
       entityType: z.string().trim().min(1).max(120).optional(),
-      limit: limitSchema,
-      page: pageSchema,
+      limit: limitQuerySchema,
+      page: pageQuerySchema,
     })
     .refine(
       (value) =>

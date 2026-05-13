@@ -139,6 +139,7 @@ model AttendanceRecord {
   @@index([employeeId, date])
   @@index([date])
   @@index([status])
+  @@index([status, date])
 }
 
 model LeaveType {
@@ -177,6 +178,7 @@ model LeaveRequest {
   @@index([employeeId, status])
   @@index([status, createdAt])
   @@index([leaveTypeId])
+  @@index([leaveTypeId, createdAt])
   @@index([reviewedById])
 }
 
@@ -218,6 +220,7 @@ model Payslip {
   @@unique([employeeId, year, month])
   @@index([employeeId, year, month])
   @@index([status])
+  @@index([status, year, month, uploadedAt])
   @@index([uploadedById])
 }
 
@@ -267,6 +270,8 @@ model AuditLog {
   @@index([entityType, entityId])
   @@index([action])
   @@index([createdAt])
+  @@index([action, createdAt])
+  @@index([entityType, createdAt])
 }
 
 model PasswordResetToken {

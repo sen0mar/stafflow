@@ -1,6 +1,7 @@
-import { Eye, Filter, ScrollText, Search, X } from 'lucide-react'
-import { useState } from 'react'
+import { Eye, Filter, ScrollText, X } from 'lucide-react'
+import { useCallback, useState } from 'react'
 import { Navigate } from 'react-router-dom'
+import { FilterSelect } from '@/shared/components/data-table/filter-select'
 import { Badge } from '@/shared/components/ui/badge'
 import { Button } from '@/shared/components/ui/button'
 import {
@@ -12,13 +13,7 @@ import {
 } from '@/shared/components/ui/dialog'
 import { Input } from '@/shared/components/ui/input'
 import { Label } from '@/shared/components/ui/label'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/shared/components/ui/select'
+import { SearchInput } from '@/shared/components/data-table/search-input'
 import { Skeleton } from '@/shared/components/ui/skeleton'
 import {
   Table,
@@ -32,6 +27,7 @@ import { PaginationControls } from '@/shared/components/data-table/pagination-co
 import { PageHeader } from '@/shared/components/layout/page-header'
 import { useCurrentUser } from '@/features/auth/hooks/use-current-user'
 import { getRolePermissions, hasPermission } from '@/shared/lib/permissions'
+import { useTableQueryState } from '@/shared/hooks/use-table-query-state'
 import type { AuditLog } from '../api/audit-logs.api'
 import { useAuditLog, useAuditLogs } from '../hooks/use-audit-logs'
 
@@ -318,13 +314,14 @@ const AuditLogsTable = ({ auditLogs, onView }: AuditLogsTableProps) => (
 )
 
 export const AuditLogsPage = () => {
-  const [page, setPage] = useState(1)
-  const [actorUserId, setActorUserId] = useState('')
-  const [entityType, setEntityType] = useState<EntityTypeFilter>('all')
-  const [entityId, setEntityId] = useState('')
-  const [action, setAction] = useState<ActionFilter>('all')
-  const [createdAtFrom, setCreatedAtFrom] = useState('')
-  const [createdAtTo, setCreatedAtTo] = useState('')
+  const tableState = useTableQueryState()
+  const page = tableState.getNumber('page', 1)
+  const actorUserId = tableState.getString('actorUserId')
+  const entityType = tableState.getString('entityType', 'all') as EntityTypeFilter
+  const entityId = tableState.getString('entityId')
+  const action = tableState.getString('action', 'all') as ActionFilter
+  const createdAtFrom = tableState.getDate('from')
+  const createdAtTo = tableState.getDate('to')
   const [selectedAuditLogId, setSelectedAuditLogId] = useState<string | null>(null)
   const currentUserQuery = useCurrentUser()
   const permissions = currentUserQuery.data ? getRolePermissions(currentUserQuery.data.role) : []
@@ -343,23 +340,36 @@ export const AuditLogsPage = () => {
     currentUserQuery.isSuccess && canReadAuditLogs,
   )
   const selectedAuditLogQuery = useAuditLog(selectedAuditLogId, Boolean(selectedAuditLogId))
-  const auditLogs = auditLogsQuery.data?.items ?? []
-  const pagination = auditLogsQuery.data?.pagination
+  const auditLogs = auditLogsQuery.data?.data ?? []
+  const pagination = auditLogsQuery.data?.meta
+  const { updateQuery } = tableState
+
+  const setPage = (nextPage: number) => {
+    updateQuery({ page: nextPage === 1 ? undefined : nextPage })
+  }
+
+  const handleActorSearchChange = useCallback((value: string) => {
+    updateQuery({ actorUserId: value.trim() || undefined }, { resetPage: true })
+  }, [updateQuery])
+
+  const handleEntitySearchChange = useCallback((value: string) => {
+    updateQuery({ entityId: value.trim() || undefined }, { resetPage: true })
+  }, [updateQuery])
 
   if (currentUserQuery.isSuccess && !canReadAuditLogs) {
     return <Navigate to="/app/dashboard" replace />
   }
 
-  const resetPage = () => setPage(1)
-
   const clearFilters = () => {
-    setActorUserId('')
-    setEntityType('all')
-    setEntityId('')
-    setAction('all')
-    setCreatedAtFrom('')
-    setCreatedAtTo('')
-    setPage(1)
+    updateQuery({
+      action: undefined,
+      actorUserId: undefined,
+      entityId: undefined,
+      entityType: undefined,
+      from: undefined,
+      page: undefined,
+      to: undefined,
+    })
   }
 
   return (
@@ -374,79 +384,49 @@ export const AuditLogsPage = () => {
         <div className="grid gap-3 xl:grid-cols-[1fr_1fr_1fr_1fr_0.8fr_0.8fr_auto]">
           <div className="space-y-2">
             <Label htmlFor="audit-actor">Actor user ID</Label>
-            <div className="relative">
-              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" aria-hidden="true" />
-              <Input
-                id="audit-actor"
-                className="pl-9"
-                placeholder="User ID"
-                value={actorUserId}
-                onChange={(event) => {
-                  setActorUserId(event.target.value)
-                  resetPage()
-                }}
-              />
-            </div>
+            <SearchInput
+              key={`actor-${actorUserId}`}
+              ariaLabel="Actor user ID"
+              placeholder="User ID"
+              value={actorUserId}
+              onDebouncedChange={handleActorSearchChange}
+            />
           </div>
 
           <div className="space-y-2">
             <Label>Entity type</Label>
-            <Select
+            <FilterSelect
               value={entityType}
-              onValueChange={(value) => {
-                setEntityType(value as EntityTypeFilter)
-                resetPage()
-              }}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All entities</SelectItem>
-                {entityTypeOptions.map((option) => (
-                  <SelectItem key={option} value={option}>
-                    {option}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              onValueChange={(value) => tableState.updateQuery({ entityType: value }, { resetPage: true })}
+              options={[
+                { label: 'All entities', value: 'all' },
+                ...entityTypeOptions.map((option) => ({ label: option, value: option })),
+              ]}
+            />
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="audit-entity-id">Entity ID</Label>
-            <Input
-              id="audit-entity-id"
+            <SearchInput
+              key={`entity-${entityId}`}
+              ariaLabel="Entity ID"
               placeholder="Entity ID"
               value={entityId}
-              onChange={(event) => {
-                setEntityId(event.target.value)
-                resetPage()
-              }}
+              onDebouncedChange={handleEntitySearchChange}
             />
           </div>
 
           <div className="space-y-2">
             <Label>Action</Label>
-            <Select
+            <FilterSelect
+              icon={<Filter className="h-4 w-4 text-muted" aria-hidden="true" />}
               value={action}
-              onValueChange={(value) => {
-                setAction(value as ActionFilter)
-                resetPage()
-              }}
-            >
-              <SelectTrigger>
-                <Filter className="h-4 w-4 text-muted" aria-hidden="true" />
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All actions</SelectItem>
-                {actionOptions.map((option) => (
-                  <SelectItem key={option} value={option}>
-                    {humanizeAction(option)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              onValueChange={(value) => tableState.updateQuery({ action: value }, { resetPage: true })}
+              options={[
+                { label: 'All actions', value: 'all' },
+                ...actionOptions.map((option) => ({ label: humanizeAction(option), value: option })),
+              ]}
+            />
           </div>
 
           <div className="space-y-2">
@@ -455,10 +435,7 @@ export const AuditLogsPage = () => {
               id="audit-from"
               type="date"
               value={createdAtFrom}
-              onChange={(event) => {
-                setCreatedAtFrom(event.target.value)
-                resetPage()
-              }}
+              onChange={(event) => tableState.updateQuery({ from: event.target.value }, { resetPage: true })}
             />
           </div>
 
@@ -468,10 +445,7 @@ export const AuditLogsPage = () => {
               id="audit-to"
               type="date"
               value={createdAtTo}
-              onChange={(event) => {
-                setCreatedAtTo(event.target.value)
-                resetPage()
-              }}
+              onChange={(event) => tableState.updateQuery({ to: event.target.value }, { resetPage: true })}
             />
           </div>
 
@@ -495,9 +469,7 @@ export const AuditLogsPage = () => {
             <AuditLogsTable auditLogs={auditLogs} onView={(auditLog) => setSelectedAuditLogId(auditLog.id)} />
             <PaginationControls
               itemLabel="audit logs"
-              page={pagination?.page ?? page}
-              pageCount={pagination?.pageCount ?? 1}
-              total={pagination?.total ?? 0}
+              meta={pagination ?? { limit: pageSize, page, total: 0, totalPages: 1 }}
               onPageChange={setPage}
             />
           </>

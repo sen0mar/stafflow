@@ -1,7 +1,6 @@
 import { z } from "zod";
 
-const pageSchema = z.coerce.number().int().min(1).default(1);
-const limitSchema = z.coerce.number().int().min(1).max(100).default(10);
+import { limitQuerySchema, pageQuerySchema } from "../../core/pagination/pagination";
 const optionalTrimmedString = z
   .string()
   .trim()
@@ -18,8 +17,8 @@ export const employeeIdSchema = z.object({
 export const listEmployeesSchema = z.object({
   query: z.object({
     departmentId: z.string().trim().optional(),
-    limit: limitSchema,
-    page: pageSchema,
+    limit: limitQuerySchema,
+    page: pageQuerySchema,
     search: z.string().trim().optional(),
     sort: z
       .enum(["name", "newest", "oldest", "department", "status"])

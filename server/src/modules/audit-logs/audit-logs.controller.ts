@@ -13,9 +13,8 @@ export const listAuditLogsController: RequestHandler = async (
 ) => {
   const { query } = listAuditLogsSchema.parse({ query: request.query });
   const auditLogs = await getAuditLogs(query);
-  const responseBody: ApiSuccess<typeof auditLogs> = { data: auditLogs };
 
-  response.status(200).json(responseBody);
+  response.status(200).json(auditLogs);
 };
 
 export const getAuditLogController: RequestHandler = async (

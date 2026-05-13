@@ -1,25 +1,14 @@
 import { AppError } from "../../core/errors/app-error";
 import {
+  getPaginationParams,
+  toPaginatedResult,
+} from "../../core/pagination/pagination";
+import {
   findAuditLogById,
   listAuditLogs,
   type AuditLogRecord,
 } from "./audit-logs.repository";
 import type { ListAuditLogsInput } from "./audit-logs.schema";
-
-const getPagination = ({
-  page,
-  pageSize,
-  total,
-}: {
-  page: number;
-  pageSize: number;
-  total: number;
-}) => ({
-  page,
-  pageCount: Math.max(1, Math.ceil(total / pageSize)),
-  pageSize,
-  total,
-});
 
 const toAuditLogDto = (auditLog: AuditLogRecord) => ({
   action: auditLog.action,
@@ -36,17 +25,18 @@ const toAuditLogDto = (auditLog: AuditLogRecord) => ({
 
 export const getAuditLogs = async (input: ListAuditLogsInput) => {
   const page = input.page;
-  const pageSize = input.limit;
+  const limit = input.limit;
   const { items, total } = await listAuditLogs({
     ...input,
-    skip: (page - 1) * pageSize,
-    take: pageSize,
+    ...getPaginationParams({ limit, page }),
   });
 
-  return {
-    items: items.map(toAuditLogDto),
-    pagination: getPagination({ page, pageSize, total }),
-  };
+  return toPaginatedResult({
+    data: items.map(toAuditLogDto),
+    limit,
+    page,
+    total,
+  });
 };
 
 export const getAuditLog = async (id: string) => {

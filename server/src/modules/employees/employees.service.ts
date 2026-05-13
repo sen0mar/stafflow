@@ -4,6 +4,10 @@ import type { AuthContext } from "../../core/auth/auth.types";
 import { hashPassword } from "../../core/auth/password.service";
 import { createSessionToken, hashSessionToken } from "../../core/auth/session.service";
 import { AppError } from "../../core/errors/app-error";
+import {
+  getPaginationParams,
+  toPaginatedResult,
+} from "../../core/pagination/pagination";
 import { findUserAccountByEmail } from "../users/users.repository";
 import {
   createEmployeeAuditLog,
@@ -35,21 +39,6 @@ interface AuditContext {
 }
 
 const invitationTtlMs = 7 * 24 * 60 * 60 * 1000;
-
-const getPagination = ({
-  page,
-  pageSize,
-  total,
-}: {
-  page: number;
-  pageSize: number;
-  total: number;
-}) => ({
-  page,
-  pageCount: Math.max(1, Math.ceil(total / pageSize)),
-  pageSize,
-  total,
-});
 
 const toEmployeeDto = (employee: EmployeeRecord) => ({
   account: employee.user
@@ -176,17 +165,18 @@ const withEmployeeWriteErrors = async <T>(operation: () => Promise<T>) => {
 
 export const getEmployees = async (input: ListEmployeesInput) => {
   const page = input.page;
-  const pageSize = input.limit;
+  const limit = input.limit;
   const { items, total } = await listEmployees({
     ...input,
-    skip: (page - 1) * pageSize,
-    take: pageSize,
+    ...getPaginationParams({ limit, page }),
   });
 
-  return {
-    items: items.map(toEmployeeDto),
-    pagination: getPagination({ page, pageSize, total }),
-  };
+  return toPaginatedResult({
+    data: items.map(toEmployeeDto),
+    limit,
+    page,
+    total,
+  });
 };
 
 export const getEmployee = async (id: string) => {

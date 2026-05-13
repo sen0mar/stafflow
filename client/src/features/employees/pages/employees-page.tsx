@@ -1,17 +1,13 @@
-import { Plus, Search, UsersRound } from 'lucide-react'
-import { useState } from 'react'
+import { Plus, UsersRound } from 'lucide-react'
+import { useCallback, useState } from 'react'
+import { FilterSelect } from '@/shared/components/data-table/filter-select'
 import { Button } from '@/shared/components/ui/button'
-import { Input } from '@/shared/components/ui/input'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/shared/components/ui/select'
+import { SearchInput } from '@/shared/components/data-table/search-input'
+import { TableToolbar } from '@/shared/components/data-table/table-toolbar'
 import { Skeleton } from '@/shared/components/ui/skeleton'
 import { PaginationControls } from '@/shared/components/data-table/pagination-controls'
 import { PageHeader } from '@/shared/components/layout/page-header'
+import { useTableQueryState } from '@/shared/hooks/use-table-query-state'
 import { useDepartments } from '@/features/departments/hooks/use-departments'
 import type { Employee, EmployeeSort, EmployeeStatus } from '../api/employees.api'
 import { EmployeeForm } from '../components/employee-form'
@@ -53,11 +49,12 @@ const EmployeesEmpty = () => (
 )
 
 export const EmployeesPage = () => {
-  const [page, setPage] = useState(1)
-  const [search, setSearch] = useState('')
-  const [departmentId, setDepartmentId] = useState(allValue)
-  const [status, setStatus] = useState<StatusFilter>(allValue)
-  const [sort, setSort] = useState<EmployeeSort>('name')
+  const tableState = useTableQueryState()
+  const page = tableState.getNumber('page', 1)
+  const search = tableState.getString('search')
+  const departmentId = tableState.getString('departmentId', allValue)
+  const status = tableState.getString('status', allValue) as StatusFilter
+  const sort = tableState.getString('sort', 'name') as EmployeeSort
   const [formOpen, setFormOpen] = useState(false)
   const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null)
   const [createdInvitation, setCreatedInvitation] = useState<{
@@ -78,9 +75,13 @@ export const EmployeesPage = () => {
   const updateEmployee = useUpdateEmployee()
   const updateEmployeeStatus = useUpdateEmployeeStatus()
   const disableEmployee = useDisableEmployee()
-  const employees = employeesQuery.data?.items ?? []
-  const pagination = employeesQuery.data?.pagination
-  const departments = departmentsQuery.data?.items ?? []
+  const employees = employeesQuery.data?.data ?? []
+  const pagination = employeesQuery.data?.meta
+  const departments = departmentsQuery.data?.data ?? []
+  const { updateQuery } = tableState
+  const setPage = useCallback((nextPage: number) => {
+    updateQuery({ page: nextPage === 1 ? undefined : nextPage })
+  }, [updateQuery])
 
   const openCreateDialog = () => {
     setEditingEmployee(null)
@@ -124,7 +125,7 @@ export const EmployeesPage = () => {
       {
         onSuccess: (result) => {
           setFormOpen(false)
-          setPage(1)
+            setPage(1)
           setCreatedInvitation({
             employeeName: result.employee.fullName,
             expiresAt: result.invitation.expiresAt,
@@ -147,10 +148,9 @@ export const EmployeesPage = () => {
     })
   }
 
-  const handleSearchChange = (value: string) => {
-    setSearch(value)
-    setPage(1)
-  }
+  const handleSearchChange = useCallback((value: string) => {
+    updateQuery({ search: value.trim() || undefined }, { resetPage: true })
+  }, [updateQuery])
 
   return (
     <div className="space-y-6">
@@ -184,57 +184,43 @@ export const EmployeesPage = () => {
       ) : null}
 
       <section className="space-y-4 rounded-2xl border border-default bg-surface p-4 shadow-soft">
-        <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_180px_180px_160px]">
-          <div className="relative">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" aria-hidden="true" />
-            <Input
-              className="pl-9"
-              placeholder="Search employees"
-              value={search}
-              onChange={(event) => handleSearchChange(event.target.value)}
-            />
-          </div>
-          <Select
+        <TableToolbar className="lg:grid-cols-[minmax(0,1fr)_180px_180px_160px]">
+          <SearchInput
+            key={search}
+            placeholder="Search employees"
+            value={search}
+            onDebouncedChange={handleSearchChange}
+          />
+          <FilterSelect
             value={departmentId}
-            onValueChange={(value) => {
-              setDepartmentId(value)
-              setPage(1)
-            }}
-          >
-            <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value={allValue}>All departments</SelectItem>
-              {departments.map((department) => (
-                <SelectItem key={department.id} value={department.id}>{department.name}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Select
+            onValueChange={(value) => tableState.updateQuery({ departmentId: value }, { resetPage: true })}
+            options={[
+              { label: 'All departments', value: allValue },
+              ...departments.map((department) => ({ label: department.name, value: department.id })),
+            ]}
+          />
+          <FilterSelect
             value={status}
-            onValueChange={(value) => {
-              setStatus(value as StatusFilter)
-              setPage(1)
-            }}
-          >
-            <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value={allValue}>All statuses</SelectItem>
-              <SelectItem value="ACTIVE">Active</SelectItem>
-              <SelectItem value="INACTIVE">Inactive</SelectItem>
-              <SelectItem value="TERMINATED">Terminated</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select value={sort} onValueChange={(value) => setSort(value as EmployeeSort)}>
-            <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="name">Name</SelectItem>
-              <SelectItem value="newest">Newest</SelectItem>
-              <SelectItem value="oldest">Oldest</SelectItem>
-              <SelectItem value="department">Department</SelectItem>
-              <SelectItem value="status">Status</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+            onValueChange={(value) => tableState.updateQuery({ status: value }, { resetPage: true })}
+            options={[
+              { label: 'All statuses', value: allValue },
+              { label: 'Active', value: 'ACTIVE' },
+              { label: 'Inactive', value: 'INACTIVE' },
+              { label: 'Terminated', value: 'TERMINATED' },
+            ]}
+          />
+          <FilterSelect
+            value={sort}
+            onValueChange={(value) => tableState.updateQuery({ sort: value === 'name' ? undefined : value }, { resetPage: true })}
+            options={[
+              { label: 'Name', value: 'name' },
+              { label: 'Newest', value: 'newest' },
+              { label: 'Oldest', value: 'oldest' },
+              { label: 'Department', value: 'department' },
+              { label: 'Status', value: 'status' },
+            ]}
+          />
+        </TableToolbar>
 
         {employeesQuery.isLoading ? <EmployeesLoading /> : null}
         {employeesQuery.isError ? (
@@ -253,9 +239,7 @@ export const EmployeesPage = () => {
             />
             <PaginationControls
               itemLabel="employees"
-              page={pagination?.page ?? page}
-              pageCount={pagination?.pageCount ?? 1}
-              total={pagination?.total ?? 0}
+              meta={pagination ?? { limit: pageSize, page, total: 0, totalPages: 1 }}
               onPageChange={setPage}
             />
           </>

@@ -33,11 +33,8 @@ export const listEmployeesController: RequestHandler = async (
 ) => {
   const { query } = listEmployeesSchema.parse({ query: request.query });
   const employees = await getEmployees(query);
-  const responseBody: ApiSuccess<typeof employees> = {
-    data: employees,
-  };
 
-  response.status(200).json(responseBody);
+  response.status(200).json(employees);
 };
 
 export const getEmployeeController: RequestHandler = async (

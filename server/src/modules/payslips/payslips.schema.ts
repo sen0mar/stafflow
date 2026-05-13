@@ -1,7 +1,6 @@
 import { z } from "zod";
 
-const pageSchema = z.coerce.number().int().min(1).default(1);
-const limitSchema = z.coerce.number().int().min(1).max(100).default(10);
+import { limitQuerySchema, pageQuerySchema } from "../../core/pagination/pagination";
 
 export const payslipIdSchema = z.object({
   params: z.object({
@@ -12,9 +11,9 @@ export const payslipIdSchema = z.object({
 export const listPayslipsSchema = z.object({
   query: z.object({
     employeeId: z.string().trim().optional(),
-    limit: limitSchema,
+    limit: limitQuerySchema,
     month: z.coerce.number().int().min(1).max(12).optional(),
-    page: pageSchema,
+    page: pageQuerySchema,
     search: z.string().trim().optional(),
     year: z.coerce.number().int().min(2000).max(2100).optional(),
   }),
@@ -22,9 +21,9 @@ export const listPayslipsSchema = z.object({
 
 export const listSelfPayslipsSchema = z.object({
   query: z.object({
-    limit: limitSchema,
+    limit: limitQuerySchema,
     month: z.coerce.number().int().min(1).max(12).optional(),
-    page: pageSchema,
+    page: pageQuerySchema,
     year: z.coerce.number().int().min(2000).max(2100).optional(),
   }),
 });
