@@ -1,4 +1,4 @@
-import { Users } from 'lucide-react'
+import { BarChart3 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
 interface LandingBrandMarkProps {
@@ -13,8 +13,8 @@ export const LandingBrandMark = ({
     className="flex items-center gap-3 text-primary"
     aria-label="Stafflow home"
   >
-    <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-brand text-white shadow-glow">
-      <Users className="h-5 w-5" aria-hidden="true" />
+    <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand text-white shadow-glow">
+      <BarChart3 className="h-5 w-5" aria-hidden="true" />
     </span>
     <span className="leading-tight">
       <span className="block text-lg font-semibold tracking-normal">

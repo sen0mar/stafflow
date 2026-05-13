@@ -39,6 +39,7 @@ Keep entries short. This file should explain what changed, not become a detailed
 - Feature 32: List Page Standardization — normalized list APIs to `data`/`meta` pagination, added shared table/filter/query-state helpers, persisted table filters in URL params, debounced text search, and added list-query indexes.
 - Feature 33: Polish and Resilience States — added route error boundaries, shared loading/empty/error/unauthorized UI states, safe mutation error messages, and global protected-session expiration handling.
 - Feature 34: Testing and CI Guardrails — added strict client TypeScript, Prettier formatting, Vitest unit/component/integration tests for security-critical flows, guarded database smoke scripts, and GitHub Actions CI.
+- Feature 35: Custom Domain Branding Cleanup — updated the app document title, homepage brand mark, and favicon so the deployed Stafflow experience no longer exposes starter-template branding.
 
 ## Entry Format
 
