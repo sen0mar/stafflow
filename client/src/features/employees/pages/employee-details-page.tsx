@@ -3,7 +3,11 @@ import { Link, useParams } from 'react-router-dom'
 import { Button } from '@/shared/components/ui/button'
 import { Skeleton } from '@/shared/components/ui/skeleton'
 import { PageHeader } from '@/shared/components/layout/page-header'
-import { useEmployee, useDisableEmployee, useUpdateEmployeeStatus } from '../hooks/use-employees'
+import {
+  useEmployee,
+  useDisableEmployee,
+  useUpdateEmployeeStatus,
+} from '../hooks/use-employees'
 import { EmployeeProfileCard } from '../components/employee-profile-card'
 
 export const EmployeeDetailsPage = () => {
@@ -70,7 +74,10 @@ export const EmployeeDetailsPage = () => {
                   disabled={updateEmployeeStatus.isPending}
                   onClick={() =>
                     updateEmployeeStatus.mutate({
-                      accountStatus: employee.account?.status === 'DISABLED' ? 'ACTIVE' : employee.account?.status,
+                      accountStatus:
+                        employee.account?.status === 'DISABLED'
+                          ? 'ACTIVE'
+                          : employee.account?.status,
                       employeeStatus: 'ACTIVE',
                       id: employee.id,
                     })

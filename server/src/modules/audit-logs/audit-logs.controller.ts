@@ -1,10 +1,7 @@
 import type { RequestHandler } from "express";
 
 import type { ApiSuccess } from "../../core/types/api-response";
-import {
-  auditLogIdSchema,
-  listAuditLogsSchema,
-} from "./audit-logs.schema";
+import { auditLogIdSchema, listAuditLogsSchema } from "./audit-logs.schema";
 import { getAuditLog, getAuditLogs } from "./audit-logs.service";
 
 export const listAuditLogsController: RequestHandler = async (

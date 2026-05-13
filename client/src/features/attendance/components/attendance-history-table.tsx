@@ -1,5 +1,8 @@
 import { Edit3 } from 'lucide-react'
-import { DataTable, type DataTableColumn } from '@/shared/components/data-table/data-table'
+import {
+  DataTable,
+  type DataTableColumn,
+} from '@/shared/components/data-table/data-table'
 import { Button } from '@/shared/components/ui/button'
 import { formatDate } from '@/shared/lib/dates'
 import type { AttendanceRecord } from '../api/attendance.api'
@@ -19,18 +22,23 @@ export const AttendanceHistoryTable = ({
 }: AttendanceHistoryTableProps) => {
   const columns: DataTableColumn<AttendanceRecord>[] = [
     ...(isAdmin
-      ? [{
-          header: 'Employee',
-          id: 'employee',
-          render: (record: AttendanceRecord) => (
-            <div>
-              <p className="font-medium text-primary">{record.employee.fullName}</p>
-              <p className="mt-1 text-xs text-muted">
-                {record.employee.employeeCode} · {record.employee.department?.name ?? 'Unassigned'}
-              </p>
-            </div>
-          ),
-        }]
+      ? [
+          {
+            header: 'Employee',
+            id: 'employee',
+            render: (record: AttendanceRecord) => (
+              <div>
+                <p className="font-medium text-primary">
+                  {record.employee.fullName}
+                </p>
+                <p className="mt-1 text-xs text-muted">
+                  {record.employee.employeeCode} ·{' '}
+                  {record.employee.department?.name ?? 'Unassigned'}
+                </p>
+              </div>
+            ),
+          },
+        ]
       : []),
     {
       className: 'font-medium text-primary',
@@ -41,12 +49,14 @@ export const AttendanceHistoryTable = ({
     {
       header: 'Clock In',
       id: 'clockIn',
-      render: (record) => record.clockInAt ? formatDate(record.clockInAt, 'p') : 'Not recorded',
+      render: (record) =>
+        record.clockInAt ? formatDate(record.clockInAt, 'p') : 'Not recorded',
     },
     {
       header: 'Clock Out',
       id: 'clockOut',
-      render: (record) => record.clockOutAt ? formatDate(record.clockOutAt, 'p') : 'Not recorded',
+      render: (record) =>
+        record.clockOutAt ? formatDate(record.clockOutAt, 'p') : 'Not recorded',
     },
     {
       header: 'Total',
@@ -64,11 +74,12 @@ export const AttendanceHistoryTable = ({
       render: (record) => record.source,
     },
     ...(isAdmin
-      ? [{
-          className: 'w-12',
-          header: <span className="sr-only">Actions</span>,
-          id: 'actions',
-          render: (record: AttendanceRecord) => (
+      ? [
+          {
+            className: 'w-12',
+            header: <span className="sr-only">Actions</span>,
+            id: 'actions',
+            render: (record: AttendanceRecord) => (
               <Button
                 type="button"
                 variant="ghost"
@@ -78,10 +89,17 @@ export const AttendanceHistoryTable = ({
               >
                 <Edit3 className="h-4 w-4" aria-hidden="true" />
               </Button>
-          ),
-        }]
+            ),
+          },
+        ]
       : []),
   ]
 
-  return <DataTable columns={columns} getRowKey={(record) => record.id} items={records} />
+  return (
+    <DataTable
+      columns={columns}
+      getRowKey={(record) => record.id}
+      items={records}
+    />
+  )
 }

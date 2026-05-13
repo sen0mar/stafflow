@@ -108,7 +108,13 @@ export const PayslipUploadDialog = ({
                   >
                     <FormControl>
                       <SelectTrigger className="w-full">
-                        <SelectValue placeholder={isLoadingEmployees ? 'Loading employees' : 'Select employee'} />
+                        <SelectValue
+                          placeholder={
+                            isLoadingEmployees
+                              ? 'Loading employees'
+                              : 'Select employee'
+                          }
+                        />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -165,7 +171,9 @@ export const PayslipUploadDialog = ({
                         type="number"
                         value={field.value}
                         onBlur={field.onBlur}
-                        onChange={(event) => field.onChange(Number(event.target.value))}
+                        onChange={(event) =>
+                          field.onChange(Number(event.target.value))
+                        }
                       />
                     </FormControl>
                     <FormMessage />
@@ -188,14 +196,19 @@ export const PayslipUploadDialog = ({
                     />
                   </FormControl>
                   <p className="text-xs text-muted">
-                    Maximum size: {Math.round(maxPayslipUploadBytes / 1024 / 1024)} MB.
+                    Maximum size:{' '}
+                    {Math.round(maxPayslipUploadBytes / 1024 / 1024)} MB.
                   </p>
                   <FormMessage />
                 </FormItem>
               )}
             />
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => onOpenChange(false)}
+              >
                 Cancel
               </Button>
               <Button type="submit" disabled={isSubmitting}>

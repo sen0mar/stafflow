@@ -39,13 +39,19 @@ export const DepartmentsTable = ({
         <TableHead>Status</TableHead>
         <TableHead>Employees</TableHead>
         <TableHead>Updated</TableHead>
-        {canManage ? <TableHead className="w-12"><span className="sr-only">Actions</span></TableHead> : null}
+        {canManage ? (
+          <TableHead className="w-12">
+            <span className="sr-only">Actions</span>
+          </TableHead>
+        ) : null}
       </TableRow>
     </TableHeader>
     <TableBody>
       {departments.map((department) => (
         <TableRow key={department.id}>
-          <TableCell className="font-medium text-primary">{department.name}</TableCell>
+          <TableCell className="font-medium text-primary">
+            {department.name}
+          </TableCell>
           <TableCell className="max-w-[28rem] truncate text-muted">
             {department.description || 'No description'}
           </TableCell>
@@ -55,12 +61,19 @@ export const DepartmentsTable = ({
             </Badge>
           </TableCell>
           <TableCell>{department.employeeCount}</TableCell>
-          <TableCell>{formatDate(department.updatedAt, 'MMM d, yyyy')}</TableCell>
+          <TableCell>
+            {formatDate(department.updatedAt, 'MMM d, yyyy')}
+          </TableCell>
           {canManage ? (
             <TableCell>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button type="button" variant="ghost" size="icon" aria-label={`Open actions for ${department.name}`}>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    aria-label={`Open actions for ${department.name}`}
+                  >
                     <MoreHorizontal className="h-4 w-4" aria-hidden="true" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -69,7 +82,10 @@ export const DepartmentsTable = ({
                     <Edit3 className="h-4 w-4" aria-hidden="true" />
                     Edit
                   </DropdownMenuItem>
-                  <DropdownMenuItem variant="destructive" onSelect={() => onDelete(department)}>
+                  <DropdownMenuItem
+                    variant="destructive"
+                    onSelect={() => onDelete(department)}
+                  >
                     <Trash2 className="h-4 w-4" aria-hidden="true" />
                     Delete
                   </DropdownMenuItem>

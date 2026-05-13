@@ -8,7 +8,10 @@ const safeClientStatuses = new Set([400, 404, 409, 422, 429])
 export const isApiStatus = (error: unknown, status: number) =>
   error instanceof ApiClientError && error.status === status
 
-export const getSafeErrorMessage = (error: unknown, fallback = genericErrorMessage) => {
+export const getSafeErrorMessage = (
+  error: unknown,
+  fallback = genericErrorMessage,
+) => {
   if (!(error instanceof ApiClientError)) {
     return fallback
   }

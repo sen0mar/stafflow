@@ -51,7 +51,12 @@ export class ApiClientError extends Error {
   code?: string
   details?: unknown
 
-  constructor(message: string, status: number, code?: string, details?: unknown) {
+  constructor(
+    message: string,
+    status: number,
+    code?: string,
+    details?: unknown,
+  ) {
     super(message)
     this.name = 'ApiClientError'
     this.status = status
@@ -73,7 +78,9 @@ const getCookieValue = (name: string) => {
     .split('; ')
     .find((item) => item.startsWith(`${encodeURIComponent(name)}=`))
 
-  return cookie ? decodeURIComponent(cookie.split('=').slice(1).join('=')) : undefined
+  return cookie
+    ? decodeURIComponent(cookie.split('=').slice(1).join('='))
+    : undefined
 }
 
 const getRequestUrl = (input: RequestInfo | URL) => {
@@ -108,7 +115,7 @@ export const apiClient = async <TResponse>(
 
   const method = init.method ?? 'GET'
   const requestCsrfToken = shouldAttachCsrfToken(method)
-    ? csrfToken ?? getCookieValue(csrfCookieName)
+    ? (csrfToken ?? getCookieValue(csrfCookieName))
     : undefined
 
   if (requestCsrfToken && !requestHeaders.has(csrfHeaderName)) {
@@ -137,7 +144,8 @@ export const apiClient = async <TResponse>(
     }
 
     throw new ApiClientError(
-      errorPayload?.error?.message ?? `Request failed with status ${response.status}`,
+      errorPayload?.error?.message ??
+        `Request failed with status ${response.status}`,
       response.status,
       errorPayload?.error?.code,
       errorPayload?.error?.details,

@@ -1,5 +1,11 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { AlertTriangle, Building2, CalendarClock, FileText, type LucideIcon } from 'lucide-react'
+import {
+  AlertTriangle,
+  Building2,
+  CalendarClock,
+  FileText,
+  type LucideIcon,
+} from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Button } from '@/shared/components/ui/button'
@@ -34,7 +40,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/shared/components/ui/select'
-import { FormSkeleton, QueryStateError } from '@/shared/components/layout/page-state'
+import {
+  FormSkeleton,
+  QueryStateError,
+} from '@/shared/components/layout/page-state'
 import { Textarea } from '@/shared/components/ui/textarea'
 import { cn } from '@/shared/lib/cn'
 import type {
@@ -80,13 +89,17 @@ const commonTimezones = [
   'Asia/Singapore',
 ]
 
-const getCompanyDefaults = (settings?: CompanySettings): CompanySettingsFormValues => ({
+const getCompanyDefaults = (
+  settings?: CompanySettings,
+): CompanySettingsFormValues => ({
   locale: settings?.locale ?? 'en-US',
   name: settings?.name ?? '',
   timezone: settings?.timezone ?? 'UTC',
 })
 
-const getAttendanceDefaults = (settings?: AttendanceSettings): AttendanceSettingsFormValues => ({
+const getAttendanceDefaults = (
+  settings?: AttendanceSettings,
+): AttendanceSettingsFormValues => ({
   allowEmployeeClockIn: settings?.allowEmployeeClockIn ?? true,
   lateGracePeriodMinutes: settings?.lateGracePeriodMinutes ?? 0,
   weeklyWorkingDays: settings?.weeklyWorkingDays ?? [1, 2, 3, 4, 5],
@@ -95,7 +108,9 @@ const getAttendanceDefaults = (settings?: AttendanceSettings): AttendanceSetting
   workdayStart: settings?.workdayStart ?? '09:00',
 })
 
-const getLeaveDefaults = (settings?: LeaveSettings): LeaveSettingsFormValues => ({
+const getLeaveDefaults = (
+  settings?: LeaveSettings,
+): LeaveSettingsFormValues => ({
   allowNegativeBalance: settings?.allowNegativeBalance ?? false,
   defaultAnnualAllowanceDays: settings?.defaultAnnualAllowanceDays ?? 0,
   policyText: settings?.policyText ?? '',
@@ -118,24 +133,30 @@ type PendingSettingsSave =
 const confirmationContent = {
   attendance: {
     buttonLabel: 'Save attendance',
-    description: 'These attendance defaults will be used by admin and employee attendance workflows.',
+    description:
+      'These attendance defaults will be used by admin and employee attendance workflows.',
     title: 'Save attendance settings?',
   },
   company: {
     buttonLabel: 'Save company',
-    description: 'This will update the company identity and regional defaults used across Stafflow.',
+    description:
+      'This will update the company identity and regional defaults used across Stafflow.',
     title: 'Save company settings?',
   },
   leave: {
     buttonLabel: 'Save leave',
-    description: 'This will update the default leave policy and balance behavior.',
+    description:
+      'This will update the default leave policy and balance behavior.',
     title: 'Save leave settings?',
   },
-} satisfies Record<PendingSettingsSave['type'], {
-  buttonLabel: string
-  description: string
-  title: string
-}>
+} satisfies Record<
+  PendingSettingsSave['type'],
+  {
+    buttonLabel: string
+    description: string
+    title: string
+  }
+>
 
 interface SettingsSaveConfirmDialogProps {
   isSubmitting: boolean
@@ -150,7 +171,9 @@ const SettingsSaveConfirmDialog = ({
   onOpenChange,
   pendingSave,
 }: SettingsSaveConfirmDialogProps) => {
-  const content = pendingSave ? confirmationContent[pendingSave.type] : confirmationContent.company
+  const content = pendingSave
+    ? confirmationContent[pendingSave.type]
+    : confirmationContent.company
 
   return (
     <Dialog open={Boolean(pendingSave)} onOpenChange={onOpenChange}>
@@ -163,7 +186,11 @@ const SettingsSaveConfirmDialog = ({
           <DialogDescription>{content.description}</DialogDescription>
         </DialogHeader>
         <DialogFooter>
-          <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+          >
             Cancel
           </Button>
           <Button type="button" disabled={isSubmitting} onClick={onConfirm}>
@@ -181,7 +208,11 @@ interface SectionHeaderProps {
   title: string
 }
 
-const SectionHeader = ({ description, icon: Icon, title }: SectionHeaderProps) => (
+const SectionHeader = ({
+  description,
+  icon: Icon,
+  title,
+}: SectionHeaderProps) => (
   <CardHeader>
     <div className="flex items-start gap-3">
       <div className="rounded-xl bg-brand-soft p-2 text-brand">
@@ -202,12 +233,19 @@ export const SettingsPage = () => {
   const updateCompanyMutation = useUpdateCompanySettings()
   const updateAttendanceMutation = useUpdateAttendanceSettings()
   const updateLeaveMutation = useUpdateLeaveSettings()
-  const [pendingSave, setPendingSave] = useState<PendingSettingsSave | null>(null)
-  const isLoading = companyQuery.isLoading || attendanceQuery.isLoading || leaveQuery.isLoading
-  const hasError = companyQuery.isError || attendanceQuery.isError || leaveQuery.isError
-  const firstError = companyQuery.error ?? attendanceQuery.error ?? leaveQuery.error
+  const [pendingSave, setPendingSave] = useState<PendingSettingsSave | null>(
+    null,
+  )
+  const isLoading =
+    companyQuery.isLoading || attendanceQuery.isLoading || leaveQuery.isLoading
+  const hasError =
+    companyQuery.isError || attendanceQuery.isError || leaveQuery.isError
+  const firstError =
+    companyQuery.error ?? attendanceQuery.error ?? leaveQuery.error
   const demoMode = Boolean(
-    companyQuery.data?.demoMode || attendanceQuery.data?.demoMode || leaveQuery.data?.demoMode,
+    companyQuery.data?.demoMode ||
+    attendanceQuery.data?.demoMode ||
+    leaveQuery.data?.demoMode,
   )
   const timezoneOptions =
     companyQuery.data && !commonTimezones.includes(companyQuery.data.timezone)
@@ -302,9 +340,12 @@ export const SettingsPage = () => {
     <div className="space-y-6">
       <div>
         <p className="text-sm font-medium text-brand">Admin settings</p>
-        <h1 className="mt-2 text-2xl font-semibold tracking-normal text-primary">Settings</h1>
+        <h1 className="mt-2 text-2xl font-semibold tracking-normal text-primary">
+          Settings
+        </h1>
         <p className="mt-2 max-w-3xl text-sm leading-6 text-muted">
-          Manage the basic company defaults used across attendance, leave, and employee self-service.
+          Manage the basic company defaults used across attendance, leave, and
+          employee self-service.
         </p>
       </div>
 
@@ -314,7 +355,8 @@ export const SettingsPage = () => {
           <div>
             <p className="font-medium">Demo mode is enabled.</p>
             <p className="mt-1 text-muted">
-              Settings changes are audited and may be reset with the demo seed data.
+              Settings changes are audited and may be reset with the demo seed
+              data.
             </p>
           </div>
         </div>
@@ -445,7 +487,9 @@ export const SettingsPage = () => {
                           min="1"
                           max="1440"
                           value={field.value}
-                          onChange={(event) => field.onChange(Number(event.target.value))}
+                          onChange={(event) =>
+                            field.onChange(Number(event.target.value))
+                          }
                         />
                       </FormControl>
                       <FormMessage />
@@ -466,7 +510,9 @@ export const SettingsPage = () => {
                           min="0"
                           max="240"
                           value={field.value}
-                          onChange={(event) => field.onChange(Number(event.target.value))}
+                          onChange={(event) =>
+                            field.onChange(Number(event.target.value))
+                          }
                         />
                       </FormControl>
                       <FormMessage />
@@ -479,7 +525,12 @@ export const SettingsPage = () => {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Employee clock-in</FormLabel>
-                      <Select value={field.value ? 'enabled' : 'disabled'} onValueChange={(value) => field.onChange(value === 'enabled')}>
+                      <Select
+                        value={field.value ? 'enabled' : 'disabled'}
+                        onValueChange={(value) =>
+                          field.onChange(value === 'enabled')
+                        }
+                      >
                         <FormControl>
                           <SelectTrigger className="w-full">
                             <SelectValue />
@@ -510,11 +561,18 @@ export const SettingsPage = () => {
                             key={day.value}
                             type="button"
                             variant={selected ? 'default' : 'outline'}
-                            className={cn('h-9 min-w-14', selected && 'shadow-glow')}
+                            className={cn(
+                              'h-9 min-w-14',
+                              selected && 'shadow-glow',
+                            )}
                             onClick={() => {
                               const nextValue = selected
-                                ? field.value.filter((value) => value !== day.value)
-                                : [...field.value, day.value].sort((a, b) => a - b)
+                                ? field.value.filter(
+                                    (value) => value !== day.value,
+                                  )
+                                : [...field.value, day.value].sort(
+                                    (a, b) => a - b,
+                                  )
 
                               field.onChange(nextValue)
                             }}
@@ -529,8 +587,13 @@ export const SettingsPage = () => {
                 )}
               />
               <div className="flex justify-end">
-                <Button type="submit" disabled={updateAttendanceMutation.isPending}>
-                  {updateAttendanceMutation.isPending ? 'Saving...' : 'Save attendance'}
+                <Button
+                  type="submit"
+                  disabled={updateAttendanceMutation.isPending}
+                >
+                  {updateAttendanceMutation.isPending
+                    ? 'Saving...'
+                    : 'Save attendance'}
                 </Button>
               </div>
             </form>
@@ -566,7 +629,9 @@ export const SettingsPage = () => {
                           max="365"
                           step="0.5"
                           value={field.value}
-                          onChange={(event) => field.onChange(Number(event.target.value))}
+                          onChange={(event) =>
+                            field.onChange(Number(event.target.value))
+                          }
                         />
                       </FormControl>
                       <FormMessage />
@@ -579,7 +644,12 @@ export const SettingsPage = () => {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Negative balance</FormLabel>
-                      <Select value={field.value ? 'allowed' : 'blocked'} onValueChange={(value) => field.onChange(value === 'allowed')}>
+                      <Select
+                        value={field.value ? 'allowed' : 'blocked'}
+                        onValueChange={(value) =>
+                          field.onChange(value === 'allowed')
+                        }
+                      >
                         <FormControl>
                           <SelectTrigger className="w-full">
                             <SelectValue />
@@ -602,7 +672,11 @@ export const SettingsPage = () => {
                   <FormItem>
                     <FormLabel>Policy note</FormLabel>
                     <FormControl>
-                      <Textarea rows={5} placeholder="Basic leave policy and review expectations" {...field} />
+                      <Textarea
+                        rows={5}
+                        placeholder="Basic leave policy and review expectations"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

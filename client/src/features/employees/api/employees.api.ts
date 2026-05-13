@@ -4,7 +4,12 @@ import type { PaginatedResponse } from '@/shared/types/pagination'
 export type EmployeeStatus = 'ACTIVE' | 'INACTIVE' | 'TERMINATED'
 export type AccountStatus = 'ACTIVE' | 'DISABLED' | 'INVITED'
 export type UserRole = 'ADMIN' | 'EMPLOYEE'
-export type EmployeeSort = 'name' | 'newest' | 'oldest' | 'department' | 'status'
+export type EmployeeSort =
+  | 'name'
+  | 'newest'
+  | 'oldest'
+  | 'department'
+  | 'status'
 
 export interface EmployeeDepartment {
   id: string
@@ -64,7 +69,9 @@ export interface CreateEmployeeInput {
   phone?: string | null
 }
 
-export type UpdateEmployeeInput = Partial<Omit<CreateEmployeeInput, 'email'>> & {
+export type UpdateEmployeeInput = Partial<
+  Omit<CreateEmployeeInput, 'email'>
+> & {
   id: string
 }
 
@@ -136,10 +143,13 @@ export const getSelfEmployee = async () => {
 }
 
 export const createEmployee = async (input: CreateEmployeeInput) => {
-  const response = await apiClient<ApiResponse<CreateEmployeeResponse>>('/employees', {
-    body: { ...input },
-    method: 'POST',
-  })
+  const response = await apiClient<ApiResponse<CreateEmployeeResponse>>(
+    '/employees',
+    {
+      body: { ...input },
+      method: 'POST',
+    },
+  )
 
   return response.data
 }
@@ -153,11 +163,17 @@ export const updateEmployee = async ({ id, ...input }: UpdateEmployeeInput) => {
   return response.data
 }
 
-export const updateEmployeeStatus = async ({ id, ...input }: UpdateEmployeeStatusInput) => {
-  const response = await apiClient<ApiResponse<Employee>>(`/employees/${id}/status`, {
-    body: input,
-    method: 'PATCH',
-  })
+export const updateEmployeeStatus = async ({
+  id,
+  ...input
+}: UpdateEmployeeStatusInput) => {
+  const response = await apiClient<ApiResponse<Employee>>(
+    `/employees/${id}/status`,
+    {
+      body: input,
+      method: 'PATCH',
+    },
+  )
 
   return response.data
 }
@@ -171,10 +187,13 @@ export const disableEmployee = async (id: string) => {
 }
 
 export const updateSelfProfile = async (input: UpdateSelfProfileInput) => {
-  const response = await apiClient<ApiResponse<Employee>>('/employees/me/profile', {
-    body: { ...input },
-    method: 'PATCH',
-  })
+  const response = await apiClient<ApiResponse<Employee>>(
+    '/employees/me/profile',
+    {
+      body: { ...input },
+      method: 'PATCH',
+    },
+  )
 
   return response.data
 }

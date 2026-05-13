@@ -2,26 +2,26 @@
 
 ## Stack
 
-| Layer | Technology | Role |
-| --- | --- | --- |
-| Frontend | React + TypeScript + Vite | Authenticated single-page web app for admins and employees |
-| Routing | React Router | Protected app routes and feature pages |
-| UI | Tailwind CSS + shadcn/ui | Styling, reusable primitives, dashboard components |
-| Server state | TanStack Query | API fetching, caching, invalidation, loading/error state |
-| Client state | Zustand | Lightweight UI/application state such as sidebar, theme, filters, and local preferences |
-| Forms and validation | React Hook Form + Zod | Form state, client validation, shared schema-style validation where useful |
-| API | Node.js + Express.js + TypeScript | REST API, auth/session handling, RBAC, business workflows |
-| Database | PostgreSQL on Neon | Relational data for users, employees, departments, attendance, leave, payslips, settings, sessions, and audit logs |
-| ORM | Prisma | Type-safe database access, schema modeling, migrations |
-| Auth | First-party session auth | Email/password login, database-backed sessions, HTTP-only secure cookies, no public registration |
-| Password hashing | bcrypt | Password hashing with a tuned cost factor |
-| Rate limiting | Upstash Redis + `@upstash/ratelimit` | Distributed rate limiting for auth, API, uploads, and expensive actions |
-| File storage | Cloudflare R2 | Payslip PDF storage and future private file objects, protected from public-demo abuse |
-| Logging | Pino + `pino-http` | Structured technical logs and request logs |
-| Frontend hosting | Vercel | Client deployment |
-| Backend hosting | Render | Express API deployment |
-| Domain model | One custom domain with subdomains | Example: `app.company.com` for frontend and `api.company.com` for backend |
-| Public demo model | Seeded demo users, no sign-up | Portfolio visitors can log in, but cannot create a clean reusable workspace from the login page |
+| Layer                | Technology                           | Role                                                                                                               |
+| -------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------ |
+| Frontend             | React + TypeScript + Vite            | Authenticated single-page web app for admins and employees                                                         |
+| Routing              | React Router                         | Protected app routes and feature pages                                                                             |
+| UI                   | Tailwind CSS + shadcn/ui             | Styling, reusable primitives, dashboard components                                                                 |
+| Server state         | TanStack Query                       | API fetching, caching, invalidation, loading/error state                                                           |
+| Client state         | Zustand                              | Lightweight UI/application state such as sidebar, theme, filters, and local preferences                            |
+| Forms and validation | React Hook Form + Zod                | Form state, client validation, shared schema-style validation where useful                                         |
+| API                  | Node.js + Express.js + TypeScript    | REST API, auth/session handling, RBAC, business workflows                                                          |
+| Database             | PostgreSQL on Neon                   | Relational data for users, employees, departments, attendance, leave, payslips, settings, sessions, and audit logs |
+| ORM                  | Prisma                               | Type-safe database access, schema modeling, migrations                                                             |
+| Auth                 | First-party session auth             | Email/password login, database-backed sessions, HTTP-only secure cookies, no public registration                   |
+| Password hashing     | bcrypt                               | Password hashing with a tuned cost factor                                                                          |
+| Rate limiting        | Upstash Redis + `@upstash/ratelimit` | Distributed rate limiting for auth, API, uploads, and expensive actions                                            |
+| File storage         | Cloudflare R2                        | Payslip PDF storage and future private file objects, protected from public-demo abuse                              |
+| Logging              | Pino + `pino-http`                   | Structured technical logs and request logs                                                                         |
+| Frontend hosting     | Vercel                               | Client deployment                                                                                                  |
+| Backend hosting      | Render                               | Express API deployment                                                                                             |
+| Domain model         | One custom domain with subdomains    | Example: `app.company.com` for frontend and `api.company.com` for backend                                          |
+| Public demo model    | Seeded demo users, no sign-up        | Portfolio visitors can log in, but cannot create a clean reusable workspace from the login page                    |
 
 ## System Boundaries
 

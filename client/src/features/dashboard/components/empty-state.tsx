@@ -6,7 +6,11 @@ interface EmptyStateProps {
   title: string
 }
 
-export const EmptyState = ({ description, icon: Icon, title }: EmptyStateProps) => (
+export const EmptyState = ({
+  description,
+  icon: Icon,
+  title,
+}: EmptyStateProps) => (
   <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-default bg-inset px-6 py-10 text-center">
     <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-brand-soft text-brand-text">
       <Icon className="h-6 w-6" aria-hidden="true" />

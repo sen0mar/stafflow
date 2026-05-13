@@ -46,9 +46,12 @@ interface EmployeeFormProps {
 
 const unassignedDepartmentValue = 'unassigned'
 
-const getDateInputValue = (value?: string | null) => (value ? value.slice(0, 10) : '')
+const getDateInputValue = (value?: string | null) =>
+  value ? value.slice(0, 10) : ''
 
-const getDefaultValues = (employee?: Employee | null): EmployeeFormValues | CreateEmployeeFormValues => ({
+const getDefaultValues = (
+  employee?: Employee | null,
+): EmployeeFormValues | CreateEmployeeFormValues => ({
   departmentId: employee?.departmentId ?? unassignedDepartmentValue,
   email: employee?.account?.email ?? '',
   employeeCode: employee?.employeeCode ?? '',
@@ -70,7 +73,9 @@ export const EmployeeForm = ({
   const isEditing = Boolean(employee)
   const form = useForm<CreateEmployeeFormValues | EmployeeFormValues>({
     defaultValues: getDefaultValues(employee),
-    resolver: zodResolver(isEditing ? employeeFormSchema : createEmployeeFormSchema),
+    resolver: zodResolver(
+      isEditing ? employeeFormSchema : createEmployeeFormSchema,
+    ),
   })
 
   useEffect(() => {
@@ -83,7 +88,9 @@ export const EmployeeForm = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
-          <DialogTitle>{isEditing ? 'Edit employee' : 'Create employee'}</DialogTitle>
+          <DialogTitle>
+            {isEditing ? 'Edit employee' : 'Create employee'}
+          </DialogTitle>
           <DialogDescription>
             {isEditing
               ? 'Update profile and assignment details.'
@@ -99,7 +106,9 @@ export const EmployeeForm = ({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>First name</FormLabel>
-                    <FormControl><Input {...field} /></FormControl>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -110,7 +119,9 @@ export const EmployeeForm = ({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Last name</FormLabel>
-                    <FormControl><Input {...field} /></FormControl>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -123,7 +134,9 @@ export const EmployeeForm = ({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Employee code</FormLabel>
-                    <FormControl><Input placeholder="EMP-001" {...field} /></FormControl>
+                    <FormControl>
+                      <Input placeholder="EMP-001" {...field} />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -134,7 +147,9 @@ export const EmployeeForm = ({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Email</FormLabel>
-                    <FormControl><Input disabled={isEditing} type="email" {...field} /></FormControl>
+                    <FormControl>
+                      <Input disabled={isEditing} type="email" {...field} />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -147,14 +162,23 @@ export const EmployeeForm = ({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Department</FormLabel>
-                    <Select value={field.value || unassignedDepartmentValue} onValueChange={field.onChange}>
+                    <Select
+                      value={field.value || unassignedDepartmentValue}
+                      onValueChange={field.onChange}
+                    >
                       <FormControl>
-                        <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+                        <SelectTrigger className="w-full">
+                          <SelectValue />
+                        </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value={unassignedDepartmentValue}>Unassigned</SelectItem>
+                        <SelectItem value={unassignedDepartmentValue}>
+                          Unassigned
+                        </SelectItem>
                         {departments.map((department) => (
-                          <SelectItem key={department.id} value={department.id}>{department.name}</SelectItem>
+                          <SelectItem key={department.id} value={department.id}>
+                            {department.name}
+                          </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
@@ -168,7 +192,9 @@ export const EmployeeForm = ({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Hire date</FormLabel>
-                    <FormControl><Input type="date" {...field} /></FormControl>
+                    <FormControl>
+                      <Input type="date" {...field} />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -181,7 +207,9 @@ export const EmployeeForm = ({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Job title</FormLabel>
-                    <FormControl><Input placeholder="Operations Associate" {...field} /></FormControl>
+                    <FormControl>
+                      <Input placeholder="Operations Associate" {...field} />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -192,18 +220,28 @@ export const EmployeeForm = ({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Phone</FormLabel>
-                    <FormControl><Input {...field} /></FormControl>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => onOpenChange(false)}
+              >
                 Cancel
               </Button>
               <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? 'Saving...' : isEditing ? 'Save changes' : 'Create employee'}
+                {isSubmitting
+                  ? 'Saving...'
+                  : isEditing
+                    ? 'Save changes'
+                    : 'Create employee'}
               </Button>
             </DialogFooter>
           </form>

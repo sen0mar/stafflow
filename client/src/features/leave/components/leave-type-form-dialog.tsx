@@ -28,7 +28,10 @@ import {
 } from '@/shared/components/ui/select'
 import { Textarea } from '@/shared/components/ui/textarea'
 import type { LeaveType } from '../api/leave.api'
-import { leaveTypeFormSchema, type LeaveTypeFormValues } from '../schemas/leave-form.schema'
+import {
+  leaveTypeFormSchema,
+  type LeaveTypeFormValues,
+} from '../schemas/leave-form.schema'
 
 interface LeaveTypeFormDialogProps {
   isSubmitting: boolean
@@ -38,7 +41,9 @@ interface LeaveTypeFormDialogProps {
   open: boolean
 }
 
-const getDefaultValues = (leaveType?: LeaveType | null): LeaveTypeFormValues => ({
+const getDefaultValues = (
+  leaveType?: LeaveType | null,
+): LeaveTypeFormValues => ({
   annualAllowance: String(leaveType?.annualAllowance ?? 0),
   description: leaveType?.description ?? '',
   isActive: leaveType?.isActive ?? true,
@@ -69,9 +74,13 @@ export const LeaveTypeFormDialog = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{isEditing ? 'Edit leave type' : 'Create leave type'}</DialogTitle>
+          <DialogTitle>
+            {isEditing ? 'Edit leave type' : 'Create leave type'}
+          </DialogTitle>
           <DialogDescription>
-            {isEditing ? 'Update allowance, payment status, and availability.' : 'Add a request type employees can select.'}
+            {isEditing
+              ? 'Update allowance, payment status, and availability.'
+              : 'Add a request type employees can select.'}
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -109,7 +118,12 @@ export const LeaveTypeFormDialog = ({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Payment</FormLabel>
-                    <Select value={field.value ? 'paid' : 'unpaid'} onValueChange={(value) => field.onChange(value === 'paid')}>
+                    <Select
+                      value={field.value ? 'paid' : 'unpaid'}
+                      onValueChange={(value) =>
+                        field.onChange(value === 'paid')
+                      }
+                    >
                       <FormControl>
                         <SelectTrigger className="w-full">
                           <SelectValue />
@@ -130,7 +144,12 @@ export const LeaveTypeFormDialog = ({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Status</FormLabel>
-                    <Select value={field.value ? 'active' : 'inactive'} onValueChange={(value) => field.onChange(value === 'active')}>
+                    <Select
+                      value={field.value ? 'active' : 'inactive'}
+                      onValueChange={(value) =>
+                        field.onChange(value === 'active')
+                      }
+                    >
                       <FormControl>
                         <SelectTrigger className="w-full">
                           <SelectValue />
@@ -153,18 +172,30 @@ export const LeaveTypeFormDialog = ({
                 <FormItem>
                   <FormLabel>Description</FormLabel>
                   <FormControl>
-                    <Textarea placeholder="Optional leave policy note" rows={3} {...field} />
+                    <Textarea
+                      placeholder="Optional leave policy note"
+                      rows={3}
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => onOpenChange(false)}
+              >
                 Cancel
               </Button>
               <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? 'Saving...' : isEditing ? 'Save changes' : 'Create leave type'}
+                {isSubmitting
+                  ? 'Saving...'
+                  : isEditing
+                    ? 'Save changes'
+                    : 'Create leave type'}
               </Button>
             </DialogFooter>
           </form>

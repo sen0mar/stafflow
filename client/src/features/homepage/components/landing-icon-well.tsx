@@ -6,7 +6,10 @@ interface LandingIconWellProps {
   className?: string
 }
 
-export const LandingIconWell = ({ icon: Icon, className }: LandingIconWellProps) => (
+export const LandingIconWell = ({
+  icon: Icon,
+  className,
+}: LandingIconWellProps) => (
   <span
     className={cn(
       'flex h-11 w-11 items-center justify-center rounded-2xl bg-brand-soft text-brand-text shadow-soft',

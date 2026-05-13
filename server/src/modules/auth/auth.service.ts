@@ -90,7 +90,10 @@ export const login = async (input: LoginInput) => {
     throw invalidCredentialsError();
   }
 
-  const passwordMatches = await verifyPassword(input.password, user.passwordHash);
+  const passwordMatches = await verifyPassword(
+    input.password,
+    user.passwordHash,
+  );
 
   if (!passwordMatches) {
     throw invalidCredentialsError();
@@ -147,7 +150,10 @@ export const changePassword = async ({
     });
   }
 
-  const passwordMatches = await verifyPassword(currentPassword, user.passwordHash);
+  const passwordMatches = await verifyPassword(
+    currentPassword,
+    user.passwordHash,
+  );
 
   if (!passwordMatches) {
     throw new AppError({
@@ -248,7 +254,8 @@ export const acceptInvitation = async ({
   }
 
   const passwordHash = await hashPassword(password);
-  const existingUser = invitation.user ?? (await findUserByEmailForAuth(invitation.email));
+  const existingUser =
+    invitation.user ?? (await findUserByEmailForAuth(invitation.email));
   const user =
     existingUser ??
     (await createInvitedUserForAcceptedInvitation({

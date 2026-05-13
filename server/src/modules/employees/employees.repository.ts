@@ -82,7 +82,11 @@ const getEmployeeOrderBy = (
   }
 
   if (sort === "department") {
-    return [{ department: { name: "asc" } }, { lastName: "asc" }, { firstName: "asc" }];
+    return [
+      { department: { name: "asc" } },
+      { lastName: "asc" },
+      { firstName: "asc" },
+    ];
   }
 
   if (sort === "status") {

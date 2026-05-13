@@ -15,7 +15,8 @@ interface PaginationControlsProps {
   onPageChange: (page: number) => void
 }
 
-const clampPage = (page: number, pageCount: number) => Math.min(Math.max(page, 1), Math.max(pageCount, 1))
+const clampPage = (page: number, pageCount: number) =>
+  Math.min(Math.max(page, 1), Math.max(pageCount, 1))
 
 export const PaginationControls = ({
   itemLabel,

@@ -1,7 +1,14 @@
 import { apiClient } from '@/shared/lib/api-client'
-import type { PaginatedResponse, PaginationMeta } from '@/shared/types/pagination'
+import type {
+  PaginatedResponse,
+  PaginationMeta,
+} from '@/shared/types/pagination'
 
-export type LeaveRequestStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'CANCELLED'
+export type LeaveRequestStatus =
+  | 'PENDING'
+  | 'APPROVED'
+  | 'REJECTED'
+  | 'CANCELLED'
 
 export interface LeaveType {
   annualAllowance: number | null
@@ -131,7 +138,10 @@ interface ApiResponse<TData> {
   data: TData
 }
 
-const appendPagination = (searchParams: URLSearchParams, params: { limit: number; page: number }) => {
+const appendPagination = (
+  searchParams: URLSearchParams,
+  params: { limit: number; page: number },
+) => {
   searchParams.set('limit', String(params.limit))
   searchParams.set('page', String(params.page))
 }
@@ -164,24 +174,35 @@ export const createLeaveType = async (input: CreateLeaveTypeInput) => {
   return response.data
 }
 
-export const updateLeaveType = async ({ id, ...input }: UpdateLeaveTypeInput) => {
-  const response = await apiClient<ApiResponse<LeaveType>>(`/leave-types/${id}`, {
-    body: input,
-    method: 'PATCH',
-  })
+export const updateLeaveType = async ({
+  id,
+  ...input
+}: UpdateLeaveTypeInput) => {
+  const response = await apiClient<ApiResponse<LeaveType>>(
+    `/leave-types/${id}`,
+    {
+      body: input,
+      method: 'PATCH',
+    },
+  )
 
   return response.data
 }
 
 export const deleteLeaveType = async (id: string) => {
-  const response = await apiClient<ApiResponse<LeaveType>>(`/leave-types/${id}`, {
-    method: 'DELETE',
-  })
+  const response = await apiClient<ApiResponse<LeaveType>>(
+    `/leave-types/${id}`,
+    {
+      method: 'DELETE',
+    },
+  )
 
   return response.data
 }
 
-export const getSelfLeaveRequests = async (params: SelfLeaveRequestListParams) => {
+export const getSelfLeaveRequests = async (
+  params: SelfLeaveRequestListParams,
+) => {
   const searchParams = new URLSearchParams()
   appendPagination(searchParams, params)
 
@@ -197,18 +218,24 @@ export const getSelfLeaveRequests = async (params: SelfLeaveRequestListParams) =
 }
 
 export const createLeaveRequest = async (input: CreateLeaveRequestInput) => {
-  const response = await apiClient<ApiResponse<LeaveRequest>>('/leave-requests', {
-    body: { ...input },
-    method: 'POST',
-  })
+  const response = await apiClient<ApiResponse<LeaveRequest>>(
+    '/leave-requests',
+    {
+      body: { ...input },
+      method: 'POST',
+    },
+  )
 
   return response.data
 }
 
 export const cancelLeaveRequest = async (id: string) => {
-  const response = await apiClient<ApiResponse<LeaveRequest>>(`/leave-requests/${id}/cancel`, {
-    method: 'PATCH',
-  })
+  const response = await apiClient<ApiResponse<LeaveRequest>>(
+    `/leave-requests/${id}/cancel`,
+    {
+      method: 'PATCH',
+    },
+  )
 
   return response.data
 }
@@ -237,25 +264,39 @@ export const getLeaveRequests = async (params: LeaveRequestListParams) => {
 }
 
 export const getLeaveRequest = async (id: string) => {
-  const response = await apiClient<ApiResponse<LeaveRequest>>(`/leave-requests/${id}`)
+  const response = await apiClient<ApiResponse<LeaveRequest>>(
+    `/leave-requests/${id}`,
+  )
 
   return response.data
 }
 
-export const approveLeaveRequest = async ({ id, reviewNote }: ReviewLeaveRequestInput) => {
-  const response = await apiClient<ApiResponse<LeaveRequest>>(`/leave-requests/${id}/approve`, {
-    body: { reviewNote },
-    method: 'PATCH',
-  })
+export const approveLeaveRequest = async ({
+  id,
+  reviewNote,
+}: ReviewLeaveRequestInput) => {
+  const response = await apiClient<ApiResponse<LeaveRequest>>(
+    `/leave-requests/${id}/approve`,
+    {
+      body: { reviewNote },
+      method: 'PATCH',
+    },
+  )
 
   return response.data
 }
 
-export const rejectLeaveRequest = async ({ id, reviewNote }: ReviewLeaveRequestInput) => {
-  const response = await apiClient<ApiResponse<LeaveRequest>>(`/leave-requests/${id}/reject`, {
-    body: { reviewNote },
-    method: 'PATCH',
-  })
+export const rejectLeaveRequest = async ({
+  id,
+  reviewNote,
+}: ReviewLeaveRequestInput) => {
+  const response = await apiClient<ApiResponse<LeaveRequest>>(
+    `/leave-requests/${id}/reject`,
+    {
+      body: { reviewNote },
+      method: 'PATCH',
+    },
+  )
 
   return response.data
 }

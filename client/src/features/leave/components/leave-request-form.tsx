@@ -19,7 +19,10 @@ import {
 } from '@/shared/components/ui/select'
 import { Textarea } from '@/shared/components/ui/textarea'
 import type { LeaveType } from '../api/leave.api'
-import { leaveRequestFormSchema, type LeaveRequestFormValues } from '../schemas/leave-form.schema'
+import {
+  leaveRequestFormSchema,
+  type LeaveRequestFormValues,
+} from '../schemas/leave-form.schema'
 
 interface LeaveRequestFormProps {
   isSubmitting: boolean
@@ -34,7 +37,11 @@ const defaultValues: LeaveRequestFormValues = {
   startDate: '',
 }
 
-export const LeaveRequestForm = ({ isSubmitting, leaveTypes, onSubmit }: LeaveRequestFormProps) => {
+export const LeaveRequestForm = ({
+  isSubmitting,
+  leaveTypes,
+  onSubmit,
+}: LeaveRequestFormProps) => {
   const form = useForm<LeaveRequestFormValues>({
     defaultValues,
     resolver: zodResolver(leaveRequestFormSchema),
@@ -100,7 +107,11 @@ export const LeaveRequestForm = ({ isSubmitting, leaveTypes, onSubmit }: LeaveRe
           )}
         />
         <div className="flex items-end">
-          <Button type="submit" className="w-full" disabled={isSubmitting || leaveTypes.length === 0}>
+          <Button
+            type="submit"
+            className="w-full"
+            disabled={isSubmitting || leaveTypes.length === 0}
+          >
             {isSubmitting ? 'Submitting...' : 'Submit request'}
           </Button>
         </div>
@@ -111,7 +122,11 @@ export const LeaveRequestForm = ({ isSubmitting, leaveTypes, onSubmit }: LeaveRe
             <FormItem className="lg:col-span-4">
               <FormLabel>Reason</FormLabel>
               <FormControl>
-                <Textarea placeholder="Optional note for the approver" rows={3} {...field} />
+                <Textarea
+                  placeholder="Optional note for the approver"
+                  rows={3}
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>

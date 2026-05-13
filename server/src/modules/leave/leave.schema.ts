@@ -1,6 +1,9 @@
 import { z } from "zod";
 
-import { limitQuerySchema, pageQuerySchema } from "../../core/pagination/pagination";
+import {
+  limitQuerySchema,
+  pageQuerySchema,
+} from "../../core/pagination/pagination";
 const optionalNoteSchema = z
   .string()
   .trim()
@@ -41,12 +44,11 @@ export const createLeaveTypeSchema = z.object({
 });
 
 export const updateLeaveTypeSchema = z.object({
-  body: createLeaveTypeSchema.shape.body.partial().refine(
-    (value) => Object.keys(value).length > 0,
-    {
+  body: createLeaveTypeSchema.shape.body
+    .partial()
+    .refine((value) => Object.keys(value).length > 0, {
       message: "At least one leave type field is required.",
-    },
-  ),
+    }),
   params: leaveIdSchema.shape.params,
 });
 
@@ -54,9 +56,7 @@ export const listSelfLeaveRequestsSchema = z.object({
   query: z.object({
     limit: limitQuerySchema,
     page: pageQuerySchema,
-    status: z
-      .enum(["PENDING", "APPROVED", "REJECTED"])
-      .optional(),
+    status: z.enum(["PENDING", "APPROVED", "REJECTED"]).optional(),
   }),
 });
 
@@ -66,9 +66,7 @@ export const listLeaveRequestsSchema = z.object({
     leaveTypeId: z.string().trim().optional(),
     limit: limitQuerySchema,
     page: pageQuerySchema,
-    status: z
-      .enum(["PENDING", "APPROVED", "REJECTED"])
-      .optional(),
+    status: z.enum(["PENDING", "APPROVED", "REJECTED"]).optional(),
   }),
 });
 
@@ -91,7 +89,9 @@ export const reviewLeaveRequestSchema = z.object({
 export type CreateLeaveRequestInput = z.infer<
   typeof createLeaveRequestSchema
 >["body"];
-export type CreateLeaveTypeInput = z.infer<typeof createLeaveTypeSchema>["body"];
+export type CreateLeaveTypeInput = z.infer<
+  typeof createLeaveTypeSchema
+>["body"];
 export type ListLeaveRequestsInput = z.infer<
   typeof listLeaveRequestsSchema
 >["query"];
@@ -102,4 +102,6 @@ export type ListSelfLeaveRequestsInput = z.infer<
 export type ReviewLeaveRequestInput = z.infer<
   typeof reviewLeaveRequestSchema
 >["body"];
-export type UpdateLeaveTypeInput = z.infer<typeof updateLeaveTypeSchema>["body"];
+export type UpdateLeaveTypeInput = z.infer<
+  typeof updateLeaveTypeSchema
+>["body"];

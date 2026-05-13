@@ -27,7 +27,9 @@ interface AuditContext {
   userAgent?: string;
 }
 
-const toDepartmentDto = (department: NonNullable<Awaited<ReturnType<typeof findDepartmentById>>>) => ({
+const toDepartmentDto = (
+  department: NonNullable<Awaited<ReturnType<typeof findDepartmentById>>>,
+) => ({
   createdAt: department.createdAt.toISOString(),
   description: department.description,
   employeeCount: department._count.employees,
@@ -64,10 +66,12 @@ const assertUniqueDepartmentName = async (name: string, currentId?: string) => {
 };
 
 const isUniqueConstraintError = (error: unknown) =>
-  error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002";
+  error instanceof Prisma.PrismaClientKnownRequestError &&
+  error.code === "P2002";
 
 const isMissingRecordError = (error: unknown) =>
-  error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2025";
+  error instanceof Prisma.PrismaClientKnownRequestError &&
+  error.code === "P2025";
 
 const withDepartmentWriteErrors = async <T>(operation: () => Promise<T>) => {
   try {

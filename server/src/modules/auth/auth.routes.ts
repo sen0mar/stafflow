@@ -20,7 +20,13 @@ export const createAuthRoutes = (): Router => {
   router.post("/reset-password", resetPasswordController);
   router.post("/invitations/accept", acceptInvitationController);
   router.get("/me", attachAuth, requireAuth, meController);
-  router.post("/logout", attachAuth, requireAuth, requireCsrf, logoutController);
+  router.post(
+    "/logout",
+    attachAuth,
+    requireAuth,
+    requireCsrf,
+    logoutController,
+  );
   router.post(
     "/change-password",
     attachAuth,

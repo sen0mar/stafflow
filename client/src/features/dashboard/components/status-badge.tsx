@@ -1,6 +1,12 @@
 import { cn } from '@/shared/lib/utils'
 
-type StatusBadgeVariant = 'success' | 'warning' | 'error' | 'info' | 'neutral' | 'brand'
+type StatusBadgeVariant =
+  | 'success'
+  | 'warning'
+  | 'error'
+  | 'info'
+  | 'neutral'
+  | 'brand'
 
 interface StatusBadgeProps {
   children: string
@@ -17,8 +23,18 @@ const statusBadgeClasses: Record<StatusBadgeVariant, string> = {
   brand: 'bg-brand-soft text-brand-text',
 }
 
-export const StatusBadge = ({ children, className, variant = 'neutral' }: StatusBadgeProps) => (
-  <span className={cn('inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium', statusBadgeClasses[variant], className)}>
+export const StatusBadge = ({
+  children,
+  className,
+  variant = 'neutral',
+}: StatusBadgeProps) => (
+  <span
+    className={cn(
+      'inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium',
+      statusBadgeClasses[variant],
+      className,
+    )}
+  >
     {children}
   </span>
 )

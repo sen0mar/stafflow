@@ -3,7 +3,11 @@ import { useCallback, useState } from 'react'
 import { FilterSelect } from '@/shared/components/data-table/filter-select'
 import { SearchInput } from '@/shared/components/data-table/search-input'
 import { Button } from '@/shared/components/ui/button'
-import { EmptyState, QueryStateError, TableSkeleton } from '@/shared/components/layout/page-state'
+import {
+  EmptyState,
+  QueryStateError,
+  TableSkeleton,
+} from '@/shared/components/layout/page-state'
 import {
   Table,
   TableBody,
@@ -67,8 +71,10 @@ const formatDate = (value: string) =>
     year: 'numeric',
   }).format(new Date(value))
 
-const getMonthValue = (value: MonthFilter) => (value === 'all' ? undefined : Number(value))
-const getYearValue = (value: YearFilter) => (value === 'all' ? undefined : Number(value))
+const getMonthValue = (value: MonthFilter) =>
+  value === 'all' ? undefined : Number(value)
+const getYearValue = (value: YearFilter) =>
+  value === 'all' ? undefined : Number(value)
 
 const PayslipsEmpty = ({ canUpload }: { canUpload: boolean }) => (
   <EmptyState
@@ -121,16 +127,24 @@ const PayslipsTable = ({
           <TableRow key={payslip.id}>
             {isAdminView ? (
               <TableCell>
-                <div className="font-medium text-primary">{payslip.employee.fullName}</div>
-                <div className="text-xs text-muted">{payslip.employee.employeeCode}</div>
+                <div className="font-medium text-primary">
+                  {payslip.employee.fullName}
+                </div>
+                <div className="text-xs text-muted">
+                  {payslip.employee.employeeCode}
+                </div>
               </TableCell>
             ) : null}
             <TableCell>
               {months[payslip.month - 1]} {payslip.year}
             </TableCell>
             <TableCell>
-              <div className="max-w-64 truncate font-medium text-primary">{payslip.fileName}</div>
-              <div className="text-xs text-muted">{formatFileSize(payslip.fileSize)}</div>
+              <div className="max-w-64 truncate font-medium text-primary">
+                {payslip.fileName}
+              </div>
+              <div className="text-xs text-muted">
+                {formatFileSize(payslip.fileSize)}
+              </div>
             </TableCell>
             <TableCell>{formatDate(payslip.uploadedAt)}</TableCell>
             <TableCell>
@@ -186,7 +200,9 @@ export const PayslipsPage = () => {
   const [previewPayslip, setPreviewPayslip] = useState<Payslip | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const currentUserQuery = useCurrentUser()
-  const permissions = currentUserQuery.data ? getRolePermissions(currentUserQuery.data.role) : []
+  const permissions = currentUserQuery.data
+    ? getRolePermissions(currentUserQuery.data.role)
+    : []
   const hasCurrentUser = currentUserQuery.isSuccess
   const canReadAny = hasPermission(permissions, 'payslips:read:any')
   const canUpload = hasPermission(permissions, 'payslips:upload')
@@ -198,7 +214,10 @@ export const PayslipsPage = () => {
     search: search.trim() || undefined,
     year: getYearValue(year),
   }
-  const adminPayslipsQuery = usePayslips(listParams, hasCurrentUser && canReadAny)
+  const adminPayslipsQuery = usePayslips(
+    listParams,
+    hasCurrentUser && canReadAny,
+  )
   const selfPayslipsQuery = useSelfPayslips(
     {
       limit: pageSize,
@@ -208,12 +227,15 @@ export const PayslipsPage = () => {
     },
     hasCurrentUser && !canReadAny,
   )
-  const employeesQuery = useEmployees({
-    limit: 100,
-    page: 1,
-    sort: 'name',
-    status: 'ACTIVE',
-  }, hasCurrentUser && canUpload)
+  const employeesQuery = useEmployees(
+    {
+      limit: 100,
+      page: 1,
+      sort: 'name',
+      status: 'ACTIVE',
+    },
+    hasCurrentUser && canUpload,
+  )
   const uploadPayslip = useUploadPayslip()
   const deletePayslip = useDeletePayslip()
   const downloadPayslip = useDownloadPayslip()
@@ -227,9 +249,12 @@ export const PayslipsPage = () => {
     updateQuery({ page: nextPage === 1 ? undefined : nextPage })
   }
 
-  const handleSearchChange = useCallback((value: string) => {
-    updateQuery({ search: value.trim() || undefined }, { resetPage: true })
-  }, [updateQuery])
+  const handleSearchChange = useCallback(
+    (value: string) => {
+      updateQuery({ search: value.trim() || undefined }, { resetPage: true })
+    },
+    [updateQuery],
+  )
 
   const handleUpload = (values: PayslipUploadValues) => {
     uploadPayslip.mutate(values, {
@@ -303,25 +328,37 @@ export const PayslipsPage = () => {
             <FilterSelect
               className="w-full lg:w-40"
               value={month}
-              onValueChange={(value) => tableState.updateQuery({ month: value }, { resetPage: true })}
+              onValueChange={(value) =>
+                tableState.updateQuery({ month: value }, { resetPage: true })
+              }
               options={[
                 { label: 'All months', value: 'all' },
-                ...months.map((monthName, index) => ({ label: monthName, value: String(index + 1) })),
+                ...months.map((monthName, index) => ({
+                  label: monthName,
+                  value: String(index + 1),
+                })),
               ]}
             />
             <FilterSelect
               className="w-full lg:w-36"
               value={year}
-              onValueChange={(value) => tableState.updateQuery({ year: value }, { resetPage: true })}
+              onValueChange={(value) =>
+                tableState.updateQuery({ year: value }, { resetPage: true })
+              }
               options={[
                 { label: 'All years', value: 'all' },
-                ...years.map((yearValue) => ({ label: yearValue, value: String(yearValue) })),
+                ...years.map((yearValue) => ({
+                  label: yearValue,
+                  value: String(yearValue),
+                })),
               ]}
             />
           </div>
         </div>
 
-        {activeQuery.isLoading || currentUserQuery.isLoading ? <TableSkeleton /> : null}
+        {activeQuery.isLoading || currentUserQuery.isLoading ? (
+          <TableSkeleton />
+        ) : null}
         {activeQuery.isError ? (
           <QueryStateError
             error={activeQuery.error}
@@ -329,7 +366,9 @@ export const PayslipsPage = () => {
             description="Refresh the page or try again later."
           />
         ) : null}
-        {activeQuery.data && payslips.length === 0 ? <PayslipsEmpty canUpload={canUpload} /> : null}
+        {activeQuery.data && payslips.length === 0 ? (
+          <PayslipsEmpty canUpload={canUpload} />
+        ) : null}
         {payslips.length > 0 ? (
           <>
             <PayslipsTable
@@ -345,7 +384,9 @@ export const PayslipsPage = () => {
             />
             <PaginationControls
               itemLabel="payslips"
-              meta={pagination ?? { limit: pageSize, page, total: 0, totalPages: 1 }}
+              meta={
+                pagination ?? { limit: pageSize, page, total: 0, totalPages: 1 }
+              }
               onPageChange={setPage}
             />
           </>

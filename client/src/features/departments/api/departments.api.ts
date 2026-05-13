@@ -59,7 +59,9 @@ export const getDepartments = async (params: DepartmentListParams) => {
 }
 
 export const getDepartment = async (id: string) => {
-  const response = await apiClient<ApiResponse<Department>>(`/departments/${id}`)
+  const response = await apiClient<ApiResponse<Department>>(
+    `/departments/${id}`,
+  )
 
   return response.data
 }
@@ -73,19 +75,28 @@ export const createDepartment = async (input: DepartmentMutationInput) => {
   return response.data
 }
 
-export const updateDepartment = async ({ id, ...input }: UpdateDepartmentInput) => {
-  const response = await apiClient<ApiResponse<Department>>(`/departments/${id}`, {
-    body: { ...input },
-    method: 'PATCH',
-  })
+export const updateDepartment = async ({
+  id,
+  ...input
+}: UpdateDepartmentInput) => {
+  const response = await apiClient<ApiResponse<Department>>(
+    `/departments/${id}`,
+    {
+      body: { ...input },
+      method: 'PATCH',
+    },
+  )
 
   return response.data
 }
 
 export const deleteDepartment = async (id: string) => {
-  const response = await apiClient<ApiResponse<Department>>(`/departments/${id}`, {
-    method: 'DELETE',
-  })
+  const response = await apiClient<ApiResponse<Department>>(
+    `/departments/${id}`,
+    {
+      method: 'DELETE',
+    },
+  )
 
   return response.data
 }

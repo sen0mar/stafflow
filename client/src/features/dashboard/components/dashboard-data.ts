@@ -69,15 +69,48 @@ export const dashboardStats: DashboardStat[] = [
 ]
 
 export const leaveRequests: LeaveRequest[] = [
-  { employee: 'Priya Sharma', type: 'Annual Leave', date: 'May 20-24', status: 'Approved' },
-  { employee: 'Rohan Mehta', type: 'Sick Leave', date: 'May 21', status: 'In Review' },
-  { employee: 'Aayel Verma', type: 'Personal Leave', date: 'May 26-27', status: 'Pending' },
+  {
+    employee: 'Priya Sharma',
+    type: 'Annual Leave',
+    date: 'May 20-24',
+    status: 'Approved',
+  },
+  {
+    employee: 'Rohan Mehta',
+    type: 'Sick Leave',
+    date: 'May 21',
+    status: 'In Review',
+  },
+  {
+    employee: 'Aayel Verma',
+    type: 'Personal Leave',
+    date: 'May 26-27',
+    status: 'Pending',
+  },
 ]
 
 export const recentEmployees: RecentEmployee[] = [
-  { name: 'Nora Patel', initials: 'NP', role: 'Product Designer', department: 'Design', status: 'Active' },
-  { name: 'Omar Reed', initials: 'OR', role: 'Backend Engineer', department: 'Engineering', status: 'Active' },
-  { name: 'Leah Chen', initials: 'LC', role: 'People Ops', department: 'HR', status: 'Onboarding' },
+  {
+    name: 'Nora Patel',
+    initials: 'NP',
+    role: 'Product Designer',
+    department: 'Design',
+    status: 'Active',
+  },
+  {
+    name: 'Omar Reed',
+    initials: 'OR',
+    role: 'Backend Engineer',
+    department: 'Engineering',
+    status: 'Active',
+  },
+  {
+    name: 'Leah Chen',
+    initials: 'LC',
+    role: 'People Ops',
+    department: 'HR',
+    status: 'Onboarding',
+  },
 ]
 
 export const departmentShares: DepartmentShare[] = [

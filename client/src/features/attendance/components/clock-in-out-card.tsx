@@ -46,10 +46,18 @@ export const ClockInOutCard = ({
 
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
           {isLoading ? <Skeleton className="h-10 w-36" /> : null}
-          {!isLoading && today ? <AttendanceStatusBadge status={today.status} /> : null}
+          {!isLoading && today ? (
+            <AttendanceStatusBadge status={today.status} />
+          ) : null}
           <Button
             type="button"
-            disabled={isLoading || isClockingIn || isClockingOut || hasActiveClockIn || hasCompletedRecord}
+            disabled={
+              isLoading ||
+              isClockingIn ||
+              isClockingOut ||
+              hasActiveClockIn ||
+              hasCompletedRecord
+            }
             onClick={onClockIn}
           >
             <LogIn className="h-4 w-4" aria-hidden="true" />
@@ -58,7 +66,9 @@ export const ClockInOutCard = ({
           <Button
             type="button"
             variant="outline"
-            disabled={isLoading || isClockingIn || isClockingOut || !hasActiveClockIn}
+            disabled={
+              isLoading || isClockingIn || isClockingOut || !hasActiveClockIn
+            }
             onClick={onClockOut}
           >
             <LogOut className="h-4 w-4" aria-hidden="true" />
@@ -71,13 +81,17 @@ export const ClockInOutCard = ({
         <div className="rounded-xl border border-subtle bg-inset p-3">
           <p className="text-xs font-medium text-muted">Clock in</p>
           <p className="mt-1 text-sm font-semibold text-primary">
-            {today?.clockInAt ? formatDate(today.clockInAt, 'p') : 'Not recorded'}
+            {today?.clockInAt
+              ? formatDate(today.clockInAt, 'p')
+              : 'Not recorded'}
           </p>
         </div>
         <div className="rounded-xl border border-subtle bg-inset p-3">
           <p className="text-xs font-medium text-muted">Clock out</p>
           <p className="mt-1 text-sm font-semibold text-primary">
-            {today?.clockOutAt ? formatDate(today.clockOutAt, 'p') : 'Not recorded'}
+            {today?.clockOutAt
+              ? formatDate(today.clockOutAt, 'p')
+              : 'Not recorded'}
           </p>
         </div>
         <div className="rounded-xl border border-subtle bg-inset p-3">

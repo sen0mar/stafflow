@@ -26,7 +26,11 @@ import {
 import { useCurrentUser } from '@/features/auth/hooks/use-current-user'
 import { useEmployees } from '@/features/employees/hooks/use-employees'
 import { useTableQueryState } from '@/shared/hooks/use-table-query-state'
-import type { LeaveRequest, LeaveRequestStatus, LeaveType } from '../api/leave.api'
+import type {
+  LeaveRequest,
+  LeaveRequestStatus,
+  LeaveType,
+} from '../api/leave.api'
 import { LeaveRequestForm } from '../components/leave-request-form'
 import { LeaveReviewDialog } from '../components/leave-review-dialog'
 import { LeaveStatusBadge } from '../components/leave-status-badge'
@@ -54,7 +58,8 @@ const pageSize = 10
 type StatusFilter = 'all' | LeaveRequestStatus
 type NoteMode = 'reason' | 'review'
 
-const getStatusFilter = (status: StatusFilter) => (status === 'all' ? undefined : status)
+const getStatusFilter = (status: StatusFilter) =>
+  status === 'all' ? undefined : status
 const getVisibleRequests = (requests: LeaveRequest[]) =>
   requests.filter((request) => request.status !== 'CANCELLED')
 
@@ -92,7 +97,13 @@ const EmptyState = ({ text }: { text: string }) => (
   />
 )
 
-const LeaveNotePreview = ({ label, value }: { label: string; value: string | null }) => {
+const LeaveNotePreview = ({
+  label,
+  value,
+}: {
+  label: string
+  value: string | null
+}) => {
   if (!value) {
     return <span className="text-sm text-muted">No note.</span>
   }
@@ -102,7 +113,12 @@ const LeaveNotePreview = ({ label, value }: { label: string; value: string | nul
       <span className="truncate text-sm text-muted">{getPreview(value)}</span>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button type="button" size="sm" variant="ghost" className="h-7 px-2 text-xs text-brand">
+          <Button
+            type="button"
+            size="sm"
+            variant="ghost"
+            className="h-7 px-2 text-xs text-brand"
+          >
             View
           </Button>
         </DropdownMenuTrigger>
@@ -155,8 +171,12 @@ const LeaveRequestsTable = ({
           <TableRow key={request.id}>
             <TableCell>
               <div>
-                <p className="font-medium text-primary">{request.employee.fullName}</p>
-                <p className="text-xs text-muted">{request.employee.department?.name ?? 'No department'}</p>
+                <p className="font-medium text-primary">
+                  {request.employee.fullName}
+                </p>
+                <p className="text-xs text-muted">
+                  {request.employee.department?.name ?? 'No department'}
+                </p>
               </div>
             </TableCell>
             <TableCell>{request.leaveType.name}</TableCell>
@@ -165,8 +185,12 @@ const LeaveRequestsTable = ({
             </TableCell>
             <TableCell className="max-w-[18rem] whitespace-normal">
               <LeaveNotePreview
-                label={noteMode === 'reason' ? 'Employee reason' : 'Review note'}
-                value={noteMode === 'reason' ? request.reason : request.reviewNote}
+                label={
+                  noteMode === 'reason' ? 'Employee reason' : 'Review note'
+                }
+                value={
+                  noteMode === 'reason' ? request.reason : request.reviewNote
+                }
               />
             </TableCell>
             <TableCell>{request.totalDays}</TableCell>
@@ -175,22 +199,37 @@ const LeaveRequestsTable = ({
             </TableCell>
             <TableCell>
               <div className="flex justify-end gap-2">
-                {canReview && ['PENDING', 'REJECTED', 'APPROVED'].includes(request.status) ? (
+                {canReview &&
+                ['PENDING', 'REJECTED', 'APPROVED'].includes(request.status) ? (
                   <>
                     {request.status !== 'APPROVED' ? (
-                      <Button type="button" size="sm" onClick={() => onApprove?.(request)}>
+                      <Button
+                        type="button"
+                        size="sm"
+                        onClick={() => onApprove?.(request)}
+                      >
                         Approve
                       </Button>
                     ) : null}
                     {request.status !== 'REJECTED' ? (
-                      <Button type="button" size="sm" variant="outline" onClick={() => onReject?.(request)}>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={() => onReject?.(request)}
+                      >
                         Reject
                       </Button>
                     ) : null}
                   </>
                 ) : null}
                 {canCancel && request.status === 'PENDING' ? (
-                  <Button type="button" size="sm" variant="outline" onClick={() => onCancel?.(request)}>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={() => onCancel?.(request)}
+                  >
                     Cancel
                   </Button>
                 ) : null}
@@ -237,7 +276,9 @@ const EmployeeLeavePage = () => {
       <section className="space-y-4 rounded-2xl border border-default bg-surface p-4 shadow-soft">
         <div>
           <h2 className="text-lg font-semibold text-primary">Request leave</h2>
-          <p className="mt-1 text-sm text-muted">Choose a leave type and date range.</p>
+          <p className="mt-1 text-sm text-muted">
+            Choose a leave type and date range.
+          </p>
         </div>
         <LeaveRequestForm
           isSubmitting={createRequest.isPending}
@@ -249,9 +290,16 @@ const EmployeeLeavePage = () => {
       {balances.length > 0 ? (
         <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
           {balances.map((balance) => (
-            <div key={balance.id} className="rounded-2xl border border-default bg-surface p-4 shadow-soft">
-              <p className="text-sm font-medium text-primary">{balance.leaveType.name}</p>
-              <p className="mt-2 text-2xl font-semibold text-primary">{balance.remaining}</p>
+            <div
+              key={balance.id}
+              className="rounded-2xl border border-default bg-surface p-4 shadow-soft"
+            >
+              <p className="text-sm font-medium text-primary">
+                {balance.leaveType.name}
+              </p>
+              <p className="mt-2 text-2xl font-semibold text-primary">
+                {balance.remaining}
+              </p>
               <p className="mt-1 text-xs text-muted">
                 {balance.used} used of {balance.allocated} days
               </p>
@@ -264,12 +312,16 @@ const EmployeeLeavePage = () => {
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h2 className="text-lg font-semibold text-primary">My requests</h2>
-            <p className="mt-1 text-sm text-muted">Recent leave request activity.</p>
+            <p className="mt-1 text-sm text-muted">
+              Recent leave request activity.
+            </p>
           </div>
           <FilterSelect
             className="w-full sm:w-44"
             value={status}
-            onValueChange={(value) => tableState.updateQuery({ status: value }, { resetPage: true })}
+            onValueChange={(value) =>
+              tableState.updateQuery({ status: value }, { resetPage: true })
+            }
             options={[
               { label: 'All statuses', value: 'all' },
               { label: 'Pending', value: 'PENDING' },
@@ -287,7 +339,9 @@ const EmployeeLeavePage = () => {
             description="Refresh the page or try again later."
           />
         ) : null}
-        {selfRequestsQuery.data && requests.length === 0 ? <EmptyState text="Your submitted leave requests will appear here." /> : null}
+        {selfRequestsQuery.data && requests.length === 0 ? (
+          <EmptyState text="Your submitted leave requests will appear here." />
+        ) : null}
         {requests.length > 0 ? (
           <>
             <LeaveRequestsTable
@@ -298,7 +352,9 @@ const EmployeeLeavePage = () => {
             />
             <PaginationControls
               itemLabel="requests"
-              meta={pagination ?? { limit: pageSize, page, total: 0, totalPages: 1 }}
+              meta={
+                pagination ?? { limit: pageSize, page, total: 0, totalPages: 1 }
+              }
               onPageChange={setPage}
             />
           </>
@@ -310,7 +366,9 @@ const EmployeeLeavePage = () => {
 
 const LeaveTypeManagement = () => {
   const [formOpen, setFormOpen] = useState(false)
-  const [editingLeaveType, setEditingLeaveType] = useState<LeaveType | null>(null)
+  const [editingLeaveType, setEditingLeaveType] = useState<LeaveType | null>(
+    null,
+  )
   const leaveTypesQuery = useLeaveTypes({ limit: 100, page: 1 })
   const createLeaveType = useCreateLeaveType()
   const updateLeaveType = useUpdateLeaveType()
@@ -348,7 +406,9 @@ const LeaveTypeManagement = () => {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 className="text-lg font-semibold text-primary">Leave types</h2>
-          <p className="mt-1 text-sm text-muted">Manage request categories and allowances.</p>
+          <p className="mt-1 text-sm text-muted">
+            Manage request categories and allowances.
+          </p>
         </div>
         <Button type="button" onClick={openCreate}>
           <Plus className="h-4 w-4" aria-hidden="true" />
@@ -373,13 +433,19 @@ const LeaveTypeManagement = () => {
                 <TableRow key={leaveType.id}>
                   <TableCell>
                     <div>
-                      <p className="font-medium text-primary">{leaveType.name}</p>
-                      <p className="text-xs text-muted">{leaveType.description ?? 'No description'}</p>
+                      <p className="font-medium text-primary">
+                        {leaveType.name}
+                      </p>
+                      <p className="text-xs text-muted">
+                        {leaveType.description ?? 'No description'}
+                      </p>
                     </div>
                   </TableCell>
                   <TableCell>{leaveType.annualAllowance ?? 0} days</TableCell>
                   <TableCell>{leaveType.isPaid ? 'Paid' : 'Unpaid'}</TableCell>
-                  <TableCell>{leaveType.isActive ? 'Active' : 'Inactive'}</TableCell>
+                  <TableCell>
+                    {leaveType.isActive ? 'Active' : 'Inactive'}
+                  </TableCell>
                   <TableCell>
                     <div className="flex justify-end gap-2">
                       <Button
@@ -393,7 +459,12 @@ const LeaveTypeManagement = () => {
                       >
                         Edit
                       </Button>
-                      <Button type="button" size="sm" variant="outline" onClick={() => deleteLeaveType.mutate(leaveType.id)}>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={() => deleteLeaveType.mutate(leaveType.id)}
+                      >
                         Delete
                       </Button>
                     </div>
@@ -421,7 +492,9 @@ const AdminLeavePage = () => {
   const employeeId = tableState.getString('employeeId', 'all')
   const leaveTypeId = tableState.getString('leaveTypeId', 'all')
   const status = tableState.getString('status', 'all') as StatusFilter
-  const [reviewAction, setReviewAction] = useState<'approve' | 'reject' | null>(null)
+  const [reviewAction, setReviewAction] = useState<'approve' | 'reject' | null>(
+    null,
+  )
   const [reviewRequest, setReviewRequest] = useState<LeaveRequest | null>(null)
   const leaveRequestsQuery = useLeaveRequests({
     employeeId: employeeId === 'all' ? undefined : employeeId,
@@ -487,24 +560,39 @@ const AdminLeavePage = () => {
           <FilterSelect
             icon={<Search className="h-4 w-4 text-muted" aria-hidden="true" />}
             value={employeeId}
-            onValueChange={(value) => tableState.updateQuery({ employeeId: value }, { resetPage: true })}
+            onValueChange={(value) =>
+              tableState.updateQuery({ employeeId: value }, { resetPage: true })
+            }
             options={[
               { label: 'All employees', value: 'all' },
-              ...(employeesQuery.data?.data.map((employee) => ({ label: employee.fullName, value: employee.id })) ?? []),
+              ...(employeesQuery.data?.data.map((employee) => ({
+                label: employee.fullName,
+                value: employee.id,
+              })) ?? []),
             ]}
           />
           <FilterSelect
             icon={<Filter className="h-4 w-4 text-muted" aria-hidden="true" />}
             value={leaveTypeId}
-            onValueChange={(value) => tableState.updateQuery({ leaveTypeId: value }, { resetPage: true })}
+            onValueChange={(value) =>
+              tableState.updateQuery(
+                { leaveTypeId: value },
+                { resetPage: true },
+              )
+            }
             options={[
               { label: 'All leave types', value: 'all' },
-              ...(leaveTypesQuery.data?.data.map((leaveType) => ({ label: leaveType.name, value: leaveType.id })) ?? []),
+              ...(leaveTypesQuery.data?.data.map((leaveType) => ({
+                label: leaveType.name,
+                value: leaveType.id,
+              })) ?? []),
             ]}
           />
           <FilterSelect
             value={status}
-            onValueChange={(value) => tableState.updateQuery({ status: value }, { resetPage: true })}
+            onValueChange={(value) =>
+              tableState.updateQuery({ status: value }, { resetPage: true })
+            }
             options={[
               { label: 'All statuses', value: 'all' },
               { label: 'Pending', value: 'PENDING' },
@@ -522,7 +610,9 @@ const AdminLeavePage = () => {
             description="Refresh the page or try again later."
           />
         ) : null}
-        {leaveRequestsQuery.data && requests.length === 0 ? <EmptyState text="Adjust filters or wait for employees to submit requests." /> : null}
+        {leaveRequestsQuery.data && requests.length === 0 ? (
+          <EmptyState text="Adjust filters or wait for employees to submit requests." />
+        ) : null}
         {requests.length > 0 ? (
           <>
             <LeaveRequestsTable
@@ -534,7 +624,9 @@ const AdminLeavePage = () => {
             />
             <PaginationControls
               itemLabel="requests"
-              meta={pagination ?? { limit: pageSize, page, total: 0, totalPages: 1 }}
+              meta={
+                pagination ?? { limit: pageSize, page, total: 0, totalPages: 1 }
+              }
               onPageChange={setPage}
             />
           </>

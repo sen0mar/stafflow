@@ -59,46 +59,63 @@ export interface UpdateLeaveSettingsInput {
 }
 
 export const getCompanySettings = async () => {
-  const response = await apiClient<ApiResponse<CompanySettings>>('/settings/company')
+  const response =
+    await apiClient<ApiResponse<CompanySettings>>('/settings/company')
 
   return response.data
 }
 
-export const updateCompanySettings = async (input: UpdateCompanySettingsInput) => {
-  const response = await apiClient<ApiResponse<CompanySettings>>('/settings/company', {
-    body: { ...input },
-    method: 'PATCH',
-  })
+export const updateCompanySettings = async (
+  input: UpdateCompanySettingsInput,
+) => {
+  const response = await apiClient<ApiResponse<CompanySettings>>(
+    '/settings/company',
+    {
+      body: { ...input },
+      method: 'PATCH',
+    },
+  )
 
   return response.data
 }
 
 export const getAttendanceSettings = async () => {
-  const response = await apiClient<ApiResponse<AttendanceSettings>>('/settings/attendance')
+  const response = await apiClient<ApiResponse<AttendanceSettings>>(
+    '/settings/attendance',
+  )
 
   return response.data
 }
 
-export const updateAttendanceSettings = async (input: UpdateAttendanceSettingsInput) => {
-  const response = await apiClient<ApiResponse<AttendanceSettings>>('/settings/attendance', {
-    body: { ...input },
-    method: 'PATCH',
-  })
+export const updateAttendanceSettings = async (
+  input: UpdateAttendanceSettingsInput,
+) => {
+  const response = await apiClient<ApiResponse<AttendanceSettings>>(
+    '/settings/attendance',
+    {
+      body: { ...input },
+      method: 'PATCH',
+    },
+  )
 
   return response.data
 }
 
 export const getLeaveSettings = async () => {
-  const response = await apiClient<ApiResponse<LeaveSettings>>('/settings/leave')
+  const response =
+    await apiClient<ApiResponse<LeaveSettings>>('/settings/leave')
 
   return response.data
 }
 
 export const updateLeaveSettings = async (input: UpdateLeaveSettingsInput) => {
-  const response = await apiClient<ApiResponse<LeaveSettings>>('/settings/leave', {
-    body: { ...input },
-    method: 'PATCH',
-  })
+  const response = await apiClient<ApiResponse<LeaveSettings>>(
+    '/settings/leave',
+    {
+      body: { ...input },
+      method: 'PATCH',
+    },
+  )
 
   return response.data
 }

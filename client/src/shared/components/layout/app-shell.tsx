@@ -39,7 +39,11 @@ export const AppShell = () => {
           onLogout={handleLogout}
         />
         <div className="min-w-0">
-          <Topbar email={user?.email} role={user?.role} onOpenSidebar={() => setIsSidebarOpen(true)} />
+          <Topbar
+            email={user?.email}
+            role={user?.role}
+            onOpenSidebar={() => setIsSidebarOpen(true)}
+          />
           <main className="px-5 py-6 sm:px-6 lg:px-8">
             <div className="mx-auto max-w-7xl">
               <Outlet />

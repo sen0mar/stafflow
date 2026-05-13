@@ -79,7 +79,9 @@ export const getAttendanceSettings = async () => {
 const getDateFilter = ({
   from,
   to,
-}: Pick<ListAttendanceInput, "from" | "to">): Prisma.DateTimeFilter | undefined => {
+}: Pick<ListAttendanceInput, "from" | "to">):
+  | Prisma.DateTimeFilter
+  | undefined => {
   if (!from && !to) {
     return undefined;
   }
@@ -162,10 +164,7 @@ export const findAttendanceRecordById = (id: string) =>
     where: { id },
   });
 
-export const findAttendanceRecordForDay = (
-  employeeId: string,
-  date: Date,
-) =>
+export const findAttendanceRecordForDay = (employeeId: string, date: Date) =>
   prisma.attendanceRecord.findUnique({
     select: attendanceSelect,
     where: {

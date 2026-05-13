@@ -16,7 +16,12 @@ export const LandingHeader = () => (
             <ArrowRight className="h-4 w-4" aria-hidden="true" />
           </Link>
         </Button>
-        <Button asChild size="icon" className="sm:hidden" aria-label="Demo Login">
+        <Button
+          asChild
+          size="icon"
+          className="sm:hidden"
+          aria-label="Demo Login"
+        >
           <Link to="/login">
             <ArrowRight className="h-4 w-4" aria-hidden="true" />
           </Link>

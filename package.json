@@ -9,13 +9,35 @@
     "dev:client": "npm --prefix client run dev",
     "dev:server": "npm --prefix server run dev --if-present",
     "build": "npm run build --workspaces --if-present",
+    "build:client": "npm --prefix client run build",
+    "build:server": "npm --prefix server run build",
     "lint": "npm run lint --workspaces --if-present",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "db:bootstrap-demo-auth": "tsx prisma/bootstrap-demo-auth.ts",
+    "db:migrate:deploy": "prisma migrate deploy",
+    "db:migrate:status": "prisma migrate status",
     "db:seed": "tsx prisma/seed.ts",
+    "db:seed:check": "tsx prisma/seed-check.ts",
     "db:reset-added-users": "tsx prisma/reset-added-demo-users.ts",
-    "typecheck": "npm --prefix client exec -- tsc -b client/tsconfig.json"
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "test:unit": "npm --prefix server run test:unit",
+    "test:integration": "npm --prefix server run test:integration",
+    "smoke": "npm run build:client && npm run build:server && npm run typecheck && npm run db:migrate:status && npm run db:seed:check"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/supertest": "^7.2.0",
+    "@vitest/coverage-v8": "^4.1.6",
+    "jsdom": "^29.1.1",
+    "prettier": "^3.8.3",
+    "supertest": "^7.2.2",
+    "vitest": "^4.1.6"
   }
 }

@@ -107,12 +107,18 @@ const getTodayDate = async () => {
   return zonedDayToUtc(getZonedParts(new Date(), timeZone), timeZone);
 };
 
-const calculateTotalMinutes = (clockInAt: Date | null, clockOutAt: Date | null) => {
+const calculateTotalMinutes = (
+  clockInAt: Date | null,
+  clockOutAt: Date | null,
+) => {
   if (!clockInAt || !clockOutAt) {
     return null;
   }
 
-  return Math.max(0, Math.round((clockOutAt.getTime() - clockInAt.getTime()) / 60_000));
+  return Math.max(
+    0,
+    Math.round((clockOutAt.getTime() - clockInAt.getTime()) / 60_000),
+  );
 };
 
 const getClockOutStatus = (
@@ -249,7 +255,8 @@ export const clockOutSelf = async (auth: AuthContext) => {
   }
 
   const clockOutAt = new Date();
-  const totalMinutes = calculateTotalMinutes(activeRecord.clockInAt, clockOutAt) ?? 0;
+  const totalMinutes =
+    calculateTotalMinutes(activeRecord.clockInAt, clockOutAt) ?? 0;
   const settings = await getAttendanceSettings();
   const record = await updateClockOutRecord({
     clockOutAt,

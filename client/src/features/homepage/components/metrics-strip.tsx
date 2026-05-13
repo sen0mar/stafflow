@@ -6,10 +6,15 @@ export const MetricsStrip = () => (
     <div className="grid gap-4 rounded-3xl border border-default bg-overlay p-5 shadow-card backdrop-blur sm:grid-cols-2 lg:grid-cols-4">
       {metrics.map((metric) => (
         <div key={metric.label} className="flex items-center gap-4">
-          <LandingIconWell icon={metric.icon} className="h-11 w-11 shrink-0 rounded-xl" />
+          <LandingIconWell
+            icon={metric.icon}
+            className="h-11 w-11 shrink-0 rounded-xl"
+          />
           <div>
             <p className="text-sm font-medium text-muted">{metric.label}</p>
-            <p className="mt-1 text-2xl font-semibold text-primary">{metric.value}</p>
+            <p className="mt-1 text-2xl font-semibold text-primary">
+              {metric.value}
+            </p>
             <p className="mt-1 text-xs text-faint">{metric.detail}</p>
           </div>
         </div>

@@ -26,11 +26,17 @@ export const PayslipPreviewDialog = ({
     <DialogContent className="max-h-[92vh] sm:max-w-5xl">
       <DialogHeader>
         <DialogTitle>{fileName ?? 'Payslip preview'}</DialogTitle>
-        <DialogDescription>Signed preview links expire shortly after they are created.</DialogDescription>
+        <DialogDescription>
+          Signed preview links expire shortly after they are created.
+        </DialogDescription>
       </DialogHeader>
       <div className="h-[70vh] overflow-hidden rounded-lg border border-default bg-inset">
         {previewUrl ? (
-          <iframe className="h-full w-full" src={previewUrl} title={fileName ?? 'Payslip preview'} />
+          <iframe
+            className="h-full w-full"
+            src={previewUrl}
+            title={fileName ?? 'Payslip preview'}
+          />
         ) : (
           <div className="flex h-full items-center justify-center text-sm text-muted">
             Preview is loading.
@@ -42,7 +48,9 @@ export const PayslipPreviewDialog = ({
           <Button
             type="button"
             variant="outline"
-            onClick={() => window.open(previewUrl, '_blank', 'noopener,noreferrer')}
+            onClick={() =>
+              window.open(previewUrl, '_blank', 'noopener,noreferrer')
+            }
           >
             <ExternalLink className="h-4 w-4" aria-hidden="true" />
             Open in new tab

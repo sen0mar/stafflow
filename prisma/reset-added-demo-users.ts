@@ -53,13 +53,13 @@ const main = async () => {
   );
 
   if (addedUsers.length > 0) {
-    console.info(
-      addedUsers.map((user) => `- ${user.email}`).join("\n"),
-    );
+    console.info(addedUsers.map((user) => `- ${user.email}`).join("\n"));
   }
 
   if (!shouldConfirm) {
-    console.info("Run `npm run db:reset-added-users -- --confirm` to delete these records.");
+    console.info(
+      "Run `npm run db:reset-added-users -- --confirm` to delete these records.",
+    );
     return;
   }
 
@@ -85,7 +85,9 @@ const main = async () => {
     }
   });
 
-  console.info("Added development users were deleted. Seed users were left untouched.");
+  console.info(
+    "Added development users were deleted. Seed users were left untouched.",
+  );
 };
 
 main()

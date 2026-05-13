@@ -57,7 +57,8 @@ const atUtcMidnight = (value: string) => {
 };
 
 const calculateTotalDays = (startDate: Date, endDate: Date) =>
-  Math.floor((endDate.getTime() - startDate.getTime()) / millisecondsPerDay) + 1;
+  Math.floor((endDate.getTime() - startDate.getTime()) / millisecondsPerDay) +
+  1;
 
 const getFullName = (firstName: string, lastName: string) =>
   `${firstName} ${lastName}`;
@@ -226,17 +227,20 @@ const assertNoOverlap = async ({
   if (existingRequest) {
     throw new AppError({
       code: "LEAVE_REQUEST_OVERLAP",
-      message: "This leave request overlaps with an existing pending or approved request.",
+      message:
+        "This leave request overlaps with an existing pending or approved request.",
       statusCode: 409,
     });
   }
 };
 
 const isUniqueConstraintError = (error: unknown) =>
-  error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002";
+  error instanceof Prisma.PrismaClientKnownRequestError &&
+  error.code === "P2002";
 
 const isMissingRecordError = (error: unknown) =>
-  error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2025";
+  error instanceof Prisma.PrismaClientKnownRequestError &&
+  error.code === "P2025";
 
 const withLeaveTypeWriteErrors = async <T>(operation: () => Promise<T>) => {
   try {
@@ -283,7 +287,9 @@ export const createNewLeaveType = async (
   auditContext: AuditContext,
 ) => {
   await assertUniqueLeaveTypeName(input.name);
-  const leaveType = await withLeaveTypeWriteErrors(() => createLeaveType(input));
+  const leaveType = await withLeaveTypeWriteErrors(() =>
+    createLeaveType(input),
+  );
   await createLeaveTypeAuditLog({
     ...auditContext,
     action: "LEAVE_TYPE_CREATED",
@@ -310,7 +316,9 @@ export const updateExistingLeaveType = async (
     await assertUniqueLeaveTypeName(input.name, id);
   }
 
-  const leaveType = await withLeaveTypeWriteErrors(() => updateLeaveType(id, input));
+  const leaveType = await withLeaveTypeWriteErrors(() =>
+    updateLeaveType(id, input),
+  );
   await createLeaveTypeAuditLog({
     ...auditContext,
     action: "LEAVE_TYPE_UPDATED",
@@ -474,8 +482,8 @@ export const approveLeaveRequest = async (
   const settings = await getLeaveSettings();
   const allocation =
     current.leaveType && current.leaveTypeId
-      ? (await assertLeaveTypeExists(current.leaveTypeId)).annualAllowance ??
-        settings.defaultAnnualAllowanceDays
+      ? ((await assertLeaveTypeExists(current.leaveTypeId)).annualAllowance ??
+        settings.defaultAnnualAllowanceDays)
       : settings.defaultAnnualAllowanceDays;
 
   try {
@@ -491,7 +499,10 @@ export const approveLeaveRequest = async (
 
     return toLeaveRequestDto(leaveRequest);
   } catch (error) {
-    if (error instanceof Error && error.message === "INSUFFICIENT_LEAVE_BALANCE") {
+    if (
+      error instanceof Error &&
+      error.message === "INSUFFICIENT_LEAVE_BALANCE"
+    ) {
       throw new AppError({
         code: "LEAVE_BALANCE_INSUFFICIENT",
         message: "This employee does not have enough remaining leave balance.",

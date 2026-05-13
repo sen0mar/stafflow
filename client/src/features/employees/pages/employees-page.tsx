@@ -6,10 +6,18 @@ import { SearchInput } from '@/shared/components/data-table/search-input'
 import { TableToolbar } from '@/shared/components/data-table/table-toolbar'
 import { PaginationControls } from '@/shared/components/data-table/pagination-controls'
 import { PageHeader } from '@/shared/components/layout/page-header'
-import { EmptyState, QueryStateError, TableSkeleton } from '@/shared/components/layout/page-state'
+import {
+  EmptyState,
+  QueryStateError,
+  TableSkeleton,
+} from '@/shared/components/layout/page-state'
 import { useTableQueryState } from '@/shared/hooks/use-table-query-state'
 import { useDepartments } from '@/features/departments/hooks/use-departments'
-import type { Employee, EmployeeSort, EmployeeStatus } from '../api/employees.api'
+import type {
+  Employee,
+  EmployeeSort,
+  EmployeeStatus,
+} from '../api/employees.api'
 import { EmployeeForm } from '../components/employee-form'
 import { EmployeeTable } from '../components/employee-table'
 import {
@@ -19,16 +27,22 @@ import {
   useUpdateEmployee,
   useUpdateEmployeeStatus,
 } from '../hooks/use-employees'
-import type { CreateEmployeeFormValues, EmployeeFormValues } from '../schemas/employee-form.schema'
+import type {
+  CreateEmployeeFormValues,
+  EmployeeFormValues,
+} from '../schemas/employee-form.schema'
 
 const pageSize = 10
 const allValue = 'all'
 
 type StatusFilter = EmployeeStatus | typeof allValue
 
-const toIsoDate = (value?: string) => (value ? new Date(`${value}T00:00:00.000Z`).toISOString() : null)
-const getNullableValue = (value?: string | null) => (value && value.trim() ? value.trim() : null)
-const getDepartmentValue = (value?: string | null) => (value && value !== 'unassigned' ? value : null)
+const toIsoDate = (value?: string) =>
+  value ? new Date(`${value}T00:00:00.000Z`).toISOString() : null
+const getNullableValue = (value?: string | null) =>
+  value && value.trim() ? value.trim() : null
+const getDepartmentValue = (value?: string | null) =>
+  value && value !== 'unassigned' ? value : null
 
 export const EmployeesPage = () => {
   const tableState = useTableQueryState()
@@ -52,7 +66,11 @@ export const EmployeesPage = () => {
     sort,
     status: status === allValue ? undefined : status,
   })
-  const departmentsQuery = useDepartments({ isActive: true, page: 1, pageSize: 100 })
+  const departmentsQuery = useDepartments({
+    isActive: true,
+    page: 1,
+    pageSize: 100,
+  })
   const createEmployee = useCreateEmployee()
   const updateEmployee = useUpdateEmployee()
   const updateEmployeeStatus = useUpdateEmployeeStatus()
@@ -61,9 +79,12 @@ export const EmployeesPage = () => {
   const pagination = employeesQuery.data?.meta
   const departments = departmentsQuery.data?.data ?? []
   const { updateQuery } = tableState
-  const setPage = useCallback((nextPage: number) => {
-    updateQuery({ page: nextPage === 1 ? undefined : nextPage })
-  }, [updateQuery])
+  const setPage = useCallback(
+    (nextPage: number) => {
+      updateQuery({ page: nextPage === 1 ? undefined : nextPage })
+    },
+    [updateQuery],
+  )
 
   const openCreateDialog = () => {
     setEditingEmployee(null)
@@ -75,7 +96,9 @@ export const EmployeesPage = () => {
     setFormOpen(true)
   }
 
-  const handleSubmit = (values: CreateEmployeeFormValues | EmployeeFormValues) => {
+  const handleSubmit = (
+    values: CreateEmployeeFormValues | EmployeeFormValues,
+  ) => {
     const payload = {
       departmentId: getDepartmentValue(values.departmentId),
       employeeCode: values.employeeCode.trim(),
@@ -107,7 +130,7 @@ export const EmployeesPage = () => {
       {
         onSuccess: (result) => {
           setFormOpen(false)
-            setPage(1)
+          setPage(1)
           setCreatedInvitation({
             employeeName: result.employee.fullName,
             expiresAt: result.invitation.expiresAt,
@@ -124,15 +147,21 @@ export const EmployeesPage = () => {
 
   const handleEnable = (employee: Employee) => {
     updateEmployeeStatus.mutate({
-      accountStatus: employee.account?.status === 'DISABLED' ? 'ACTIVE' : employee.account?.status,
+      accountStatus:
+        employee.account?.status === 'DISABLED'
+          ? 'ACTIVE'
+          : employee.account?.status,
       employeeStatus: 'ACTIVE',
       id: employee.id,
     })
   }
 
-  const handleSearchChange = useCallback((value: string) => {
-    updateQuery({ search: value.trim() || undefined }, { resetPage: true })
-  }, [updateQuery])
+  const handleSearchChange = useCallback(
+    (value: string) => {
+      updateQuery({ search: value.trim() || undefined }, { resetPage: true })
+    },
+    [updateQuery],
+  )
 
   return (
     <div className="space-y-6">
@@ -152,7 +181,9 @@ export const EmployeesPage = () => {
         <section className="rounded-2xl border border-default bg-brand-soft p-4 shadow-soft">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
             <div>
-              <h2 className="font-semibold text-primary">Invitation ready for {createdInvitation.employeeName}</h2>
+              <h2 className="font-semibold text-primary">
+                Invitation ready for {createdInvitation.employeeName}
+              </h2>
               <p className="mt-1 text-sm text-muted">
                 Share this setup token through a secure channel. It expires on{' '}
                 {new Date(createdInvitation.expiresAt).toLocaleDateString()}.
@@ -175,15 +206,25 @@ export const EmployeesPage = () => {
           />
           <FilterSelect
             value={departmentId}
-            onValueChange={(value) => tableState.updateQuery({ departmentId: value }, { resetPage: true })}
+            onValueChange={(value) =>
+              tableState.updateQuery(
+                { departmentId: value },
+                { resetPage: true },
+              )
+            }
             options={[
               { label: 'All departments', value: allValue },
-              ...departments.map((department) => ({ label: department.name, value: department.id })),
+              ...departments.map((department) => ({
+                label: department.name,
+                value: department.id,
+              })),
             ]}
           />
           <FilterSelect
             value={status}
-            onValueChange={(value) => tableState.updateQuery({ status: value }, { resetPage: true })}
+            onValueChange={(value) =>
+              tableState.updateQuery({ status: value }, { resetPage: true })
+            }
             options={[
               { label: 'All statuses', value: allValue },
               { label: 'Active', value: 'ACTIVE' },
@@ -193,7 +234,12 @@ export const EmployeesPage = () => {
           />
           <FilterSelect
             value={sort}
-            onValueChange={(value) => tableState.updateQuery({ sort: value === 'name' ? undefined : value }, { resetPage: true })}
+            onValueChange={(value) =>
+              tableState.updateQuery(
+                { sort: value === 'name' ? undefined : value },
+                { resetPage: true },
+              )
+            }
             options={[
               { label: 'Name', value: 'name' },
               { label: 'Newest', value: 'newest' },
@@ -229,7 +275,9 @@ export const EmployeesPage = () => {
             />
             <PaginationControls
               itemLabel="employees"
-              meta={pagination ?? { limit: pageSize, page, total: 0, totalPages: 1 }}
+              meta={
+                pagination ?? { limit: pageSize, page, total: 0, totalPages: 1 }
+              }
               onPageChange={setPage}
             />
           </>

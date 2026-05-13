@@ -20,15 +20,18 @@ interface DemoEmployee {
 const departments = [
   {
     name: "Engineering",
-    description: "Product engineering, platform operations, and technical delivery.",
+    description:
+      "Product engineering, platform operations, and technical delivery.",
   },
   {
     name: "Marketing",
-    description: "Brand, demand generation, campaigns, and market communications.",
+    description:
+      "Brand, demand generation, campaigns, and market communications.",
   },
   {
     name: "Human Resources",
-    description: "People operations, employee lifecycle, and workplace support.",
+    description:
+      "People operations, employee lifecycle, and workplace support.",
   },
   {
     name: "Finance",
@@ -36,7 +39,8 @@ const departments = [
   },
   {
     name: "Operations",
-    description: "Business operations, vendor coordination, and internal workflows.",
+    description:
+      "Business operations, vendor coordination, and internal workflows.",
   },
 ];
 
@@ -121,7 +125,9 @@ const leaveTypes = [
 ];
 
 const atUtcMidnight = (date: Date) =>
-  new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
+  new Date(
+    Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()),
+  );
 
 const addDays = (date: Date, days: number) => {
   const nextDate = new Date(date);
@@ -311,9 +317,19 @@ const main = async () => {
       const isAbsent = pattern === 0;
       const isLate = pattern === 3;
       const isPartial = pattern === 6;
-      const clockInAt = isAbsent ? null : setUtcTime(date, isLate ? 9 : 8, isLate ? 34 : 58);
-      const clockOutAt = isAbsent ? null : setUtcTime(date, isPartial ? 13 : 17, isPartial ? 20 : 4);
-      const totalMinutes = isAbsent ? null : isPartial ? 262 : isLate ? 450 : 486;
+      const clockInAt = isAbsent
+        ? null
+        : setUtcTime(date, isLate ? 9 : 8, isLate ? 34 : 58);
+      const clockOutAt = isAbsent
+        ? null
+        : setUtcTime(date, isPartial ? 13 : 17, isPartial ? 20 : 4);
+      const totalMinutes = isAbsent
+        ? null
+        : isPartial
+          ? 262
+          : isLate
+            ? 450
+            : 486;
 
       await prisma.attendanceRecord.upsert({
         where: {
@@ -326,7 +342,13 @@ const main = async () => {
           clockInAt,
           clockOutAt,
           totalMinutes,
-          status: isAbsent ? "ABSENT" : isLate ? "LATE" : isPartial ? "PARTIAL" : "PRESENT",
+          status: isAbsent
+            ? "ABSENT"
+            : isLate
+              ? "LATE"
+              : isPartial
+                ? "PARTIAL"
+                : "PRESENT",
           source: "SYSTEM",
           notes: isAbsent
             ? "Demo absence record."
@@ -342,7 +364,13 @@ const main = async () => {
           clockInAt,
           clockOutAt,
           totalMinutes,
-          status: isAbsent ? "ABSENT" : isLate ? "LATE" : isPartial ? "PARTIAL" : "PRESENT",
+          status: isAbsent
+            ? "ABSENT"
+            : isLate
+              ? "LATE"
+              : isPartial
+                ? "PARTIAL"
+                : "PRESENT",
           source: "SYSTEM",
           notes: isAbsent
             ? "Demo absence record."

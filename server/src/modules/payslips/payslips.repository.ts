@@ -75,8 +75,14 @@ const getPayslipWhere = ({
     ? {
         OR: [
           { fileName: { contains: search, mode: "insensitive" } },
-          { employee: { employeeCode: { contains: search, mode: "insensitive" } } },
-          { employee: { firstName: { contains: search, mode: "insensitive" } } },
+          {
+            employee: {
+              employeeCode: { contains: search, mode: "insensitive" },
+            },
+          },
+          {
+            employee: { firstName: { contains: search, mode: "insensitive" } },
+          },
           { employee: { lastName: { contains: search, mode: "insensitive" } } },
         ],
       }
@@ -95,11 +101,7 @@ export const listPayslips = async ({
 
   const [items, total] = await Promise.all([
     prisma.payslip.findMany({
-      orderBy: [
-        { year: "desc" },
-        { month: "desc" },
-        { uploadedAt: "desc" },
-      ],
+      orderBy: [{ year: "desc" }, { month: "desc" }, { uploadedAt: "desc" }],
       select: payslipSelect,
       skip,
       take,
@@ -122,11 +124,7 @@ export const listSelfPayslips = async ({
 
   const [items, total] = await Promise.all([
     prisma.payslip.findMany({
-      orderBy: [
-        { year: "desc" },
-        { month: "desc" },
-        { uploadedAt: "desc" },
-      ],
+      orderBy: [{ year: "desc" }, { month: "desc" }, { uploadedAt: "desc" }],
       select: payslipSelect,
       skip,
       take,
@@ -289,4 +287,6 @@ export const deletePayslipWithAuditLog = async ({
     return payslip;
   });
 
-export type PayslipRecord = NonNullable<Awaited<ReturnType<typeof findPayslipById>>>;
+export type PayslipRecord = NonNullable<
+  Awaited<ReturnType<typeof findPayslipById>>
+>;

@@ -18,7 +18,9 @@ export const RoutePlaceholder = ({
       <Icon className="h-6 w-6" aria-hidden="true" />
     </div>
     <p className="text-sm font-medium text-brand-text">{eyebrow}</p>
-    <h1 className="mt-2 text-2xl font-semibold tracking-normal text-primary">{title}</h1>
+    <h1 className="mt-2 text-2xl font-semibold tracking-normal text-primary">
+      {title}
+    </h1>
     <p className="mt-3 max-w-2xl text-sm leading-6 text-muted">{description}</p>
   </section>
 )

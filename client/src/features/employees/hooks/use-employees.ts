@@ -60,7 +60,9 @@ export const useUpdateEmployee = () => {
     onSuccess: async (employee) => {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: employeesKeys.lists() }),
-        queryClient.invalidateQueries({ queryKey: employeesKeys.detail(employee.id) }),
+        queryClient.invalidateQueries({
+          queryKey: employeesKeys.detail(employee.id),
+        }),
         queryClient.invalidateQueries({ queryKey: employeesKeys.self() }),
       ])
       toast.success('Employee updated.')
@@ -74,12 +76,16 @@ export const useUpdateEmployeeStatus = () => {
   return useMutation({
     mutationFn: updateEmployeeStatus,
     onError: (error) => {
-      toast.error(getSafeErrorMessage(error, 'Employee status could not be updated.'))
+      toast.error(
+        getSafeErrorMessage(error, 'Employee status could not be updated.'),
+      )
     },
     onSuccess: async (employee) => {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: employeesKeys.lists() }),
-        queryClient.invalidateQueries({ queryKey: employeesKeys.detail(employee.id) }),
+        queryClient.invalidateQueries({
+          queryKey: employeesKeys.detail(employee.id),
+        }),
       ])
       toast.success('Employee status updated.')
     },
@@ -112,7 +118,9 @@ export const useUpdateSelfProfile = () => {
     onSuccess: async (employee) => {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: employeesKeys.self() }),
-        queryClient.invalidateQueries({ queryKey: employeesKeys.detail(employee.id) }),
+        queryClient.invalidateQueries({
+          queryKey: employeesKeys.detail(employee.id),
+        }),
       ])
       toast.success('Profile updated.')
     },

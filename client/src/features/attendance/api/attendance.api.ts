@@ -82,12 +82,16 @@ const appendCommonParams = (
 }
 
 export const getSelfTodayAttendance = async () => {
-  const response = await apiClient<ApiResponse<AttendanceRecord | null>>('/attendance/me/today')
+  const response = await apiClient<ApiResponse<AttendanceRecord | null>>(
+    '/attendance/me/today',
+  )
 
   return response.data
 }
 
-export const getSelfAttendanceHistory = async (params: SelfAttendanceListParams) => {
+export const getSelfAttendanceHistory = async (
+  params: SelfAttendanceListParams,
+) => {
   const searchParams = new URLSearchParams()
   appendCommonParams(searchParams, params)
   const response = await apiClient<AttendanceListResponse>(
@@ -98,17 +102,23 @@ export const getSelfAttendanceHistory = async (params: SelfAttendanceListParams)
 }
 
 export const clockIn = async () => {
-  const response = await apiClient<ApiResponse<AttendanceRecord>>('/attendance/clock-in', {
-    method: 'POST',
-  })
+  const response = await apiClient<ApiResponse<AttendanceRecord>>(
+    '/attendance/clock-in',
+    {
+      method: 'POST',
+    },
+  )
 
   return response.data
 }
 
 export const clockOut = async () => {
-  const response = await apiClient<ApiResponse<AttendanceRecord>>('/attendance/clock-out', {
-    method: 'POST',
-  })
+  const response = await apiClient<ApiResponse<AttendanceRecord>>(
+    '/attendance/clock-out',
+    {
+      method: 'POST',
+    },
+  )
 
   return response.data
 }
@@ -133,16 +143,24 @@ export const getAttendanceRecords = async (params: AttendanceListParams) => {
 }
 
 export const getAttendanceRecord = async (id: string) => {
-  const response = await apiClient<ApiResponse<AttendanceRecord>>(`/attendance/${id}`)
+  const response = await apiClient<ApiResponse<AttendanceRecord>>(
+    `/attendance/${id}`,
+  )
 
   return response.data
 }
 
-export const updateAttendanceRecord = async ({ id, ...input }: UpdateAttendanceInput) => {
-  const response = await apiClient<ApiResponse<AttendanceRecord>>(`/attendance/${id}`, {
-    body: input,
-    method: 'PATCH',
-  })
+export const updateAttendanceRecord = async ({
+  id,
+  ...input
+}: UpdateAttendanceInput) => {
+  const response = await apiClient<ApiResponse<AttendanceRecord>>(
+    `/attendance/${id}`,
+    {
+      body: input,
+      method: 'PATCH',
+    },
+  )
 
   return response.data
 }

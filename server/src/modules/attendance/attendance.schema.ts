@@ -1,11 +1,10 @@
 import { z } from "zod";
 
-import { limitQuerySchema, pageQuerySchema } from "../../core/pagination/pagination";
-const optionalDateTimeSchema = z
-  .string()
-  .datetime()
-  .optional()
-  .nullable();
+import {
+  limitQuerySchema,
+  pageQuerySchema,
+} from "../../core/pagination/pagination";
+const optionalDateTimeSchema = z.string().datetime().optional().nullable();
 
 export const attendanceIdSchema = z.object({
   params: z.object({
@@ -59,4 +58,6 @@ export type ListSelfAttendanceInput = z.infer<
   typeof listSelfAttendanceSchema
 >["query"];
 export type ListAttendanceInput = z.infer<typeof listAttendanceSchema>["query"];
-export type UpdateAttendanceInput = z.infer<typeof updateAttendanceSchema>["body"];
+export type UpdateAttendanceInput = z.infer<
+  typeof updateAttendanceSchema
+>["body"];

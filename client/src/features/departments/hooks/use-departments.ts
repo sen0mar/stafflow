@@ -30,7 +30,9 @@ export const useCreateDepartment = () => {
   return useMutation({
     mutationFn: createDepartment,
     onError: (error) => {
-      toast.error(getSafeErrorMessage(error, 'Department could not be created.'))
+      toast.error(
+        getSafeErrorMessage(error, 'Department could not be created.'),
+      )
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: departmentsKeys.lists() })
@@ -45,12 +47,16 @@ export const useUpdateDepartment = () => {
   return useMutation({
     mutationFn: updateDepartment,
     onError: (error) => {
-      toast.error(getSafeErrorMessage(error, 'Department could not be updated.'))
+      toast.error(
+        getSafeErrorMessage(error, 'Department could not be updated.'),
+      )
     },
     onSuccess: async (department) => {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: departmentsKeys.lists() }),
-        queryClient.invalidateQueries({ queryKey: departmentsKeys.detail(department.id) }),
+        queryClient.invalidateQueries({
+          queryKey: departmentsKeys.detail(department.id),
+        }),
       ])
       toast.success('Department updated.')
     },
@@ -63,7 +69,9 @@ export const useDeleteDepartment = () => {
   return useMutation({
     mutationFn: deleteDepartment,
     onError: (error) => {
-      toast.error(getSafeErrorMessage(error, 'Department could not be deleted.'))
+      toast.error(
+        getSafeErrorMessage(error, 'Department could not be deleted.'),
+      )
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: departmentsKeys.lists() })

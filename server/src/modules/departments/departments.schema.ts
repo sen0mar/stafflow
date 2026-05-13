@@ -1,6 +1,9 @@
 import { z } from "zod";
 
-import { limitQuerySchema, pageQuerySchema } from "../../core/pagination/pagination";
+import {
+  limitQuerySchema,
+  pageQuerySchema,
+} from "../../core/pagination/pagination";
 
 export const departmentIdSchema = z.object({
   params: z.object({

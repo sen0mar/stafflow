@@ -16,7 +16,11 @@
   --bg-dot: rgba(194, 101, 28, 0.16);
   --gradient-surface: linear-gradient(145deg, #ffffff 0%, #f1eee8 100%);
   --gradient-elevated: linear-gradient(145deg, #ffffff 0%, #ebe7df 100%);
-  --gradient-overlay: linear-gradient(145deg, rgba(255, 255, 255, 0.9) 0%, rgba(238, 234, 226, 0.88) 100%);
+  --gradient-overlay: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.9) 0%,
+    rgba(238, 234, 226, 0.88) 100%
+  );
 
   --border-default: #d6d2ca;
   --border-subtle: #e4e0d8;
@@ -51,14 +55,24 @@
   --shadow-soft: 0 10px 28px rgba(23, 23, 23, 0.08);
   --shadow-glow: 0 0 32px rgba(208, 106, 28, 0.16);
 
-  --gradient-primary: linear-gradient(180deg, #df8a42 0%, #d06a1c 54%, #b65a18 100%);
-  --gradient-hero: radial-gradient(circle at 72% 34%, rgba(208, 106, 28, 0.12), transparent 38%);
+  --gradient-primary: linear-gradient(
+    180deg,
+    #df8a42 0%,
+    #d06a1c 54%,
+    #b65a18 100%
+  );
+  --gradient-hero: radial-gradient(
+    circle at 72% 34%,
+    rgba(208, 106, 28, 0.12),
+    transparent 38%
+  );
 
   --font-geist-sans:
-    "Geist", "Geist Sans", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-    sans-serif;
+    "Geist", "Geist Sans", ui-sans-serif, system-ui, -apple-system,
+    BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-geist-mono:
-    "Geist Mono", "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    "Geist Mono", "SFMono-Regular", Consolas, "Liberation Mono", Menlo,
+    monospace;
 
   --radius: 0.75rem;
 }
@@ -76,7 +90,11 @@
   --bg-dot: rgba(217, 119, 38, 0.16);
   --gradient-surface: linear-gradient(145deg, #111111 0%, #232323 100%);
   --gradient-elevated: linear-gradient(145deg, #1a1a1a 0%, #2f2f2f 100%);
-  --gradient-overlay: linear-gradient(145deg, rgba(17, 17, 17, 0.9) 0%, rgba(39, 39, 39, 0.84) 100%);
+  --gradient-overlay: linear-gradient(
+    145deg,
+    rgba(17, 17, 17, 0.9) 0%,
+    rgba(39, 39, 39, 0.84) 100%
+  );
 
   --border-default: #303030;
   --border-subtle: #252525;
@@ -111,8 +129,17 @@
   --shadow-soft: 0 14px 40px rgba(0, 0, 0, 0.24);
   --shadow-glow: 0 0 38px rgba(229, 121, 34, 0.22);
 
-  --gradient-primary: linear-gradient(180deg, #ee9a54 0%, #e57922 50%, #c8661d 100%);
-  --gradient-hero: radial-gradient(circle at 75% 35%, rgba(229, 121, 34, 0.18), transparent 36%);
+  --gradient-primary: linear-gradient(
+    180deg,
+    #ee9a54 0%,
+    #e57922 50%,
+    #c8661d 100%
+  );
+  --gradient-hero: radial-gradient(
+    circle at 75% 35%,
+    rgba(229, 121, 34, 0.18),
+    transparent 36%
+  );
 }
 
 @theme inline {
@@ -285,7 +312,11 @@
 
   .dot-grid {
     background-color: var(--bg-base);
-    background-image: radial-gradient(circle, var(--bg-dot) 1px, transparent 1px);
+    background-image: radial-gradient(
+      circle,
+      var(--bg-dot) 1px,
+      transparent 1px
+    );
     background-size: 16px 16px;
   }
 }

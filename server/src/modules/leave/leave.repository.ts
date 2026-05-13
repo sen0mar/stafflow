@@ -118,7 +118,10 @@ export type LeaveBalanceRecord = Prisma.LeaveBalanceGetPayload<{
 const getLeaveTypeWhere = ({
   isActive,
   search,
-}: Pick<ListLeaveTypesInput, "isActive" | "search">): Prisma.LeaveTypeWhereInput => ({
+}: Pick<
+  ListLeaveTypesInput,
+  "isActive" | "search"
+>): Prisma.LeaveTypeWhereInput => ({
   ...(isActive === undefined ? {} : { isActive }),
   ...(search
     ? {
@@ -530,7 +533,9 @@ export const rejectApprovedLeaveRequestWithBalance = ({
         new Prisma.Decimal(0),
         new Prisma.Decimal(existingBalance.used).minus(current.totalDays),
       );
-      const nextRemaining = new Prisma.Decimal(existingBalance.allocated).minus(nextUsed);
+      const nextRemaining = new Prisma.Decimal(existingBalance.allocated).minus(
+        nextUsed,
+      );
 
       await tx.leaveBalance.update({
         data: {

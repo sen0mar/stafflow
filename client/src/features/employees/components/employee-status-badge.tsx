@@ -18,7 +18,12 @@ export const EmployeeStatusBadge = ({
   status,
   type = 'employee',
 }: EmployeeStatusBadgeProps) => {
-  const variant = status === 'ACTIVE' ? 'secondary' : status === 'INVITED' ? 'outline' : 'destructive'
+  const variant =
+    status === 'ACTIVE'
+      ? 'secondary'
+      : status === 'INVITED'
+        ? 'outline'
+        : 'destructive'
 
   return (
     <Badge variant={variant}>

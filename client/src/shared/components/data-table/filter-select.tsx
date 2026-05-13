@@ -29,7 +29,10 @@ export const FilterSelect = <TValue extends string>({
   options,
   value,
 }: FilterSelectProps<TValue>) => (
-  <Select value={value} onValueChange={(nextValue) => onValueChange(nextValue as TValue)}>
+  <Select
+    value={value}
+    onValueChange={(nextValue) => onValueChange(nextValue as TValue)}
+  >
     <SelectTrigger aria-label={ariaLabel} className={className ?? 'w-full'}>
       {icon}
       <SelectValue />
