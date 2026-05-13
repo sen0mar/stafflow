@@ -1,24 +1,42 @@
-const js = require('@eslint/js')
-const { defineConfig, globalIgnores } = require('eslint/config')
-const tseslint = require('typescript-eslint')
+const js = require("@eslint/js");
+const { defineConfig, globalIgnores } = require("eslint/config");
+const tseslint = require("typescript-eslint");
+
+const vitestGlobals = {
+  afterAll: "readonly",
+  afterEach: "readonly",
+  beforeAll: "readonly",
+  beforeEach: "readonly",
+  describe: "readonly",
+  expect: "readonly",
+  it: "readonly",
+  vi: "readonly",
+};
 
 module.exports = defineConfig([
-  globalIgnores(['dist']),
+  globalIgnores(["dist"]),
   {
-    files: ['**/*.ts'],
+    files: ["**/*.ts"],
     extends: [js.configs.recommended, tseslint.configs.recommended],
     languageOptions: {
+      globals: vitestGlobals,
       parserOptions: {
-        projectService: true,
+        projectService: {
+          allowDefaultProject: [
+            "test/*.ts",
+            "test/integration/*.ts",
+            "vitest.config.mts",
+          ],
+        },
         tsconfigRootDir: __dirname,
       },
     },
     rules: {
-      '@typescript-eslint/no-namespace': 'off',
-      '@typescript-eslint/no-unused-vars': [
-        'error',
-        { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
+      "@typescript-eslint/no-namespace": "off",
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
       ],
     },
   },
-])
+]);

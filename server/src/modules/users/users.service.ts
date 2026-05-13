@@ -49,7 +49,8 @@ export const assertUserAccountExists = async (id: string) => {
 };
 
 const isMissingRecordError = (error: unknown) =>
-  error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2025";
+  error instanceof Prisma.PrismaClientKnownRequestError &&
+  error.code === "P2025";
 
 export const updateExistingUserAccount = async (
   id: string,

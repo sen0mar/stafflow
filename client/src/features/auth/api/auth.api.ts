@@ -1,4 +1,8 @@
-import { apiClient, clearApiCsrfToken, setApiCsrfToken } from '@/shared/lib/api-client'
+import {
+  apiClient,
+  clearApiCsrfToken,
+  setApiCsrfToken,
+} from '@/shared/lib/api-client'
 
 export type AuthRole = 'ADMIN' | 'EMPLOYEE'
 export type AuthStatus = 'ACTIVE' | 'DISABLED' | 'INVITED'

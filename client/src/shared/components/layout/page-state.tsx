@@ -20,10 +20,17 @@ export const EmptyState = ({
   icon: Icon,
   title,
 }: EmptyStateProps) => (
-  <div className={cn('rounded-2xl border border-dashed border-default bg-surface px-6 py-12 text-center shadow-soft', className)}>
+  <div
+    className={cn(
+      'rounded-2xl border border-dashed border-default bg-surface px-6 py-12 text-center shadow-soft',
+      className,
+    )}
+  >
     <Icon className="mx-auto h-10 w-10 text-muted" aria-hidden="true" />
     <h2 className="mt-4 text-lg font-semibold text-primary">{title}</h2>
-    <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-muted">{description}</p>
+    <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-muted">
+      {description}
+    </p>
   </div>
 )
 
@@ -42,11 +49,18 @@ export const PageErrorState = ({
   icon: Icon = AlertTriangle,
   title,
 }: ErrorStateProps) => (
-  <section className={cn('rounded-2xl border border-default bg-surface p-6 shadow-card', className)}>
+  <section
+    className={cn(
+      'rounded-2xl border border-default bg-surface p-6 shadow-card',
+      className,
+    )}
+  >
     <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-brand-soft text-brand-text">
       <Icon className="h-6 w-6" aria-hidden="true" />
     </div>
-    <h1 className="text-xl font-semibold tracking-normal text-primary">{title}</h1>
+    <h1 className="text-xl font-semibold tracking-normal text-primary">
+      {title}
+    </h1>
     <p className="mt-2 max-w-2xl text-sm leading-6 text-muted">{description}</p>
     {action ? <div className="mt-5">{action}</div> : null}
   </section>
@@ -57,7 +71,12 @@ export const InlineErrorState = ({
   description,
   title,
 }: Pick<ErrorStateProps, 'className' | 'description' | 'title'>) => (
-  <div className={cn('rounded-xl border border-default bg-inset p-6 text-sm text-muted', className)}>
+  <div
+    className={cn(
+      'rounded-xl border border-default bg-inset p-6 text-sm text-muted',
+      className,
+    )}
+  >
     <p className="font-medium text-primary">{title}</p>
     <p className="mt-1 leading-6">{description}</p>
   </div>
@@ -69,7 +88,11 @@ interface QueryStateErrorProps {
   title: string
 }
 
-export const QueryStateError = ({ description, error, title }: QueryStateErrorProps) => {
+export const QueryStateError = ({
+  description,
+  error,
+  title,
+}: QueryStateErrorProps) => {
   if (isApiStatus(error, 403)) {
     return (
       <UnauthorizedState description="Your account does not have permission to view this information." />
@@ -107,7 +130,12 @@ interface TableSkeletonProps {
 }
 
 export const TableSkeleton = ({ className, rows = 6 }: TableSkeletonProps) => (
-  <div className={cn('space-y-3 rounded-2xl border border-default bg-surface p-4 shadow-soft', className)}>
+  <div
+    className={cn(
+      'space-y-3 rounded-2xl border border-default bg-surface p-4 shadow-soft',
+      className,
+    )}
+  >
     {Array.from({ length: rows }, (_item, index) => (
       <Skeleton key={index} className="h-12 w-full rounded-xl" />
     ))}
@@ -130,7 +158,9 @@ export const RouteErrorBoundary = () => {
     <main className="flex min-h-screen items-center justify-center bg-base px-5 py-10">
       <div className="w-full max-w-xl">
         <PageErrorState
-          title={isNotFound ? 'This page is not available' : 'Something went wrong'}
+          title={
+            isNotFound ? 'This page is not available' : 'Something went wrong'
+          }
           description={
             isNotFound
               ? 'The requested route does not exist in Stafflow.'

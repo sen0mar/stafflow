@@ -4,18 +4,22 @@ const timeSchema = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, {
   message: "Time must use HH:mm format.",
 });
 
-const timezoneSchema = z.string().trim().min(1).refine(
-  (value) => {
-    try {
-      new Intl.DateTimeFormat("en-US", { timeZone: value });
+const timezoneSchema = z
+  .string()
+  .trim()
+  .min(1)
+  .refine(
+    (value) => {
+      try {
+        new Intl.DateTimeFormat("en-US", { timeZone: value });
 
-      return true;
-    } catch {
-      return false;
-    }
-  },
-  { message: "Timezone must be a valid IANA timezone." },
-);
+        return true;
+      } catch {
+        return false;
+      }
+    },
+    { message: "Timezone must be a valid IANA timezone." },
+  );
 
 const optionalTextSchema = (max: number) =>
   z
@@ -27,9 +31,12 @@ const optionalTextSchema = (max: number) =>
     .nullable();
 
 const partialObject = <TShape extends z.ZodRawShape>(shape: TShape) =>
-  z.object(shape).partial().refine((value) => Object.keys(value).length > 0, {
-    message: "At least one settings field is required.",
-  });
+  z
+    .object(shape)
+    .partial()
+    .refine((value) => Object.keys(value).length > 0, {
+      message: "At least one settings field is required.",
+    });
 
 export const updateCompanySettingsSchema = z.object({
   body: partialObject({

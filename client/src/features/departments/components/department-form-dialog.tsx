@@ -28,7 +28,10 @@ import {
 } from '@/shared/components/ui/select'
 import { Textarea } from '@/shared/components/ui/textarea'
 import type { Department } from '../api/departments.api'
-import { departmentFormSchema, type DepartmentFormValues } from '../schemas/department-form.schema'
+import {
+  departmentFormSchema,
+  type DepartmentFormValues,
+} from '../schemas/department-form.schema'
 
 interface DepartmentFormDialogProps {
   department?: Department | null
@@ -38,7 +41,9 @@ interface DepartmentFormDialogProps {
   open: boolean
 }
 
-const getDefaultValues = (department?: Department | null): DepartmentFormValues => ({
+const getDefaultValues = (
+  department?: Department | null,
+): DepartmentFormValues => ({
   description: department?.description ?? '',
   isActive: department?.isActive ?? true,
   name: department?.name ?? '',
@@ -67,9 +72,13 @@ export const DepartmentFormDialog = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{isEditing ? 'Edit department' : 'Create department'}</DialogTitle>
+          <DialogTitle>
+            {isEditing ? 'Edit department' : 'Create department'}
+          </DialogTitle>
           <DialogDescription>
-            {isEditing ? 'Update department details and availability.' : 'Add a department employees can be assigned to.'}
+            {isEditing
+              ? 'Update department details and availability.'
+              : 'Add a department employees can be assigned to.'}
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -94,7 +103,11 @@ export const DepartmentFormDialog = ({
                 <FormItem>
                   <FormLabel>Description</FormLabel>
                   <FormControl>
-                    <Textarea placeholder="Optional department notes" rows={3} {...field} />
+                    <Textarea
+                      placeholder="Optional department notes"
+                      rows={3}
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -108,7 +121,9 @@ export const DepartmentFormDialog = ({
                   <FormLabel>Status</FormLabel>
                   <Select
                     value={field.value ? 'active' : 'inactive'}
-                    onValueChange={(value) => field.onChange(value === 'active')}
+                    onValueChange={(value) =>
+                      field.onChange(value === 'active')
+                    }
                   >
                     <FormControl>
                       <SelectTrigger className="w-full">
@@ -125,11 +140,19 @@ export const DepartmentFormDialog = ({
               )}
             />
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => onOpenChange(false)}
+              >
                 Cancel
               </Button>
               <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? 'Saving...' : isEditing ? 'Save changes' : 'Create department'}
+                {isSubmitting
+                  ? 'Saving...'
+                  : isEditing
+                    ? 'Save changes'
+                    : 'Create department'}
               </Button>
             </DialogFooter>
           </form>

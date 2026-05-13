@@ -31,10 +31,9 @@ export const auditLogSelect = {
 const getCreatedAtFilter = ({
   createdAtFrom,
   createdAtTo,
-}: Pick<
-  ListAuditLogsInput,
-  "createdAtFrom" | "createdAtTo"
->): Prisma.DateTimeFilter | undefined => {
+}: Pick<ListAuditLogsInput, "createdAtFrom" | "createdAtTo">):
+  | Prisma.DateTimeFilter
+  | undefined => {
   if (!createdAtFrom && !createdAtTo) {
     return undefined;
   }

@@ -35,7 +35,9 @@ export const useUpdateCompanySettings = () => {
   return useMutation({
     mutationFn: updateCompanySettings,
     onError: (error) => {
-      toast.error(getSafeErrorMessage(error, 'Company settings could not be saved.'))
+      toast.error(
+        getSafeErrorMessage(error, 'Company settings could not be saved.'),
+      )
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: settingsKeys.company() })
@@ -50,10 +52,14 @@ export const useUpdateAttendanceSettings = () => {
   return useMutation({
     mutationFn: updateAttendanceSettings,
     onError: (error) => {
-      toast.error(getSafeErrorMessage(error, 'Attendance settings could not be saved.'))
+      toast.error(
+        getSafeErrorMessage(error, 'Attendance settings could not be saved.'),
+      )
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: settingsKeys.attendance() })
+      await queryClient.invalidateQueries({
+        queryKey: settingsKeys.attendance(),
+      })
       toast.success('Attendance settings saved.')
     },
   })
@@ -65,7 +71,9 @@ export const useUpdateLeaveSettings = () => {
   return useMutation({
     mutationFn: updateLeaveSettings,
     onError: (error) => {
-      toast.error(getSafeErrorMessage(error, 'Leave settings could not be saved.'))
+      toast.error(
+        getSafeErrorMessage(error, 'Leave settings could not be saved.'),
+      )
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: settingsKeys.leave() })

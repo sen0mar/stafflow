@@ -4,8 +4,11 @@ import { useSearchParams } from 'react-router-dom'
 type QueryValue = number | string | undefined
 type QueryState = Record<string, QueryValue>
 
-const getValue = (searchParams: URLSearchParams, key: string, fallback: string) =>
-  searchParams.get(key) ?? fallback
+const getValue = (
+  searchParams: URLSearchParams,
+  key: string,
+  fallback: string,
+) => searchParams.get(key) ?? fallback
 
 export const getQueryString = (
   searchParams: URLSearchParams,
@@ -49,21 +52,28 @@ export const useTableQueryState = () => {
 
   const updateQuery = useCallback(
     (values: QueryState, options: { resetPage?: boolean } = {}) => {
-      setSearchParams((previousParams) => {
-        const nextParams = setQueryState(previousParams, {
-          ...values,
-          ...(options.resetPage ? { page: undefined } : {}),
-        })
+      setSearchParams(
+        (previousParams) => {
+          const nextParams = setQueryState(previousParams, {
+            ...values,
+            ...(options.resetPage ? { page: undefined } : {}),
+          })
 
-        return nextParams
-      }, { replace: true })
+          return nextParams
+        },
+        { replace: true },
+      )
     },
     [setSearchParams],
   )
 
-  const getDateValue = useCallback((key: string) => getQueryDate(searchParams, key), [searchParams])
+  const getDateValue = useCallback(
+    (key: string) => getQueryDate(searchParams, key),
+    [searchParams],
+  )
   const getNumberValue = useCallback(
-    (key: string, fallback: number) => getQueryNumber(searchParams, key, fallback),
+    (key: string, fallback: number) =>
+      getQueryNumber(searchParams, key, fallback),
     [searchParams],
   )
   const getStringValue = useCallback(

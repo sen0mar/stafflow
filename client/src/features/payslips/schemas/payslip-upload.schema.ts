@@ -7,8 +7,14 @@ export const payslipUploadSchema = z.object({
   file: z
     .instanceof(File, { message: 'Choose a PDF file.' })
     .refine((file) => file.type === 'application/pdf', 'Choose a PDF file.')
-    .refine((file) => file.name.toLowerCase().endsWith('.pdf'), 'File name must end in .pdf.')
-    .refine((file) => file.size <= maxPayslipUploadBytes, 'PDF must be 2 MB or smaller.'),
+    .refine(
+      (file) => file.name.toLowerCase().endsWith('.pdf'),
+      'File name must end in .pdf.',
+    )
+    .refine(
+      (file) => file.size <= maxPayslipUploadBytes,
+      'PDF must be 2 MB or smaller.',
+    ),
   month: z.number().int().min(1).max(12),
   year: z.number().int().min(2000).max(2100),
 })

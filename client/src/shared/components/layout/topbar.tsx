@@ -23,13 +23,19 @@ export const Topbar = ({ email, role, onOpenSidebar }: TopbarProps) => (
           <Menu className="h-5 w-5" aria-hidden="true" />
         </Button>
         <div className="min-w-0">
-          <p className="truncate text-sm font-semibold text-primary">Stafflow workspace</p>
-          <p className="truncate text-xs text-muted">{role === 'ADMIN' ? 'Admin controls' : 'Self-service tools'}</p>
+          <p className="truncate text-sm font-semibold text-primary">
+            Stafflow workspace
+          </p>
+          <p className="truncate text-xs text-muted">
+            {role === 'ADMIN' ? 'Admin controls' : 'Self-service tools'}
+          </p>
         </div>
       </div>
       <div className="flex items-center gap-3">
         <div className="hidden text-right sm:block">
-          <p className="max-w-52 truncate text-sm font-medium text-primary">{email ?? 'Signed in'}</p>
+          <p className="max-w-52 truncate text-sm font-medium text-primary">
+            {email ?? 'Signed in'}
+          </p>
           <p className="text-xs text-muted">{role ?? 'USER'}</p>
         </div>
         <ThemeToggle />

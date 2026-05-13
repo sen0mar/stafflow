@@ -1,6 +1,8 @@
 import { z } from 'zod'
 
-const timeSchema = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'Use HH:mm format.')
+const timeSchema = z
+  .string()
+  .regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'Use HH:mm format.')
 
 const numberInputSchema = (min: number, max: number) =>
   z.number().min(min).max(max)
@@ -15,7 +17,9 @@ export const attendanceSettingsFormSchema = z
   .object({
     allowEmployeeClockIn: z.boolean(),
     lateGracePeriodMinutes: numberInputSchema(0, 240),
-    weeklyWorkingDays: z.array(z.number().int().min(0).max(6)).min(1, 'Select at least one working day.'),
+    weeklyWorkingDays: z
+      .array(z.number().int().min(0).max(6))
+      .min(1, 'Select at least one working day.'),
     workdayEnd: timeSchema,
     workdayMinutes: numberInputSchema(1, 1440),
     workdayStart: timeSchema,
@@ -31,6 +35,10 @@ export const leaveSettingsFormSchema = z.object({
   policyText: z.string().max(2000, 'Policy text is too long.'),
 })
 
-export type CompanySettingsFormValues = z.infer<typeof companySettingsFormSchema>
-export type AttendanceSettingsFormValues = z.infer<typeof attendanceSettingsFormSchema>
+export type CompanySettingsFormValues = z.infer<
+  typeof companySettingsFormSchema
+>
+export type AttendanceSettingsFormValues = z.infer<
+  typeof attendanceSettingsFormSchema
+>
 export type LeaveSettingsFormValues = z.infer<typeof leaveSettingsFormSchema>

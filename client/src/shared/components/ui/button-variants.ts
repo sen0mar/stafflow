@@ -13,7 +13,8 @@ export const buttonVariants = cva(
           'border border-default bg-surface [color:var(--text-primary)] shadow-soft hover:-translate-y-0.5 hover:bg-subtle active:translate-y-0',
         secondary:
           'border border-default bg-elevated [color:var(--text-primary)] shadow-soft hover:-translate-y-0.5 hover:bg-subtle active:translate-y-0',
-        ghost: '[color:var(--text-primary)] hover:bg-subtle hover:[color:var(--text-primary)]',
+        ghost:
+          '[color:var(--text-primary)] hover:bg-subtle hover:[color:var(--text-primary)]',
         link: 'text-brand underline-offset-4 hover:underline',
       },
       size: {

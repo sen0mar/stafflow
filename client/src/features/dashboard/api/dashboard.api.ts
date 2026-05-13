@@ -2,7 +2,11 @@ import { apiClient } from '@/shared/lib/api-client'
 
 export type AttendanceStatus = 'PRESENT' | 'ABSENT' | 'LATE' | 'PARTIAL'
 export type EmploymentStatus = 'ACTIVE' | 'INACTIVE' | 'TERMINATED'
-export type LeaveRequestStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'CANCELLED'
+export type LeaveRequestStatus =
+  | 'PENDING'
+  | 'APPROVED'
+  | 'REJECTED'
+  | 'CANCELLED'
 
 export interface AdminAttendanceOverviewPoint {
   absent: number
@@ -113,13 +117,18 @@ interface DashboardResponse<TData> {
 }
 
 export const getAdminDashboardSummary = async () => {
-  const response = await apiClient<DashboardResponse<AdminDashboardSummary>>('/dashboard/admin-summary')
+  const response = await apiClient<DashboardResponse<AdminDashboardSummary>>(
+    '/dashboard/admin-summary',
+  )
 
   return response.data
 }
 
 export const getEmployeeDashboardSummary = async () => {
-  const response = await apiClient<DashboardResponse<EmployeeDashboardSummary>>('/dashboard/me')
+  const response =
+    await apiClient<DashboardResponse<EmployeeDashboardSummary>>(
+      '/dashboard/me',
+    )
 
   return response.data
 }

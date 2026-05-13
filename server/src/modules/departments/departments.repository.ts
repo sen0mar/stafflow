@@ -30,7 +30,10 @@ const departmentSelect = {
 const getDepartmentWhere = ({
   isActive,
   search,
-}: Pick<ListDepartmentsInput, "isActive" | "search">): Prisma.DepartmentWhereInput => ({
+}: Pick<
+  ListDepartmentsInput,
+  "isActive" | "search"
+>): Prisma.DepartmentWhereInput => ({
   ...(isActive === undefined ? {} : { isActive }),
   ...(search
     ? {

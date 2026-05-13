@@ -83,12 +83,7 @@ export const createPayslipRoutes = (): Router => {
     requireAuth,
     downloadPayslipController,
   );
-  router.get(
-    "/:id",
-    attachAuth,
-    requireAuth,
-    getPayslipController,
-  );
+  router.get("/:id", attachAuth, requireAuth, getPayslipController);
   router.delete(
     "/:id",
     attachAuth,

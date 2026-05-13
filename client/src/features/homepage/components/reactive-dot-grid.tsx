@@ -34,7 +34,9 @@ export const ReactiveDotGrid = () => {
     let height = 0
     let baseColor = getCssVariable('--bg-base')
     let dotColor = getCssVariable('--bg-dot')
-    let prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    let prefersReducedMotion = window.matchMedia(
+      '(prefers-reduced-motion: reduce)',
+    ).matches
     const pointer = { x: 0, y: 0, active: false }
     const easedPointer = { x: 0, y: 0, active: false }
     let animationTime = 0
@@ -116,7 +118,10 @@ export const ReactiveDotGrid = () => {
           const safeDistance = Math.max(distance, 1)
           const falloff = 1 - distance / pushRadius
           const force = falloff * falloff * maxPush
-          const ripple = Math.sin(animationTime * 5 + dot.phase + distance * 0.08) * falloff * rippleStrength
+          const ripple =
+            Math.sin(animationTime * 5 + dot.phase + distance * 0.08) *
+            falloff *
+            rippleStrength
           const tangentX = -deltaY / safeDistance
           const tangentY = deltaX / safeDistance
 
@@ -159,14 +164,19 @@ export const ReactiveDotGrid = () => {
 
     const resizeObserver = new ResizeObserver(syncCanvasSize)
     const themeObserver = new MutationObserver(syncThemeColors)
-    const motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)')
+    const motionPreference = window.matchMedia(
+      '(prefers-reduced-motion: reduce)',
+    )
 
     syncCanvasSize()
     syncThemeColors()
     restartRendering()
 
     resizeObserver.observe(container)
-    themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
+    themeObserver.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class'],
+    })
     window.addEventListener('pointermove', handlePointerMove)
     window.addEventListener('pointerleave', handlePointerLeave)
     motionPreference.addEventListener('change', handleMotionPreferenceChange)
@@ -177,12 +187,19 @@ export const ReactiveDotGrid = () => {
       themeObserver.disconnect()
       window.removeEventListener('pointermove', handlePointerMove)
       window.removeEventListener('pointerleave', handlePointerLeave)
-      motionPreference.removeEventListener('change', handleMotionPreferenceChange)
+      motionPreference.removeEventListener(
+        'change',
+        handleMotionPreferenceChange,
+      )
     }
   }, [])
 
   return (
-    <div ref={containerRef} aria-hidden="true" className="pointer-events-none absolute inset-0 z-0">
+    <div
+      ref={containerRef}
+      aria-hidden="true"
+      className="pointer-events-none absolute inset-0 z-0"
+    >
       <canvas ref={canvasRef} className="block h-full w-full" />
     </div>
   )

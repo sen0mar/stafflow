@@ -1,5 +1,8 @@
 import { apiClient } from '@/shared/lib/api-client'
-import type { PaginatedResponse, PaginationMeta } from '@/shared/types/pagination'
+import type {
+  PaginatedResponse,
+  PaginationMeta,
+} from '@/shared/types/pagination'
 
 export interface AuditLogActor {
   email: string

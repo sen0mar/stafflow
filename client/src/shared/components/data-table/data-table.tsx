@@ -29,7 +29,12 @@ export const DataTable = <TItem,>({
   items,
   wrapperClassName,
 }: DataTableProps<TItem>) => (
-  <div className={cn('overflow-hidden rounded-2xl border border-default bg-surface p-2 shadow-soft', wrapperClassName)}>
+  <div
+    className={cn(
+      'overflow-hidden rounded-2xl border border-default bg-surface p-2 shadow-soft',
+      wrapperClassName,
+    )}
+  >
     <Table>
       <TableHeader>
         <TableRow>

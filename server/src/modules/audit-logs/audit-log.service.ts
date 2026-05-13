@@ -49,9 +49,7 @@ const redactMetadataValue = (value: unknown, key?: string): unknown => {
   return value;
 };
 
-export const redactAuditMetadata = (
-  metadata: AuditMetadata,
-): AuditMetadata => {
+export const redactAuditMetadata = (metadata: AuditMetadata): AuditMetadata => {
   if (metadata === undefined) {
     return undefined;
   }

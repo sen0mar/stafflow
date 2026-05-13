@@ -20,10 +20,14 @@ import {
 } from '../api/leave.api'
 import { leaveKeys } from '../api/leave.keys'
 
-const invalidateLeaveViews = async (queryClient: ReturnType<typeof useQueryClient>) => {
+const invalidateLeaveViews = async (
+  queryClient: ReturnType<typeof useQueryClient>,
+) => {
   await Promise.all([
     queryClient.invalidateQueries({ queryKey: leaveKeys.all() }),
-    queryClient.invalidateQueries({ queryKey: dashboardKeys.employeeSummary() }),
+    queryClient.invalidateQueries({
+      queryKey: dashboardKeys.employeeSummary(),
+    }),
     queryClient.invalidateQueries({ queryKey: dashboardKeys.adminSummary() }),
   ])
 }
@@ -59,7 +63,9 @@ export const useCreateLeaveType = () => {
   return useMutation({
     mutationFn: createLeaveType,
     onError: (error) => {
-      toast.error(getSafeErrorMessage(error, 'Leave type could not be created.'))
+      toast.error(
+        getSafeErrorMessage(error, 'Leave type could not be created.'),
+      )
     },
     onSuccess: async () => {
       await invalidateLeaveViews(queryClient)
@@ -74,7 +80,9 @@ export const useUpdateLeaveType = () => {
   return useMutation({
     mutationFn: updateLeaveType,
     onError: (error) => {
-      toast.error(getSafeErrorMessage(error, 'Leave type could not be updated.'))
+      toast.error(
+        getSafeErrorMessage(error, 'Leave type could not be updated.'),
+      )
     },
     onSuccess: async () => {
       await invalidateLeaveViews(queryClient)
@@ -89,7 +97,9 @@ export const useDeleteLeaveType = () => {
   return useMutation({
     mutationFn: deleteLeaveType,
     onError: (error) => {
-      toast.error(getSafeErrorMessage(error, 'Leave type could not be deleted.'))
+      toast.error(
+        getSafeErrorMessage(error, 'Leave type could not be deleted.'),
+      )
     },
     onSuccess: async () => {
       await invalidateLeaveViews(queryClient)
@@ -104,7 +114,9 @@ export const useCreateLeaveRequest = () => {
   return useMutation({
     mutationFn: createLeaveRequest,
     onError: (error) => {
-      toast.error(getSafeErrorMessage(error, 'Leave request could not be submitted.'))
+      toast.error(
+        getSafeErrorMessage(error, 'Leave request could not be submitted.'),
+      )
     },
     onSuccess: async () => {
       await invalidateLeaveViews(queryClient)
@@ -119,7 +131,9 @@ export const useCancelLeaveRequest = () => {
   return useMutation({
     mutationFn: cancelLeaveRequest,
     onError: (error) => {
-      toast.error(getSafeErrorMessage(error, 'Leave request could not be cancelled.'))
+      toast.error(
+        getSafeErrorMessage(error, 'Leave request could not be cancelled.'),
+      )
     },
     onSuccess: async () => {
       await invalidateLeaveViews(queryClient)
@@ -134,12 +148,16 @@ export const useApproveLeaveRequest = () => {
   return useMutation({
     mutationFn: approveLeaveRequest,
     onError: (error) => {
-      toast.error(getSafeErrorMessage(error, 'Leave request could not be approved.'))
+      toast.error(
+        getSafeErrorMessage(error, 'Leave request could not be approved.'),
+      )
     },
     onSuccess: async (leaveRequest) => {
       await Promise.all([
         invalidateLeaveViews(queryClient),
-        queryClient.invalidateQueries({ queryKey: leaveKeys.requestDetail(leaveRequest.id) }),
+        queryClient.invalidateQueries({
+          queryKey: leaveKeys.requestDetail(leaveRequest.id),
+        }),
       ])
       toast.success('Leave request approved.')
     },
@@ -152,12 +170,16 @@ export const useRejectLeaveRequest = () => {
   return useMutation({
     mutationFn: rejectLeaveRequest,
     onError: (error) => {
-      toast.error(getSafeErrorMessage(error, 'Leave request could not be rejected.'))
+      toast.error(
+        getSafeErrorMessage(error, 'Leave request could not be rejected.'),
+      )
     },
     onSuccess: async (leaveRequest) => {
       await Promise.all([
         invalidateLeaveViews(queryClient),
-        queryClient.invalidateQueries({ queryKey: leaveKeys.requestDetail(leaveRequest.id) }),
+        queryClient.invalidateQueries({
+          queryKey: leaveKeys.requestDetail(leaveRequest.id),
+        }),
       ])
       toast.success('Leave request rejected.')
     },

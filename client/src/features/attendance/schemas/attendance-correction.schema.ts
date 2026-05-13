@@ -21,4 +21,6 @@ export const attendanceCorrectionSchema = z
     },
   )
 
-export type AttendanceCorrectionValues = z.infer<typeof attendanceCorrectionSchema>
+export type AttendanceCorrectionValues = z.infer<
+  typeof attendanceCorrectionSchema
+>

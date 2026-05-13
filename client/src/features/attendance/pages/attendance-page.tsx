@@ -5,7 +5,11 @@ import { FilterSelect } from '@/shared/components/data-table/filter-select'
 import { TableToolbar } from '@/shared/components/data-table/table-toolbar'
 import { PaginationControls } from '@/shared/components/data-table/pagination-controls'
 import { PageHeader } from '@/shared/components/layout/page-header'
-import { EmptyState, QueryStateError, TableSkeleton } from '@/shared/components/layout/page-state'
+import {
+  EmptyState,
+  QueryStateError,
+  TableSkeleton,
+} from '@/shared/components/layout/page-state'
 import { useTableQueryState } from '@/shared/hooks/use-table-query-state'
 import { useCurrentUser } from '@/features/auth/hooks/use-current-user'
 import { useDepartments } from '@/features/departments/hooks/use-departments'
@@ -30,7 +34,8 @@ const pageSize = 10
 
 type StatusFilter = 'all' | AttendanceStatus
 
-const getStatusFilter = (status: StatusFilter) => (status === 'all' ? undefined : status)
+const getStatusFilter = (status: StatusFilter) =>
+  status === 'all' ? undefined : status
 
 const toDateFilter = (value: string, endOfDay = false) => {
   if (!value) {
@@ -58,7 +63,9 @@ const EmployeeAttendancePage = () => {
   const tableState = useTableQueryState()
   const page = tableState.getNumber('page', 1)
   const status = tableState.getString('status', 'all') as StatusFilter
-  const [confirmAction, setConfirmAction] = useState<'clock-in' | 'clock-out' | null>(null)
+  const [confirmAction, setConfirmAction] = useState<
+    'clock-in' | 'clock-out' | null
+  >(null)
   const todayQuery = useSelfTodayAttendance()
   const historyQuery = useSelfAttendanceHistory({
     limit: pageSize,
@@ -94,12 +101,16 @@ const EmployeeAttendancePage = () => {
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h2 className="text-lg font-semibold text-primary">History</h2>
-            <p className="mt-1 text-sm text-muted">Your recent attendance records.</p>
+            <p className="mt-1 text-sm text-muted">
+              Your recent attendance records.
+            </p>
           </div>
           <FilterSelect
             className="w-full sm:w-44"
             value={status}
-            onValueChange={(value) => tableState.updateQuery({ status: value }, { resetPage: true })}
+            onValueChange={(value) =>
+              tableState.updateQuery({ status: value }, { resetPage: true })
+            }
             options={[
               { label: 'All statuses', value: 'all' },
               { label: 'Present', value: 'PRESENT' },
@@ -124,7 +135,9 @@ const EmployeeAttendancePage = () => {
             <AttendanceHistoryTable records={records} />
             <PaginationControls
               itemLabel="records"
-              meta={pagination ?? { limit: pageSize, page, total: 0, totalPages: 1 }}
+              meta={
+                pagination ?? { limit: pageSize, page, total: 0, totalPages: 1 }
+              }
               onPageChange={setPage}
             />
           </>
@@ -167,7 +180,8 @@ const AdminAttendancePage = () => {
   const from = tableState.getDate('from')
   const to = tableState.getDate('to')
   const [correctionOpen, setCorrectionOpen] = useState(false)
-  const [correctingRecord, setCorrectingRecord] = useState<AttendanceRecord | null>(null)
+  const [correctingRecord, setCorrectingRecord] =
+    useState<AttendanceRecord | null>(null)
   const attendanceQuery = useAttendanceRecords({
     departmentId: departmentId === 'all' ? undefined : departmentId,
     employeeId: employeeId === 'all' ? undefined : employeeId,
@@ -236,24 +250,39 @@ const AdminAttendancePage = () => {
           <FilterSelect
             icon={<Search className="h-4 w-4 text-muted" aria-hidden="true" />}
             value={employeeId}
-            onValueChange={(value) => tableState.updateQuery({ employeeId: value }, { resetPage: true })}
+            onValueChange={(value) =>
+              tableState.updateQuery({ employeeId: value }, { resetPage: true })
+            }
             options={[
               { label: 'All employees', value: 'all' },
-              ...(employeesQuery.data?.data.map((employee) => ({ label: employee.fullName, value: employee.id })) ?? []),
+              ...(employeesQuery.data?.data.map((employee) => ({
+                label: employee.fullName,
+                value: employee.id,
+              })) ?? []),
             ]}
           />
           <FilterSelect
             icon={<Filter className="h-4 w-4 text-muted" aria-hidden="true" />}
             value={departmentId}
-            onValueChange={(value) => tableState.updateQuery({ departmentId: value }, { resetPage: true })}
+            onValueChange={(value) =>
+              tableState.updateQuery(
+                { departmentId: value },
+                { resetPage: true },
+              )
+            }
             options={[
               { label: 'All departments', value: 'all' },
-              ...(departmentsQuery.data?.data.map((department) => ({ label: department.name, value: department.id })) ?? []),
+              ...(departmentsQuery.data?.data.map((department) => ({
+                label: department.name,
+                value: department.id,
+              })) ?? []),
             ]}
           />
           <FilterSelect
             value={status}
-            onValueChange={(value) => tableState.updateQuery({ status: value }, { resetPage: true })}
+            onValueChange={(value) =>
+              tableState.updateQuery({ status: value }, { resetPage: true })
+            }
             options={[
               { label: 'All statuses', value: 'all' },
               { label: 'Present', value: 'PRESENT' },
@@ -265,8 +294,12 @@ const AdminAttendancePage = () => {
           <DateRangeFilter
             from={from}
             to={to}
-            onFromChange={(value) => tableState.updateQuery({ from: value }, { resetPage: true })}
-            onToChange={(value) => tableState.updateQuery({ to: value }, { resetPage: true })}
+            onFromChange={(value) =>
+              tableState.updateQuery({ from: value }, { resetPage: true })
+            }
+            onToChange={(value) =>
+              tableState.updateQuery({ to: value }, { resetPage: true })
+            }
           />
         </TableToolbar>
 
@@ -278,13 +311,21 @@ const AdminAttendancePage = () => {
             description="Refresh the page or try again later."
           />
         ) : null}
-        {attendanceQuery.data && records.length === 0 ? <EmptyAttendance isAdmin /> : null}
+        {attendanceQuery.data && records.length === 0 ? (
+          <EmptyAttendance isAdmin />
+        ) : null}
         {records.length > 0 ? (
           <>
-            <AttendanceHistoryTable isAdmin records={records} onCorrect={openCorrection} />
+            <AttendanceHistoryTable
+              isAdmin
+              records={records}
+              onCorrect={openCorrection}
+            />
             <PaginationControls
               itemLabel="records"
-              meta={pagination ?? { limit: pageSize, page, total: 0, totalPages: 1 }}
+              meta={
+                pagination ?? { limit: pageSize, page, total: 0, totalPages: 1 }
+              }
               onPageChange={setPage}
             />
           </>

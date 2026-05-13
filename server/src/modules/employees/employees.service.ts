@@ -2,7 +2,10 @@ import { Prisma } from "@prisma/client";
 
 import type { AuthContext } from "../../core/auth/auth.types";
 import { hashPassword } from "../../core/auth/password.service";
-import { createSessionToken, hashSessionToken } from "../../core/auth/session.service";
+import {
+  createSessionToken,
+  hashSessionToken,
+} from "../../core/auth/session.service";
 import { AppError } from "../../core/errors/app-error";
 import {
   getPaginationParams,
@@ -134,10 +137,12 @@ const assertDepartmentIsAssignable = async (departmentId?: string | null) => {
 };
 
 const isUniqueConstraintError = (error: unknown) =>
-  error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002";
+  error instanceof Prisma.PrismaClientKnownRequestError &&
+  error.code === "P2002";
 
 const isMissingRecordError = (error: unknown) =>
-  error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2025";
+  error instanceof Prisma.PrismaClientKnownRequestError &&
+  error.code === "P2025";
 
 const withEmployeeWriteErrors = async <T>(operation: () => Promise<T>) => {
   try {
@@ -146,7 +151,8 @@ const withEmployeeWriteErrors = async <T>(operation: () => Promise<T>) => {
     if (isUniqueConstraintError(error)) {
       throw new AppError({
         code: "EMPLOYEE_CONFLICT",
-        message: "Employee or account details conflict with an existing record.",
+        message:
+          "Employee or account details conflict with an existing record.",
         statusCode: 409,
       });
     }
@@ -237,7 +243,9 @@ export const updateExistingEmployee = async (
     await assertDepartmentIsAssignable(input.departmentId);
   }
 
-  const employee = await withEmployeeWriteErrors(() => updateEmployee(id, input));
+  const employee = await withEmployeeWriteErrors(() =>
+    updateEmployee(id, input),
+  );
   await createEmployeeAuditLog({
     ...auditContext,
     action: "EMPLOYEE_UPDATED",

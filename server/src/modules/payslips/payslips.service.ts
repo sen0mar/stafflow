@@ -53,7 +53,10 @@ const toPayslipDto = (payslip: PayslipRecord) => ({
   employee: {
     department: payslip.employee.department,
     employeeCode: payslip.employee.employeeCode,
-    fullName: getFullName(payslip.employee.firstName, payslip.employee.lastName),
+    fullName: getFullName(
+      payslip.employee.firstName,
+      payslip.employee.lastName,
+    ),
     id: payslip.employee.id,
   },
   employeeId: payslip.employeeId,
@@ -137,7 +140,10 @@ const cleanupUploadedObject = async (objectKey: string) => {
   }
 };
 
-const deleteReplacedObject = async (objectKey: string | null, newObjectKey: string) => {
+const deleteReplacedObject = async (
+  objectKey: string | null,
+  newObjectKey: string,
+) => {
   if (!objectKey || objectKey === newObjectKey) {
     return;
   }

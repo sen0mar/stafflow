@@ -68,32 +68,38 @@ export const valuePoints: LandingItem[] = [
 export const modules: LandingItem[] = [
   {
     title: 'Employee Management',
-    description: 'Centralize employee profiles, roles, and key details in one secure place.',
+    description:
+      'Centralize employee profiles, roles, and key details in one secure place.',
     icon: Users,
   },
   {
     title: 'Attendance Tracking',
-    description: 'Track daily attendance and analyze patterns with clear visual reports.',
+    description:
+      'Track daily attendance and analyze patterns with clear visual reports.',
     icon: CalendarCheck,
   },
   {
     title: 'Leave Requests',
-    description: 'Employees submit requests while admins review, approve, and keep history tidy.',
+    description:
+      'Employees submit requests while admins review, approve, and keep history tidy.',
     icon: CheckCircle2,
   },
   {
     title: 'Payslips',
-    description: 'Organize payslip records and keep private employee documents easy to find.',
+    description:
+      'Organize payslip records and keep private employee documents easy to find.',
     icon: FileText,
   },
   {
     title: 'Departments',
-    description: 'Structure teams, departments, and reporting lines without spreadsheet sprawl.',
+    description:
+      'Structure teams, departments, and reporting lines without spreadsheet sprawl.',
     icon: Building2,
   },
   {
     title: 'Role-Based Access',
-    description: 'Keep admin controls separated from employee self-service workspaces.',
+    description:
+      'Keep admin controls separated from employee self-service workspaces.',
     icon: ShieldCheck,
   },
 ]
@@ -211,4 +217,5 @@ export const absentPoints: ChartPoint[] = [
 
 export const gridLines = [24, 48, 72, 96, 120]
 
-export const toChartPath = (points: ChartPoint[]) => points.map(({ x, y }) => `${x} ${y}`).join(' L')
+export const toChartPath = (points: ChartPoint[]) =>
+  points.map(({ x, y }) => `${x} ${y}`).join(' L')

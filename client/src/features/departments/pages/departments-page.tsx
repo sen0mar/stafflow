@@ -11,7 +11,11 @@ import {
 } from '@/shared/components/ui/select'
 import { PaginationControls } from '@/shared/components/data-table/pagination-controls'
 import { PageHeader } from '@/shared/components/layout/page-header'
-import { EmptyState, QueryStateError, TableSkeleton } from '@/shared/components/layout/page-state'
+import {
+  EmptyState,
+  QueryStateError,
+  TableSkeleton,
+} from '@/shared/components/layout/page-state'
 import { getRolePermissions, hasPermission } from '@/shared/lib/permissions'
 import { useCurrentUser } from '@/features/auth/hooks/use-current-user'
 import type { Department } from '../api/departments.api'
@@ -65,11 +69,16 @@ export const DepartmentsPage = () => {
   const [search, setSearch] = useState('')
   const [status, setStatus] = useState<StatusFilter>('all')
   const [formOpen, setFormOpen] = useState(false)
-  const [editingDepartment, setEditingDepartment] = useState<Department | null>(null)
+  const [editingDepartment, setEditingDepartment] = useState<Department | null>(
+    null,
+  )
   const [deleteOpen, setDeleteOpen] = useState(false)
-  const [deletingDepartment, setDeletingDepartment] = useState<Department | null>(null)
+  const [deletingDepartment, setDeletingDepartment] =
+    useState<Department | null>(null)
   const currentUserQuery = useCurrentUser()
-  const permissions = currentUserQuery.data ? getRolePermissions(currentUserQuery.data.role) : []
+  const permissions = currentUserQuery.data
+    ? getRolePermissions(currentUserQuery.data.role)
+    : []
   const canManage = hasPermission(permissions, 'departments:manage')
   const departmentsQuery = useDepartments({
     isActive: getIsActiveFilter(status),
@@ -164,7 +173,10 @@ export const DepartmentsPage = () => {
       <section className="space-y-4 rounded-2xl border border-default bg-surface p-4 shadow-soft">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div className="relative w-full lg:max-w-sm">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" aria-hidden="true" />
+            <Search
+              className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted"
+              aria-hidden="true"
+            />
             <Input
               className="pl-9"
               placeholder="Search departments"
@@ -172,7 +184,10 @@ export const DepartmentsPage = () => {
               onChange={(event) => handleSearchChange(event.target.value)}
             />
           </div>
-          <Select value={status} onValueChange={(value) => handleStatusChange(value as StatusFilter)}>
+          <Select
+            value={status}
+            onValueChange={(value) => handleStatusChange(value as StatusFilter)}
+          >
             <SelectTrigger className="w-full lg:w-44">
               <SelectValue />
             </SelectTrigger>
@@ -192,7 +207,9 @@ export const DepartmentsPage = () => {
             description="Refresh the page or try again later."
           />
         ) : null}
-        {departmentsQuery.data && departments.length === 0 ? <DepartmentsEmpty canManage={canManage} /> : null}
+        {departmentsQuery.data && departments.length === 0 ? (
+          <DepartmentsEmpty canManage={canManage} />
+        ) : null}
         {departments.length > 0 ? (
           <>
             <DepartmentsTable
@@ -203,7 +220,9 @@ export const DepartmentsPage = () => {
             />
             <PaginationControls
               itemLabel="departments"
-              meta={pagination ?? { limit: pageSize, page, total: 0, totalPages: 1 }}
+              meta={
+                pagination ?? { limit: pageSize, page, total: 0, totalPages: 1 }
+              }
               onPageChange={setPage}
             />
           </>

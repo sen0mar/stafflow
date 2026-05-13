@@ -1,7 +1,12 @@
 import { z } from "zod";
 
 export const pageQuerySchema = z.coerce.number().int().min(1).default(1);
-export const limitQuerySchema = z.coerce.number().int().min(1).max(100).default(10);
+export const limitQuerySchema = z.coerce
+  .number()
+  .int()
+  .min(1)
+  .max(100)
+  .default(10);
 
 export interface PaginationMeta {
   limit: number;

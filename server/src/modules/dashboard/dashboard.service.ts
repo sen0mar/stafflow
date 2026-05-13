@@ -44,7 +44,8 @@ const getFullName = (firstName: string, lastName: string) =>
 
 const toIso = (date: Date | null) => date?.toISOString() ?? null;
 
-const toNumber = (value: { toString: () => string }) => Number(value.toString());
+const toNumber = (value: { toString: () => string }) =>
+  Number(value.toString());
 
 const getZonedParts = (date: Date, timeZone: string): ZonedDay => {
   const formatter = new Intl.DateTimeFormat("en-US", {
@@ -214,11 +215,13 @@ export const getAdminDashboardSummary = async () => {
       return {
         departmentId: item.departmentId ?? null,
         departmentName: item.departmentId
-          ? departmentById.get(item.departmentId)?.name ?? "Unassigned"
+          ? (departmentById.get(item.departmentId)?.name ?? "Unassigned")
           : "Unassigned",
         employeeCount,
         percentage:
-          totalEmployees > 0 ? Math.round((employeeCount / totalEmployees) * 100) : 0,
+          totalEmployees > 0
+            ? Math.round((employeeCount / totalEmployees) * 100)
+            : 0,
       };
     }),
     onLeaveToday,
@@ -249,7 +252,9 @@ export const getAdminDashboardSummary = async () => {
   };
 };
 
-export const getEmployeeDashboardSummary = async (employeeId: string | null) => {
+export const getEmployeeDashboardSummary = async (
+  employeeId: string | null,
+) => {
   if (!employeeId) {
     throw new AppError({
       code: "EMPLOYEE_PROFILE_REQUIRED",

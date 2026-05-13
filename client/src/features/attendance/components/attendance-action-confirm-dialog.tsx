@@ -20,13 +20,15 @@ interface AttendanceActionConfirmDialogProps {
 const actionContent = {
   'clock-in': {
     buttonLabel: 'Confirm clock in',
-    description: 'This will record your clock-in time using the current server time.',
+    description:
+      'This will record your clock-in time using the current server time.',
     icon: LogIn,
     title: 'Clock in now?',
   },
   'clock-out': {
     buttonLabel: 'Confirm clock out',
-    description: 'This will record your clock-out time and close today’s active attendance record.',
+    description:
+      'This will record your clock-out time and close today’s active attendance record.',
     icon: LogOut,
     title: 'Clock out now?',
   },
@@ -53,7 +55,11 @@ export const AttendanceActionConfirmDialog = ({
           <DialogDescription>{content.description}</DialogDescription>
         </DialogHeader>
         <DialogFooter>
-          <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+          >
             Cancel
           </Button>
           <Button type="button" disabled={isSubmitting} onClick={onConfirm}>

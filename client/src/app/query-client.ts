@@ -25,5 +25,7 @@ subscribeToUnauthorized(() => {
 
   isHandlingUnauthorized = true
   toast.error('Your session expired. Please sign in again.')
-  window.location.assign(`/login?from=${encodeURIComponent(window.location.pathname + window.location.search)}`)
+  window.location.assign(
+    `/login?from=${encodeURIComponent(window.location.pathname + window.location.search)}`,
+  )
 })

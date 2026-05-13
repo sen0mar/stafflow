@@ -1,6 +1,9 @@
 import { z } from "zod";
 
-import { limitQuerySchema, pageQuerySchema } from "../../core/pagination/pagination";
+import {
+  limitQuerySchema,
+  pageQuerySchema,
+} from "../../core/pagination/pagination";
 const optionalTrimmedString = z
   .string()
   .trim()
@@ -98,7 +101,9 @@ export type UpdateEmployeeInput = z.infer<typeof updateEmployeeSchema>["body"];
 export type UpdateEmployeeStatusInput = z.infer<
   typeof updateEmployeeStatusSchema
 >["body"];
-export type DisableEmployeeInput = z.infer<typeof disableEmployeeSchema>["body"];
+export type DisableEmployeeInput = z.infer<
+  typeof disableEmployeeSchema
+>["body"];
 export type UpdateSelfProfileInput = z.infer<
   typeof updateSelfProfileSchema
 >["body"];

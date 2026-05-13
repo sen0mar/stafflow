@@ -20,7 +20,10 @@ import {
 } from '@/shared/components/ui/form'
 import { Textarea } from '@/shared/components/ui/textarea'
 import type { LeaveRequest } from '../api/leave.api'
-import { leaveReviewSchema, type LeaveReviewValues } from '../schemas/leave-form.schema'
+import {
+  leaveReviewSchema,
+  type LeaveReviewValues,
+} from '../schemas/leave-form.schema'
 
 interface LeaveReviewDialogProps {
   action: 'approve' | 'reject' | null
@@ -55,7 +58,9 @@ export const LeaveReviewDialog = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{isRejecting ? 'Reject leave request' : 'Approve leave request'}</DialogTitle>
+          <DialogTitle>
+            {isRejecting ? 'Reject leave request' : 'Approve leave request'}
+          </DialogTitle>
           <DialogDescription>
             {request
               ? `${isRejecting ? 'Reject' : 'Approve'} ${request.employee.fullName}'s ${request.leaveType.name.toLowerCase()} request.`
@@ -71,18 +76,34 @@ export const LeaveReviewDialog = ({
                 <FormItem>
                   <FormLabel>Review note</FormLabel>
                   <FormControl>
-                    <Textarea placeholder="Optional note for the employee" rows={4} {...field} />
+                    <Textarea
+                      placeholder="Optional note for the employee"
+                      rows={4}
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => onOpenChange(false)}
+              >
                 Cancel
               </Button>
-              <Button type="submit" variant={isRejecting ? 'destructive' : 'default'} disabled={isSubmitting}>
-                {isSubmitting ? 'Saving...' : isRejecting ? 'Reject request' : 'Approve request'}
+              <Button
+                type="submit"
+                variant={isRejecting ? 'destructive' : 'default'}
+                disabled={isSubmitting}
+              >
+                {isSubmitting
+                  ? 'Saving...'
+                  : isRejecting
+                    ? 'Reject request'
+                    : 'Approve request'}
               </Button>
             </DialogFooter>
           </form>

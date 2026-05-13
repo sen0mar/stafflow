@@ -9,7 +9,11 @@ const statusClassName: Record<AttendanceStatus, string> = {
   PRESENT: 'border-default bg-brand-soft text-brand-text',
 }
 
-export const AttendanceStatusBadge = ({ status }: { status: AttendanceStatus }) => (
+export const AttendanceStatusBadge = ({
+  status,
+}: {
+  status: AttendanceStatus
+}) => (
   <Badge className={statusClassName[status]} variant="outline">
     {attendanceStatusLabel(status)}
   </Badge>

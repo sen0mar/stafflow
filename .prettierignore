@@ -1,0 +1,10 @@
+node_modules
+.codex
+dist
+coverage
+.vite
+.cache
+client/dist
+server/dist
+*.tsbuildinfo
+package-lock.json

@@ -16,7 +16,10 @@ import { Skeleton } from '@/shared/components/ui/skeleton'
 import { PageHeader } from '@/shared/components/layout/page-header'
 import { EmployeeProfileCard } from '../components/employee-profile-card'
 import { useSelfEmployee, useUpdateSelfProfile } from '../hooks/use-employees'
-import { selfProfileFormSchema, type SelfProfileFormValues } from '../schemas/employee-form.schema'
+import {
+  selfProfileFormSchema,
+  type SelfProfileFormValues,
+} from '../schemas/employee-form.schema'
 
 export const EmployeeProfilePage = () => {
   const selfEmployeeQuery = useSelfEmployee()
@@ -76,14 +79,19 @@ export const EmployeeProfilePage = () => {
           <section className="rounded-2xl border border-default bg-surface p-4 shadow-soft">
             <h2 className="font-semibold text-primary">Editable profile</h2>
             <Form {...form}>
-              <form className="mt-4 grid gap-4 md:grid-cols-2" onSubmit={form.handleSubmit(handleSubmit)}>
+              <form
+                className="mt-4 grid gap-4 md:grid-cols-2"
+                onSubmit={form.handleSubmit(handleSubmit)}
+              >
                 <FormField
                   control={form.control}
                   name="firstName"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>First name</FormLabel>
-                      <FormControl><Input {...field} /></FormControl>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -94,7 +102,9 @@ export const EmployeeProfilePage = () => {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Last name</FormLabel>
-                      <FormControl><Input {...field} /></FormControl>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -105,7 +115,9 @@ export const EmployeeProfilePage = () => {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Phone</FormLabel>
-                      <FormControl><Input {...field} /></FormControl>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}

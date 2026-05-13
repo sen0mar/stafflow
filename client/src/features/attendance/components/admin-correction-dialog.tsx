@@ -52,7 +52,9 @@ const toDateTimeLocalValue = (value: string | null) => {
   return new Date(date.getTime() - offsetMs).toISOString().slice(0, 16)
 }
 
-const getDefaultValues = (record?: AttendanceRecord | null): AttendanceCorrectionValues => ({
+const getDefaultValues = (
+  record?: AttendanceRecord | null,
+): AttendanceCorrectionValues => ({
   clockInAt: toDateTimeLocalValue(record?.clockInAt ?? null),
   clockOutAt: toDateTimeLocalValue(record?.clockOutAt ?? null),
   notes: record?.notes ?? '',
@@ -83,7 +85,9 @@ export const AdminCorrectionDialog = ({
         <DialogHeader>
           <DialogTitle>Correct attendance</DialogTitle>
           <DialogDescription>
-            {record ? `Update ${record.employee.fullName}'s attendance record.` : 'Update attendance details.'}
+            {record
+              ? `Update ${record.employee.fullName}'s attendance record.`
+              : 'Update attendance details.'}
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -146,14 +150,22 @@ export const AdminCorrectionDialog = ({
                 <FormItem>
                   <FormLabel>Notes</FormLabel>
                   <FormControl>
-                    <Textarea placeholder="Optional correction note" rows={3} {...field} />
+                    <Textarea
+                      placeholder="Optional correction note"
+                      rows={3}
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => onOpenChange(false)}
+              >
                 Cancel
               </Button>
               <Button type="submit" disabled={isSubmitting}>

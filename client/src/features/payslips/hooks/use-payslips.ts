@@ -12,7 +12,9 @@ import {
 } from '../api/payslips.api'
 import { payslipsKeys } from '../api/payslips.keys'
 
-const invalidatePayslips = async (queryClient: ReturnType<typeof useQueryClient>) => {
+const invalidatePayslips = async (
+  queryClient: ReturnType<typeof useQueryClient>,
+) => {
   await queryClient.invalidateQueries({ queryKey: payslipsKeys.all() })
 }
 
@@ -23,7 +25,10 @@ export const usePayslips = (params: PayslipListParams, enabled = true) =>
     queryKey: payslipsKeys.list(params),
   })
 
-export const useSelfPayslips = (params: SelfPayslipListParams, enabled = true) =>
+export const useSelfPayslips = (
+  params: SelfPayslipListParams,
+  enabled = true,
+) =>
   useQuery({
     enabled,
     queryFn: () => getSelfPayslips(params),
@@ -64,7 +69,9 @@ export const useDownloadPayslip = () =>
   useMutation({
     mutationFn: getPayslipDownload,
     onError: (error) => {
-      toast.error(getSafeErrorMessage(error, 'Payslip download is unavailable.'))
+      toast.error(
+        getSafeErrorMessage(error, 'Payslip download is unavailable.'),
+      )
     },
     onSuccess: (download) => {
       window.open(download.url, '_blank', 'noopener,noreferrer')

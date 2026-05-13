@@ -86,7 +86,9 @@ const toDateTimeFilter = (value: string, endOfDay = false) => {
     return undefined
   }
 
-  return new Date(`${value}T${endOfDay ? '23:59:59' : '00:00:00'}`).toISOString()
+  return new Date(
+    `${value}T${endOfDay ? '23:59:59' : '00:00:00'}`,
+  ).toISOString()
 }
 
 const trimValue = (value: string) => {
@@ -119,11 +121,17 @@ const stringifyValue = (value: unknown) => {
 
 const getChangedFields = (metadata: unknown) =>
   isRecord(metadata) && Array.isArray(metadata.changedFields)
-    ? metadata.changedFields.filter((field): field is string => typeof field === 'string')
+    ? metadata.changedFields.filter(
+        (field): field is string => typeof field === 'string',
+      )
     : []
 
 const getOldNewMetadata = (metadata: unknown) => {
-  if (!isRecord(metadata) || !isRecord(metadata.from) || !isRecord(metadata.to)) {
+  if (
+    !isRecord(metadata) ||
+    !isRecord(metadata.from) ||
+    !isRecord(metadata.to)
+  ) {
     return null
   }
 
@@ -133,9 +141,7 @@ const getOldNewMetadata = (metadata: unknown) => {
   }
 }
 
-const AuditLogsLoading = () => (
-  <TableSkeleton />
-)
+const AuditLogsLoading = () => <TableSkeleton />
 
 const AuditLogsEmpty = () => (
   <EmptyState
@@ -167,7 +173,9 @@ const MetadataPreview = ({ metadata }: { metadata: unknown }) => {
   const fields =
     changedFields.length > 0
       ? changedFields
-      : Array.from(new Set([...Object.keys(oldNew.from), ...Object.keys(oldNew.to)]))
+      : Array.from(
+          new Set([...Object.keys(oldNew.from), ...Object.keys(oldNew.to)]),
+        )
 
   return (
     <div className="overflow-hidden rounded-lg border border-default">
@@ -182,7 +190,9 @@ const MetadataPreview = ({ metadata }: { metadata: unknown }) => {
         <TableBody>
           {fields.map((field) => (
             <TableRow key={field}>
-              <TableCell className="font-medium text-primary">{field}</TableCell>
+              <TableCell className="font-medium text-primary">
+                {field}
+              </TableCell>
               <TableCell>
                 <code className="whitespace-pre-wrap text-xs text-muted">
                   {stringifyValue(oldNew.from[field])}
@@ -201,7 +211,13 @@ const MetadataPreview = ({ metadata }: { metadata: unknown }) => {
   )
 }
 
-const DetailItem = ({ label, value }: { label: string; value: string | null }) => (
+const DetailItem = ({
+  label,
+  value,
+}: {
+  label: string
+  value: string | null
+}) => (
   <div>
     <dt className="text-xs font-medium uppercase text-muted">{label}</dt>
     <dd className="mt-1 break-words text-sm text-primary">{value ?? 'None'}</dd>
@@ -233,8 +249,14 @@ const AuditLogDetailsDialog = ({
       {auditLog ? (
         <div className="space-y-5">
           <div className="grid gap-4 rounded-lg border border-default bg-inset p-4 sm:grid-cols-2">
-            <DetailItem label="Action" value={humanizeAction(auditLog.action)} />
-            <DetailItem label="Created" value={formatDateTime(auditLog.createdAt)} />
+            <DetailItem
+              label="Action"
+              value={humanizeAction(auditLog.action)}
+            />
+            <DetailItem
+              label="Created"
+              value={formatDateTime(auditLog.createdAt)}
+            />
             <DetailItem
               label="Actor"
               value={auditLog.actorUser?.email ?? auditLog.actorUserId}
@@ -277,16 +299,22 @@ const AuditLogsTable = ({ auditLogs, onView }: AuditLogsTableProps) => (
         {auditLogs.map((auditLog) => (
           <TableRow key={auditLog.id}>
             <TableCell>
-              <Badge variant="secondary">{humanizeAction(auditLog.action)}</Badge>
+              <Badge variant="secondary">
+                {humanizeAction(auditLog.action)}
+              </Badge>
             </TableCell>
             <TableCell>
               <div className="font-medium text-primary">
                 {auditLog.actorUser?.email ?? 'System or unauthenticated'}
               </div>
-              <div className="text-xs text-muted">{auditLog.actorUserId ?? 'No actor ID'}</div>
+              <div className="text-xs text-muted">
+                {auditLog.actorUserId ?? 'No actor ID'}
+              </div>
             </TableCell>
             <TableCell>
-              <div className="font-medium text-primary">{auditLog.entityType}</div>
+              <div className="font-medium text-primary">
+                {auditLog.entityType}
+              </div>
               <div className="max-w-56 truncate text-xs text-muted">
                 {auditLog.entityId ?? 'No entity ID'}
               </div>
@@ -316,14 +344,21 @@ export const AuditLogsPage = () => {
   const tableState = useTableQueryState()
   const page = tableState.getNumber('page', 1)
   const actorUserId = tableState.getString('actorUserId')
-  const entityType = tableState.getString('entityType', 'all') as EntityTypeFilter
+  const entityType = tableState.getString(
+    'entityType',
+    'all',
+  ) as EntityTypeFilter
   const entityId = tableState.getString('entityId')
   const action = tableState.getString('action', 'all') as ActionFilter
   const createdAtFrom = tableState.getDate('from')
   const createdAtTo = tableState.getDate('to')
-  const [selectedAuditLogId, setSelectedAuditLogId] = useState<string | null>(null)
+  const [selectedAuditLogId, setSelectedAuditLogId] = useState<string | null>(
+    null,
+  )
   const currentUserQuery = useCurrentUser()
-  const permissions = currentUserQuery.data ? getRolePermissions(currentUserQuery.data.role) : []
+  const permissions = currentUserQuery.data
+    ? getRolePermissions(currentUserQuery.data.role)
+    : []
   const canReadAuditLogs = hasPermission(permissions, 'auditLogs:read')
   const auditLogsQuery = useAuditLogs(
     {
@@ -338,7 +373,10 @@ export const AuditLogsPage = () => {
     },
     currentUserQuery.isSuccess && canReadAuditLogs,
   )
-  const selectedAuditLogQuery = useAuditLog(selectedAuditLogId, Boolean(selectedAuditLogId))
+  const selectedAuditLogQuery = useAuditLog(
+    selectedAuditLogId,
+    Boolean(selectedAuditLogId),
+  )
   const auditLogs = auditLogsQuery.data?.data ?? []
   const pagination = auditLogsQuery.data?.meta
   const { updateQuery } = tableState
@@ -347,16 +385,27 @@ export const AuditLogsPage = () => {
     updateQuery({ page: nextPage === 1 ? undefined : nextPage })
   }
 
-  const handleActorSearchChange = useCallback((value: string) => {
-    updateQuery({ actorUserId: value.trim() || undefined }, { resetPage: true })
-  }, [updateQuery])
+  const handleActorSearchChange = useCallback(
+    (value: string) => {
+      updateQuery(
+        { actorUserId: value.trim() || undefined },
+        { resetPage: true },
+      )
+    },
+    [updateQuery],
+  )
 
-  const handleEntitySearchChange = useCallback((value: string) => {
-    updateQuery({ entityId: value.trim() || undefined }, { resetPage: true })
-  }, [updateQuery])
+  const handleEntitySearchChange = useCallback(
+    (value: string) => {
+      updateQuery({ entityId: value.trim() || undefined }, { resetPage: true })
+    },
+    [updateQuery],
+  )
 
   if (currentUserQuery.isSuccess && !canReadAuditLogs) {
-    return <UnauthorizedState description="Audit logs are available to admins only." />
+    return (
+      <UnauthorizedState description="Audit logs are available to admins only." />
+    )
   }
 
   const clearFilters = () => {
@@ -396,10 +445,18 @@ export const AuditLogsPage = () => {
             <Label>Entity type</Label>
             <FilterSelect
               value={entityType}
-              onValueChange={(value) => tableState.updateQuery({ entityType: value }, { resetPage: true })}
+              onValueChange={(value) =>
+                tableState.updateQuery(
+                  { entityType: value },
+                  { resetPage: true },
+                )
+              }
               options={[
                 { label: 'All entities', value: 'all' },
-                ...entityTypeOptions.map((option) => ({ label: option, value: option })),
+                ...entityTypeOptions.map((option) => ({
+                  label: option,
+                  value: option,
+                })),
               ]}
             />
           </div>
@@ -418,12 +475,19 @@ export const AuditLogsPage = () => {
           <div className="space-y-2">
             <Label>Action</Label>
             <FilterSelect
-              icon={<Filter className="h-4 w-4 text-muted" aria-hidden="true" />}
+              icon={
+                <Filter className="h-4 w-4 text-muted" aria-hidden="true" />
+              }
               value={action}
-              onValueChange={(value) => tableState.updateQuery({ action: value }, { resetPage: true })}
+              onValueChange={(value) =>
+                tableState.updateQuery({ action: value }, { resetPage: true })
+              }
               options={[
                 { label: 'All actions', value: 'all' },
-                ...actionOptions.map((option) => ({ label: humanizeAction(option), value: option })),
+                ...actionOptions.map((option) => ({
+                  label: humanizeAction(option),
+                  value: option,
+                })),
               ]}
             />
           </div>
@@ -434,7 +498,12 @@ export const AuditLogsPage = () => {
               id="audit-from"
               type="date"
               value={createdAtFrom}
-              onChange={(event) => tableState.updateQuery({ from: event.target.value }, { resetPage: true })}
+              onChange={(event) =>
+                tableState.updateQuery(
+                  { from: event.target.value },
+                  { resetPage: true },
+                )
+              }
             />
           </div>
 
@@ -444,19 +513,31 @@ export const AuditLogsPage = () => {
               id="audit-to"
               type="date"
               value={createdAtTo}
-              onChange={(event) => tableState.updateQuery({ to: event.target.value }, { resetPage: true })}
+              onChange={(event) =>
+                tableState.updateQuery(
+                  { to: event.target.value },
+                  { resetPage: true },
+                )
+              }
             />
           </div>
 
           <div className="flex items-end">
-            <Button className="w-full gap-2" type="button" variant="outline" onClick={clearFilters}>
+            <Button
+              className="w-full gap-2"
+              type="button"
+              variant="outline"
+              onClick={clearFilters}
+            >
               <X className="h-4 w-4" aria-hidden="true" />
               Clear
             </Button>
           </div>
         </div>
 
-        {auditLogsQuery.isLoading || currentUserQuery.isLoading ? <AuditLogsLoading /> : null}
+        {auditLogsQuery.isLoading || currentUserQuery.isLoading ? (
+          <AuditLogsLoading />
+        ) : null}
         {auditLogsQuery.isError ? (
           <QueryStateError
             error={auditLogsQuery.error}
@@ -464,13 +545,20 @@ export const AuditLogsPage = () => {
             description="Refresh the page or try again later."
           />
         ) : null}
-        {auditLogsQuery.data && auditLogs.length === 0 ? <AuditLogsEmpty /> : null}
+        {auditLogsQuery.data && auditLogs.length === 0 ? (
+          <AuditLogsEmpty />
+        ) : null}
         {auditLogs.length > 0 ? (
           <>
-            <AuditLogsTable auditLogs={auditLogs} onView={(auditLog) => setSelectedAuditLogId(auditLog.id)} />
+            <AuditLogsTable
+              auditLogs={auditLogs}
+              onView={(auditLog) => setSelectedAuditLogId(auditLog.id)}
+            />
             <PaginationControls
               itemLabel="audit logs"
-              meta={pagination ?? { limit: pageSize, page, total: 0, totalPages: 1 }}
+              meta={
+                pagination ?? { limit: pageSize, page, total: 0, totalPages: 1 }
+              }
               onPageChange={setPage}
             />
           </>
