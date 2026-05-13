@@ -164,6 +164,21 @@ describeWithTestDatabase("core API flows", () => {
       });
   });
 
+  it("does not expose a public registration route", async () => {
+    await seedUsers();
+
+    await request(app)
+      .post("/auth/register")
+      .send({
+        email: "public.signup@example.com",
+        password: testPassword,
+      })
+      .expect(404)
+      .expect(({ body }) => {
+        expect(body.error.code).toBe("NOT_FOUND");
+      });
+  });
+
   it("allows employee self access without trusting request employee ids", async () => {
     const { employee, employeeUser } = await seedUsers();
     const { agent } = await login(employeeUser.email);
@@ -177,6 +192,29 @@ describeWithTestDatabase("core API flows", () => {
           id: employee.id,
         });
       });
+  });
+
+  it("forbids employees from admin-only endpoints and other employee records", async () => {
+    const { employeeUser, otherEmployee } = await seedUsers();
+    const { agent } = await login(employeeUser.email);
+
+    const forbiddenRequests = [
+      agent.get("/employees"),
+      agent.get(`/employees/${otherEmployee.id}`),
+      agent.get("/attendance"),
+      agent.get("/leave-requests"),
+      agent.get("/payslips"),
+      agent.post("/payslips").field("employeeId", otherEmployee.id),
+      agent.get("/settings/company"),
+      agent.patch("/settings/company").send({ name: "Unsafe Demo Rename" }),
+      agent.get("/audit-logs"),
+    ];
+
+    for (const forbiddenRequest of forbiddenRequests) {
+      await forbiddenRequest.expect(403).expect(({ body }) => {
+        expect(body.error.code).toBe("FORBIDDEN");
+      });
+    }
   });
 
   it("allows admins to create, read, update, and disable employees", async () => {
@@ -225,6 +263,23 @@ describeWithTestDatabase("core API flows", () => {
         expect(body.data.status).toBe("INACTIVE");
         expect(body.data.account.status).toBe("DISABLED");
       });
+
+    await expect(
+      prisma.auditLog.findMany({
+        orderBy: { createdAt: "asc" },
+        select: { action: true, actorUserId: true, entityId: true },
+        where: {
+          actorUserId: admin.id,
+          entityId: createdEmployee.id,
+        },
+      }),
+    ).resolves.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ action: "EMPLOYEE_CREATED" }),
+        expect.objectContaining({ action: "EMPLOYEE_UPDATED" }),
+        expect.objectContaining({ action: "EMPLOYEE_DISABLED" }),
+      ]),
+    );
   });
 
   it("forbids an employee from accessing another employee payslip", async () => {
