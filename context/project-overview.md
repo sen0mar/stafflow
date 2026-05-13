@@ -110,7 +110,6 @@ Employee flow:
 - Admin can review audit logs.
 - Sensitive admin actions create audit log entries.
 - Technical logs are handled separately with Pino.
-- Rate limiting protects auth, reset, upload, and expensive endpoints.
 
 ## Scope
 
@@ -140,7 +139,6 @@ Employee flow:
 - Demo-mode protection for storage-consuming actions when the app is publicly deployed.
 - Basic settings.
 - Audit logs for sensitive actions.
-- Upstash Redis rate limiting.
 - Pino technical logging.
 - Vercel frontend deployment.
 - Render backend deployment.
@@ -180,9 +178,8 @@ Employee flow:
 10. Admin-only pages and APIs are inaccessible to employees.
 11. Self-service APIs do not trust employee IDs from the request body.
 12. List pages are paginated and do not overfetch data.
-13. Auth, password reset, upload, and expensive routes are rate limited.
-14. Sensitive admin actions create audit logs.
-15. The app can be deployed with Vercel, Render, Neon, Cloudflare R2, and Upstash.
-16. The login page has no public registration path.
-17. New users are created only by admins or controlled seed/invitation flows.
-18. The public demo cannot be used to consume unbounded R2 storage or create a fresh company workspace.
+13. Sensitive admin actions create audit logs.
+14. The app can be deployed with Vercel, Render, Neon, and Cloudflare R2.
+15. The login page has no public registration path.
+16. New users are created only by admins or controlled seed/invitation flows.
+17. The public demo cannot be used to consume unbounded R2 storage or create a fresh company workspace.

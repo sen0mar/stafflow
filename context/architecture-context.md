@@ -15,7 +15,6 @@
 | ORM                  | Prisma                               | Type-safe database access, schema modeling, migrations                                                             |
 | Auth                 | First-party session auth             | Email/password login, database-backed sessions, HTTP-only secure cookies, no public registration                   |
 | Password hashing     | bcrypt                               | Password hashing with a tuned cost factor                                                                          |
-| Rate limiting        | Upstash Redis + `@upstash/ratelimit` | Distributed rate limiting for auth, API, uploads, and expensive actions                                            |
 | File storage         | Cloudflare R2                        | Payslip PDF storage and future private file objects, protected from public-demo abuse                              |
 | Logging              | Pino + `pino-http`                   | Structured technical logs and request logs                                                                         |
 | Frontend hosting     | Vercel                               | Client deployment                                                                                                  |
@@ -30,7 +29,7 @@
 - `client/src/features` — Feature modules: auth, employees, departments, attendance, leave, payslips, settings, and audit logs.
 - `server/src/app.ts` — Express app composition: middleware, CORS, cookies, security headers, routing, and error handling.
 - `server/src/server.ts` — Server bootstrap only: environment validation, port binding, graceful shutdown hooks if needed.
-- `server/src/core` — Shared backend infrastructure: environment config, errors, logging, auth/session middleware, RBAC middleware, rate limiting, CSRF, request IDs, pagination, and utilities.
+- `server/src/core` — Shared backend infrastructure: environment config, errors, logging, auth/session middleware, RBAC middleware, CSRF, request IDs, pagination, and utilities.
 - `server/src/modules` — Backend feature modules: each module owns routes, controllers, services, repositories, schemas, and policies.
 - `server/src/prisma` — Prisma client singleton and database-related infrastructure.
 - `prisma` — Prisma schema and migrations.
@@ -58,8 +57,6 @@ Controllers must stay thin. Services own business rules. Repositories own databa
 - **Cloudflare R2** stores large private files:
   - Payslip PDFs and future employee documents.
   - PostgreSQL stores only metadata and the R2 object key, not the file contents.
-- **Upstash Redis** stores ephemeral rate-limit counters:
-  - Login limits, password reset limits, authenticated API limits, upload limits, and other abuse-control counters.
 - **Render stdout logs** store structured technical logs emitted by Pino:
   - Operational logs are not a source of business truth.
 - **PostgreSQL AuditLog** stores business/security history:
@@ -205,7 +202,7 @@ Backend/database performance rules:
 - Add indexes for common filters and joins.
 - Log slow requests and slow database paths.
 - Keep heavy calculations out of page-load endpoints where possible.
-- Do not upload files to R2 before authentication, authorization, rate limiting, and file validation.
+- Do not upload files to R2 before authentication, authorization, and file validation.
 
 Important indexes to consider early:
 
@@ -230,7 +227,6 @@ Production target:
 - Backend on Render.
 - Database on Neon PostgreSQL.
 - File storage on Cloudflare R2.
-- Rate limiting on Upstash Redis.
 
 Recommended domain setup:
 
@@ -252,7 +248,6 @@ Expected backend environment groups:
 - Database URLs: pooled `DATABASE_URL` and direct `DIRECT_URL` for migrations.
 - Session/cookie secrets.
 - Cloudflare R2 credentials and bucket config.
-- Upstash Redis REST URL and token.
 - Email provider credentials once invitations/password reset are implemented.
 - Demo-mode flags, if used, such as `DEMO_MODE`, `DEMO_UPLOADS_ENABLED`, upload quotas, or cleanup settings.
 
@@ -266,7 +261,7 @@ Auth/session risks:
 - Role changes do not take effect if permissions are cached incorrectly.
 - Session tokens are stored raw instead of hashed.
 - Password hashes, cookies, or reset tokens are accidentally logged.
-- Password reset and invitation tokens are not rate-limited or are stored unsafely.
+- Password reset and invitation tokens are stored unsafely.
 
 RBAC/resource-access risks:
 
@@ -282,7 +277,7 @@ Performance risks:
 - Prisma `include` loads too many nested relations.
 - Tables render thousands of rows without pagination or virtualization.
 - Search fires on every keystroke without debounce.
-- File upload endpoints perform expensive work before rate limiting and validation.
+- File upload endpoints perform expensive work before validation.
 
 Storage risks:
 
@@ -293,21 +288,13 @@ Storage risks:
 - R2 uploads succeed but database writes fail, leaving orphan files.
 - Database writes succeed but R2 operations fail, leaving broken metadata.
 
-Rate limiting risks:
-
-- A single IP limit blocks an entire office network.
-- IP headers are trusted incorrectly behind Render's proxy.
-- All routes share one blunt global limit.
-- Rate limiting fails closed on normal routes and takes down the app during Redis issues.
-- Rate limiting happens after expensive parsing, file validation, or storage calls.
-
 Operational risks:
 
 - Demo seed data is missing, stale, or not reset, making the public demo confusing or abusable.
 - Logs are unstructured or inconsistent.
 - Request IDs are missing, making production debugging difficult.
 - Technical logs and audit logs are treated as the same thing.
-- Environment variables are missing or inconsistent across Vercel, Render, Neon, R2, and Upstash.
+- Environment variables are missing or inconsistent across Vercel, Render, Neon, and R2.
 
 ## Invariants
 
@@ -322,8 +309,7 @@ Operational risks:
 9. Large private files are stored in Cloudflare R2, not PostgreSQL.
 10. Sensitive admin actions create audit log entries.
 11. Technical logs use Pino and redact secrets, cookies, tokens, and password fields.
-12. Public auth endpoints and expensive endpoints are rate limited before expensive work runs.
-13. CORS, cookies, and proxy settings must be verified in production-like deployment.
-14. The MVP supports `ADMIN` and `EMPLOYEE`; future roles must be possible without rewriting the whole auth model.
-15. Public self-registration is not allowed; account creation is admin-only, seeded, or controlled by invitation/password setup.
-16. Public demo deployments must protect Cloudflare R2 from unrestricted uploads and storage abuse.
+12. CORS, cookies, and proxy settings must be verified in production-like deployment.
+13. The MVP supports `ADMIN` and `EMPLOYEE`; future roles must be possible without rewriting the whole auth model.
+14. Public self-registration is not allowed; account creation is admin-only, seeded, or controlled by invitation/password setup.
+15. Public demo deployments must protect Cloudflare R2 from unrestricted uploads and storage abuse.

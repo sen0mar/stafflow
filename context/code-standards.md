@@ -62,7 +62,7 @@
 - Use async error handling consistently.
 - Do not leak internal stack traces in production responses.
 - Use request IDs in logs and error paths.
-- Do not perform long or expensive work before auth, authorization, rate limiting, and validation.
+- Do not perform long or expensive work before auth, authorization, and validation.
 - Use explicit HTTP status codes: `400`, `401`, `403`, `404`, `409`, `422`, `429`, and `500` where appropriate.
 
 Recommended response shape:
@@ -145,7 +145,6 @@ server/
       errors/
       logger/
       middleware/
-      rate-limit/
       security/
       utils/
     modules/
@@ -205,7 +204,6 @@ Examples:
 - Add resource policy checks for self-vs-any access.
 - Never trust `employeeId`, `userId`, `role`, or permission values from the request body.
 - Redact sensitive values from logs.
-- Rate limit login, password reset, invitation, upload, and expensive endpoints.
 - Public demo users must not be allowed to bypass demo-mode restrictions or storage quotas.
 
 ## Logging and Audit Logs
@@ -241,5 +239,4 @@ Audit-log-worthy actions include:
 - Avoid N+1 Prisma patterns.
 - Add indexes for common query patterns.
 - Validate file size and file type before uploading to R2.
-- Place rate limiting before expensive work.
 - Add slow request logging once basic infrastructure exists.
