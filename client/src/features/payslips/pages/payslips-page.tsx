@@ -3,7 +3,7 @@ import { useCallback, useState } from 'react'
 import { FilterSelect } from '@/shared/components/data-table/filter-select'
 import { SearchInput } from '@/shared/components/data-table/search-input'
 import { Button } from '@/shared/components/ui/button'
-import { Skeleton } from '@/shared/components/ui/skeleton'
+import { EmptyState, QueryStateError, TableSkeleton } from '@/shared/components/layout/page-state'
 import {
   Table,
   TableBody,
@@ -70,24 +70,16 @@ const formatDate = (value: string) =>
 const getMonthValue = (value: MonthFilter) => (value === 'all' ? undefined : Number(value))
 const getYearValue = (value: YearFilter) => (value === 'all' ? undefined : Number(value))
 
-const PayslipsLoading = () => (
-  <div className="space-y-3 rounded-2xl border border-default bg-surface p-4 shadow-soft">
-    {Array.from({ length: 6 }, (_item, index) => (
-      <Skeleton key={index} className="h-12 w-full" />
-    ))}
-  </div>
-)
-
 const PayslipsEmpty = ({ canUpload }: { canUpload: boolean }) => (
-  <div className="rounded-2xl border border-dashed border-default bg-surface px-6 py-12 text-center shadow-soft">
-    <FileText className="mx-auto h-10 w-10 text-muted" aria-hidden="true" />
-    <h2 className="mt-4 text-lg font-semibold text-primary">No payslips found</h2>
-    <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-muted">
-      {canUpload
+  <EmptyState
+    icon={FileText}
+    title="No payslips found"
+    description={
+      canUpload
         ? 'Upload a PDF payslip, or adjust the current filters.'
-        : 'Your payslips will appear here when an admin uploads them.'}
-    </p>
-  </div>
+        : 'Your payslips will appear here when an admin uploads them.'
+    }
+  />
 )
 
 interface PayslipsTableProps {
@@ -329,11 +321,13 @@ export const PayslipsPage = () => {
           </div>
         </div>
 
-        {activeQuery.isLoading || currentUserQuery.isLoading ? <PayslipsLoading /> : null}
+        {activeQuery.isLoading || currentUserQuery.isLoading ? <TableSkeleton /> : null}
         {activeQuery.isError ? (
-          <div className="rounded-xl border border-default bg-inset p-6 text-sm text-muted">
-            Payslips could not be loaded. Refresh the page or try again later.
-          </div>
+          <QueryStateError
+            error={activeQuery.error}
+            title="Payslips could not be loaded"
+            description="Refresh the page or try again later."
+          />
         ) : null}
         {activeQuery.data && payslips.length === 0 ? <PayslipsEmpty canUpload={canUpload} /> : null}
         {payslips.length > 0 ? (

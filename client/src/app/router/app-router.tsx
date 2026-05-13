@@ -3,12 +3,14 @@ import { ProtectedRoute } from './protected-route'
 import { RouteFallback } from './route-fallback'
 import { AppShell } from '@/shared/components/layout/app-shell'
 import { NotFoundPage } from '@/shared/components/layout/not-found-page'
+import { AppRouteErrorBoundary, RouteErrorBoundary } from '@/shared/components/layout/page-state'
 
 const routeFallbackElement = <RouteFallback />
 
 export const appRouter = createBrowserRouter([
   {
     path: '/',
+    errorElement: <RouteErrorBoundary />,
     hydrateFallbackElement: routeFallbackElement,
     lazy: async () => {
       const { HomePage } = await import('@/features/homepage/pages/home-page')
@@ -18,6 +20,7 @@ export const appRouter = createBrowserRouter([
   },
   {
     path: '/login',
+    errorElement: <RouteErrorBoundary />,
     hydrateFallbackElement: routeFallbackElement,
     lazy: async () => {
       const { LoginPage } = await import('@/features/auth/pages/login-page')
@@ -28,9 +31,11 @@ export const appRouter = createBrowserRouter([
   {
     path: '/app',
     element: <ProtectedRoute />,
+    errorElement: <RouteErrorBoundary />,
     children: [
       {
         element: <AppShell />,
+        errorElement: <AppRouteErrorBoundary />,
         children: [
           {
             index: true,

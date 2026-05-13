@@ -3,9 +3,9 @@ import { useState } from 'react'
 import { DateRangeFilter } from '@/shared/components/data-table/date-range-filter'
 import { FilterSelect } from '@/shared/components/data-table/filter-select'
 import { TableToolbar } from '@/shared/components/data-table/table-toolbar'
-import { Skeleton } from '@/shared/components/ui/skeleton'
 import { PaginationControls } from '@/shared/components/data-table/pagination-controls'
 import { PageHeader } from '@/shared/components/layout/page-header'
+import { EmptyState, QueryStateError, TableSkeleton } from '@/shared/components/layout/page-state'
 import { useTableQueryState } from '@/shared/hooks/use-table-query-state'
 import { useCurrentUser } from '@/features/auth/hooks/use-current-user'
 import { useDepartments } from '@/features/departments/hooks/use-departments'
@@ -42,24 +42,16 @@ const toDateFilter = (value: string, endOfDay = false) => {
   return date.toISOString()
 }
 
-const LoadingTable = () => (
-  <div className="space-y-3 rounded-2xl border border-default bg-surface p-4 shadow-soft">
-    {Array.from({ length: 6 }, (_item, index) => (
-      <Skeleton key={index} className="h-12 w-full" />
-    ))}
-  </div>
-)
-
 const EmptyAttendance = ({ isAdmin }: { isAdmin?: boolean }) => (
-  <div className="rounded-2xl border border-dashed border-default bg-surface px-6 py-12 text-center shadow-soft">
-    <CalendarCheck className="mx-auto h-10 w-10 text-muted" aria-hidden="true" />
-    <h2 className="mt-4 text-lg font-semibold text-primary">No attendance records found</h2>
-    <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-muted">
-      {isAdmin
+  <EmptyState
+    icon={CalendarCheck}
+    title="No attendance records found"
+    description={
+      isAdmin
         ? 'Adjust the filters or wait for employees to start recording attendance.'
-        : 'Your clock-in and clock-out history will appear here.'}
-    </p>
-  </div>
+        : 'Your clock-in and clock-out history will appear here.'
+    }
+  />
 )
 
 const EmployeeAttendancePage = () => {
@@ -118,11 +110,13 @@ const EmployeeAttendancePage = () => {
           />
         </div>
 
-        {historyQuery.isLoading ? <LoadingTable /> : null}
+        {historyQuery.isLoading ? <TableSkeleton /> : null}
         {historyQuery.isError ? (
-          <div className="rounded-xl border border-default bg-inset p-6 text-sm text-muted">
-            Attendance history could not be loaded. Refresh the page or try again later.
-          </div>
+          <QueryStateError
+            error={historyQuery.error}
+            title="Attendance history could not be loaded"
+            description="Refresh the page or try again later."
+          />
         ) : null}
         {historyQuery.data && records.length === 0 ? <EmptyAttendance /> : null}
         {records.length > 0 ? (
@@ -276,11 +270,13 @@ const AdminAttendancePage = () => {
           />
         </TableToolbar>
 
-        {attendanceQuery.isLoading ? <LoadingTable /> : null}
+        {attendanceQuery.isLoading ? <TableSkeleton /> : null}
         {attendanceQuery.isError ? (
-          <div className="rounded-xl border border-default bg-inset p-6 text-sm text-muted">
-            Attendance records could not be loaded. Refresh the page or try again later.
-          </div>
+          <QueryStateError
+            error={attendanceQuery.error}
+            title="Attendance records could not be loaded"
+            description="Refresh the page or try again later."
+          />
         ) : null}
         {attendanceQuery.data && records.length === 0 ? <EmptyAttendance isAdmin /> : null}
         {records.length > 0 ? (
@@ -310,7 +306,7 @@ export const AttendancePage = () => {
   const currentUserQuery = useCurrentUser()
 
   if (currentUserQuery.isLoading) {
-    return <LoadingTable />
+    return <TableSkeleton />
   }
 
   if (currentUserQuery.data?.role === 'ADMIN') {

@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { dashboardKeys } from '@/features/dashboard/api/dashboard.keys'
-import { ApiClientError } from '@/shared/lib/api-client'
+import { getSafeErrorMessage } from '@/shared/lib/api-errors'
 import {
   clockIn,
   clockOut,
@@ -14,9 +14,6 @@ import {
   type SelfAttendanceListParams,
 } from '../api/attendance.api'
 import { attendanceKeys } from '../api/attendance.keys'
-
-const getErrorMessage = (error: unknown, fallback: string) =>
-  error instanceof ApiClientError ? error.message : fallback
 
 const invalidateAttendanceViews = async (queryClient: ReturnType<typeof useQueryClient>) => {
   await Promise.all([
@@ -58,7 +55,7 @@ export const useClockIn = () => {
   return useMutation({
     mutationFn: clockIn,
     onError: (error) => {
-      toast.error(getErrorMessage(error, 'Clock-in could not be recorded.'))
+      toast.error(getSafeErrorMessage(error, 'Clock-in could not be recorded.'))
     },
     onSuccess: async () => {
       await invalidateAttendanceViews(queryClient)
@@ -73,7 +70,7 @@ export const useClockOut = () => {
   return useMutation({
     mutationFn: clockOut,
     onError: (error) => {
-      toast.error(getErrorMessage(error, 'Clock-out could not be recorded.'))
+      toast.error(getSafeErrorMessage(error, 'Clock-out could not be recorded.'))
     },
     onSuccess: async () => {
       await invalidateAttendanceViews(queryClient)
@@ -88,7 +85,7 @@ export const useUpdateAttendanceRecord = () => {
   return useMutation({
     mutationFn: updateAttendanceRecord,
     onError: (error) => {
-      toast.error(getErrorMessage(error, 'Attendance record could not be updated.'))
+      toast.error(getSafeErrorMessage(error, 'Attendance record could not be updated.'))
     },
     onSuccess: async (record) => {
       await Promise.all([

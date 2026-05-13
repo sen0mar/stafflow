@@ -1,5 +1,8 @@
+import { notifyUnauthorized } from './auth-events'
+
 type RequestOptions = Omit<RequestInit, 'body'> & {
   body?: BodyInit | Record<string, unknown>
+  skipUnauthorizedHandler?: boolean
 }
 
 type ApiErrorResponse = {
@@ -92,7 +95,7 @@ export const apiClient = async <TResponse>(
   input: RequestInfo | URL,
   options: RequestOptions = {},
 ): Promise<TResponse> => {
-  const { body, headers, ...init } = options
+  const { body, headers, skipUnauthorizedHandler, ...init } = options
   const requestHeaders = new Headers(headers)
   const shouldSerializeJson = isJsonBody(body)
   const requestBody: BodyInit | undefined = shouldSerializeJson
@@ -126,6 +129,11 @@ export const apiClient = async <TResponse>(
       errorPayload = (await response.json()) as ApiErrorResponse
     } catch {
       errorPayload = undefined
+    }
+
+    if (response.status === 401 && !skipUnauthorizedHandler) {
+      clearApiCsrfToken()
+      notifyUnauthorized()
     }
 
     throw new ApiClientError(

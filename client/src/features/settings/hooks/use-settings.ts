@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { ApiClientError } from '@/shared/lib/api-client'
+import { getSafeErrorMessage } from '@/shared/lib/api-errors'
 import {
   getAttendanceSettings,
   getCompanySettings,
@@ -10,9 +10,6 @@ import {
   updateLeaveSettings,
 } from '../api/settings.api'
 import { settingsKeys } from '../api/settings.keys'
-
-const getErrorMessage = (error: unknown, fallback: string) =>
-  error instanceof ApiClientError ? error.message : fallback
 
 export const useCompanySettings = () =>
   useQuery({
@@ -38,7 +35,7 @@ export const useUpdateCompanySettings = () => {
   return useMutation({
     mutationFn: updateCompanySettings,
     onError: (error) => {
-      toast.error(getErrorMessage(error, 'Company settings could not be saved.'))
+      toast.error(getSafeErrorMessage(error, 'Company settings could not be saved.'))
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: settingsKeys.company() })
@@ -53,7 +50,7 @@ export const useUpdateAttendanceSettings = () => {
   return useMutation({
     mutationFn: updateAttendanceSettings,
     onError: (error) => {
-      toast.error(getErrorMessage(error, 'Attendance settings could not be saved.'))
+      toast.error(getSafeErrorMessage(error, 'Attendance settings could not be saved.'))
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: settingsKeys.attendance() })
@@ -68,7 +65,7 @@ export const useUpdateLeaveSettings = () => {
   return useMutation({
     mutationFn: updateLeaveSettings,
     onError: (error) => {
-      toast.error(getErrorMessage(error, 'Leave settings could not be saved.'))
+      toast.error(getSafeErrorMessage(error, 'Leave settings could not be saved.'))
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: settingsKeys.leave() })
