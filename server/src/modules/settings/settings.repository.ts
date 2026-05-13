@@ -1,6 +1,7 @@
 import { Prisma } from "@prisma/client";
 
 import { prisma } from "../../prisma/prisma.client";
+import { createAuditLog } from "../audit-logs/audit-log.service";
 import type {
   UpdateAttendanceSettingsInput,
   UpdateCompanySettingsInput,
@@ -124,13 +125,11 @@ export const updateCompanySettingsWithAuditLog = ({
       where: { id },
     });
 
-    await transaction.auditLog.create({
-      data: {
-        ...auditLog,
-        entityId: settings.id,
-        entityType: "CompanySettings",
-      },
-      select: { id: true },
+    await createAuditLog({
+      ...auditLog,
+      entityId: settings.id,
+      entityType: "CompanySettings",
+      tx: transaction,
     });
 
     return settings;
@@ -152,13 +151,11 @@ export const updateAttendanceSettingsWithAuditLog = ({
       where: { id },
     });
 
-    await transaction.auditLog.create({
-      data: {
-        ...auditLog,
-        entityId: settings.id,
-        entityType: "AttendanceSettings",
-      },
-      select: { id: true },
+    await createAuditLog({
+      ...auditLog,
+      entityId: settings.id,
+      entityType: "AttendanceSettings",
+      tx: transaction,
     });
 
     return settings;
@@ -180,13 +177,11 @@ export const updateLeaveSettingsWithAuditLog = ({
       where: { id },
     });
 
-    await transaction.auditLog.create({
-      data: {
-        ...auditLog,
-        entityId: settings.id,
-        entityType: "LeaveSettings",
-      },
-      select: { id: true },
+    await createAuditLog({
+      ...auditLog,
+      entityId: settings.id,
+      entityType: "LeaveSettings",
+      tx: transaction,
     });
 
     return settings;

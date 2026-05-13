@@ -1,6 +1,7 @@
 import type { PayslipStatus, Prisma } from "@prisma/client";
 
 import { prisma } from "../../prisma/prisma.client";
+import { createAuditLog } from "../audit-logs/audit-log.service";
 import type {
   CreatePayslipInput,
   ListPayslipsInput,
@@ -219,25 +220,22 @@ export const createOrReplacePayslipWithAuditLog = async ({
           select: payslipSelect,
         });
 
-    await tx.auditLog.create({
-      data: {
-        action: existing ? "PAYSLIP_REPLACED" : "PAYSLIP_UPLOADED",
-        actorUserId,
-        entityId: payslip.id,
-        entityType: "Payslip",
-        ipAddress,
-        metadata: {
-          employeeId: input.employeeId,
-          fileName,
-          fileSize,
-          month: input.month,
-          previousObjectKey: existing?.r2ObjectKey ?? null,
-          replacement: Boolean(existing),
-          year: input.year,
-        },
-        userAgent,
+    await createAuditLog({
+      action: existing ? "PAYSLIP_REPLACED" : "PAYSLIP_UPLOADED",
+      actorUserId,
+      entityId: payslip.id,
+      entityType: "Payslip",
+      ipAddress,
+      metadata: {
+        employeeId: input.employeeId,
+        fileName,
+        fileSize,
+        month: input.month,
+        replacement: Boolean(existing),
+        year: input.year,
       },
-      select: { id: true },
+      tx,
+      userAgent,
     });
 
     return {
@@ -272,22 +270,20 @@ export const deletePayslipWithAuditLog = async ({
       where: { id },
     });
 
-    await tx.auditLog.create({
-      data: {
-        action: "PAYSLIP_DELETED",
-        actorUserId,
-        entityId: id,
-        entityType: "Payslip",
-        ipAddress,
-        metadata: {
-          employeeId: current.employeeId,
-          fileName: current.fileName,
-          month: current.month,
-          year: current.year,
-        },
-        userAgent,
+    await createAuditLog({
+      action: "PAYSLIP_DELETED",
+      actorUserId,
+      entityId: id,
+      entityType: "Payslip",
+      ipAddress,
+      metadata: {
+        employeeId: current.employeeId,
+        fileName: current.fileName,
+        month: current.month,
+        year: current.year,
       },
-      select: { id: true },
+      tx,
+      userAgent,
     });
 
     return payslip;

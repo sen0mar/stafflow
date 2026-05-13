@@ -266,6 +266,7 @@ model AuditLog {
   @@index([actorUserId, createdAt])
   @@index([entityType, entityId])
   @@index([action])
+  @@index([createdAt])
 }
 
 model PasswordResetToken {

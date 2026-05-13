@@ -32,6 +32,12 @@ interface AuthResponse {
 
 const failedLoginCodes = new Set(["ACCOUNT_NOT_ACTIVE", "INVALID_CREDENTIALS"]);
 
+const getAuditContext = (request: Parameters<RequestHandler>[0]) => ({
+  actorUserId: request.auth?.userId ?? null,
+  ipAddress: request.ip,
+  userAgent: request.get("user-agent"),
+});
+
 // Login sets both cookies but only returns the sanitized user payload.
 export const loginController: RequestHandler = async (request, response) => {
   const { body } = loginSchema.parse({ body: request.body });
@@ -115,6 +121,7 @@ export const changePasswordController: RequestHandler = async (
   const { body } = changePasswordSchema.parse({ body: request.body });
   const user = await changePassword({
     ...body,
+    auditContext: getAuditContext(request),
     userId: request.auth?.userId ?? "",
   });
 
@@ -149,7 +156,10 @@ export const resetPasswordController: RequestHandler = async (
   response,
 ) => {
   const { body } = resetPasswordSchema.parse({ body: request.body });
-  const user = await resetPassword(body);
+  const user = await resetPassword({
+    ...body,
+    auditContext: getAuditContext(request),
+  });
 
   clearSessionCookie(response);
   clearCsrfCookie(response);

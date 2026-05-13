@@ -11,6 +11,7 @@ import {
 } from "../../core/auth/password.service";
 import { env } from "../../config/env";
 import type { PublicAuthUser } from "../../core/auth/auth.types";
+import { createAuditLog } from "../audit-logs/audit-log.service";
 import type {
   AcceptInvitationInput,
   ChangePasswordInput,
@@ -35,6 +36,12 @@ import {
   updateLastLoginAt,
   updatePasswordHash,
 } from "./auth.repository";
+
+interface AuditContext {
+  actorUserId: string | null;
+  ipAddress?: string;
+  userAgent?: string;
+}
 
 // Use the same response for missing users and bad passwords to avoid enumeration.
 const invalidCredentialsError = () =>
@@ -123,7 +130,9 @@ export const changePassword = async ({
   currentPassword,
   newPassword,
   userId,
+  auditContext,
 }: ChangePasswordInput & {
+  auditContext: AuditContext;
   userId: string;
 }) => {
   validatePasswordConstraints(newPassword);
@@ -160,6 +169,16 @@ export const changePassword = async ({
 
   await updatePasswordHash({ passwordHash, userId });
   await revokeUserSessions(userId);
+  await createAuditLog({
+    ...auditContext,
+    action: "PASSWORD_CHANGED",
+    actorUserId: userId,
+    entityId: userId,
+    entityType: "User",
+    metadata: {
+      sessionsRevoked: true,
+    },
+  });
 
   return toPublicAuthUser(user);
 };
@@ -185,7 +204,10 @@ export const forgotPassword = async ({ email }: ForgotPasswordInput) => {
 export const resetPassword = async ({
   newPassword,
   token,
-}: ResetPasswordInput) => {
+  auditContext,
+}: ResetPasswordInput & {
+  auditContext: AuditContext;
+}) => {
   validatePasswordConstraints(newPassword);
 
   const resetToken = await findValidPasswordResetToken(hashSessionToken(token));
@@ -199,6 +221,16 @@ export const resetPassword = async ({
   await updatePasswordHash({ passwordHash, userId: resetToken.userId });
   await markPasswordResetTokenUsed(resetToken.id);
   await revokeUserSessions(resetToken.userId);
+  await createAuditLog({
+    ...auditContext,
+    action: "PASSWORD_RESET_COMPLETED",
+    actorUserId: null,
+    entityId: resetToken.userId,
+    entityType: "User",
+    metadata: {
+      sessionsRevoked: true,
+    },
+  });
 
   return toPublicAuthUser(resetToken.user);
 };

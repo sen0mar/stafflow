@@ -1,6 +1,7 @@
 import type { AttendanceStatus, Prisma } from "@prisma/client";
 
 import { prisma } from "../../prisma/prisma.client";
+import { createAuditLog } from "../audit-logs/audit-log.service";
 import type {
   ListAttendanceInput,
   ListSelfAttendanceInput,
@@ -254,17 +255,15 @@ export const updateAttendanceWithAuditLog = ({
       where: { id: entityId },
     });
 
-    await tx.auditLog.create({
-      data: {
-        action,
-        actorUserId,
-        entityId,
-        entityType: "AttendanceRecord",
-        ipAddress,
-        metadata,
-        userAgent,
-      },
-      select: { id: true },
+    await createAuditLog({
+      action,
+      actorUserId,
+      entityId,
+      entityType: "AttendanceRecord",
+      ipAddress,
+      metadata,
+      tx,
+      userAgent,
     });
 
     return attendance;

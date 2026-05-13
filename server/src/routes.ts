@@ -1,6 +1,7 @@
 import { Router } from "express";
 
 import type { ApiSuccess } from "./core/types/api-response";
+import { createAuditLogRoutes } from "./modules/audit-logs/audit-logs.routes";
 import { createAttendanceRoutes } from "./modules/attendance/attendance.routes";
 import { createAuthRoutes } from "./modules/auth/auth.routes";
 import { createDashboardRoutes } from "./modules/dashboard/dashboard.routes";
@@ -30,6 +31,7 @@ export const createRoutes = (): Router => {
   });
 
   router.use("/auth", createAuthRoutes());
+  router.use("/audit-logs", createAuditLogRoutes());
   router.use("/attendance", createAttendanceRoutes());
   router.use("/dashboard", createDashboardRoutes());
   router.use("/departments", createDepartmentRoutes());
