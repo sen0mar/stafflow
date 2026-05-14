@@ -310,12 +310,14 @@ export const PayslipsPage = () => {
         }
       />
 
-      <section className="space-y-4 rounded-2xl border border-default bg-surface p-4 shadow-soft">
+      <section className="space-y-4 overflow-hidden rounded-2xl border border-default bg-surface p-4 shadow-soft">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           {canReadAny ? (
-            <div className="w-full lg:max-w-sm">
+            <div className="min-w-0 w-full lg:max-w-sm">
               <SearchInput
                 key={search}
+                id="payslips-search"
+                name="payslipsSearch"
                 placeholder="Search employee or file"
                 value={search}
                 onDebouncedChange={handleSearchChange}
@@ -324,9 +326,12 @@ export const PayslipsPage = () => {
           ) : (
             <div className="text-sm text-muted">Private payroll documents</div>
           )}
-          <div className="grid gap-3 sm:grid-cols-2 lg:flex">
+          <div className="grid min-w-0 gap-3 sm:grid-cols-2 lg:flex">
             <FilterSelect
+              ariaLabel="Filter payslips by month"
               className="w-full lg:w-40"
+              id="payslips-month-filter"
+              name="payslipsMonth"
               value={month}
               onValueChange={(value) =>
                 tableState.updateQuery({ month: value }, { resetPage: true })
@@ -340,7 +345,10 @@ export const PayslipsPage = () => {
               ]}
             />
             <FilterSelect
+              ariaLabel="Filter payslips by year"
               className="w-full lg:w-36"
+              id="payslips-year-filter"
+              name="payslipsYear"
               value={year}
               onValueChange={(value) =>
                 tableState.updateQuery({ year: value }, { resetPage: true })

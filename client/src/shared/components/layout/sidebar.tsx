@@ -1,4 +1,5 @@
 import { BarChart3, LogOut, X } from 'lucide-react'
+import { useEffect, useRef } from 'react'
 import { NavLink } from 'react-router-dom'
 import { Button } from '@/shared/components/ui/button'
 import { cn } from '@/shared/lib/utils'
@@ -97,31 +98,51 @@ const SidebarContent = ({
   </div>
 )
 
-export const Sidebar = (props: SidebarProps) => (
-  <>
-    <aside
-      className="sticky top-0 hidden h-screen border-r border-default bg-surface/90 px-4 py-5 shadow-soft lg:flex"
-      aria-label="Application sidebar"
-    >
-      <SidebarContent {...props} />
-    </aside>
-    <div
-      className={cn(
-        'fixed inset-0 z-40 bg-base/70 backdrop-blur-sm transition lg:hidden',
-        props.isMobileOpen ? 'opacity-100' : 'pointer-events-none opacity-0',
-      )}
-      aria-hidden="true"
-      onClick={props.onCloseMobile}
-    />
-    <aside
-      className={cn(
-        'fixed inset-y-0 left-0 z-50 flex w-[292px] border-r border-default bg-surface/95 px-4 py-5 shadow-card transition-transform duration-200 lg:hidden',
-        props.isMobileOpen ? 'translate-x-0' : '-translate-x-full',
-      )}
-      aria-hidden={!props.isMobileOpen}
-      aria-label="Application sidebar"
-    >
-      <SidebarContent {...props} showCloseButton />
-    </aside>
-  </>
-)
+export const Sidebar = (props: SidebarProps) => {
+  const mobileSidebarRef = useRef<HTMLElement | null>(null)
+
+  useEffect(() => {
+    if (props.isMobileOpen) {
+      return
+    }
+
+    const activeElement = document.activeElement
+
+    if (
+      activeElement instanceof HTMLElement &&
+      mobileSidebarRef.current?.contains(activeElement)
+    ) {
+      activeElement.blur()
+    }
+  }, [props.isMobileOpen])
+
+  return (
+    <>
+      <aside
+        className="sticky top-0 hidden h-screen border-r border-default bg-surface/90 px-4 py-5 shadow-soft lg:flex"
+        aria-label="Application sidebar"
+      >
+        <SidebarContent {...props} />
+      </aside>
+      <div
+        className={cn(
+          'fixed inset-0 z-40 bg-base/70 backdrop-blur-sm transition lg:hidden',
+          props.isMobileOpen ? 'opacity-100' : 'pointer-events-none opacity-0',
+        )}
+        aria-hidden="true"
+        onClick={props.onCloseMobile}
+      />
+      <aside
+        ref={mobileSidebarRef}
+        className={cn(
+          'fixed inset-y-0 left-0 z-50 flex w-[292px] border-r border-default bg-surface/95 px-4 py-5 shadow-card transition-transform duration-200 lg:hidden',
+          props.isMobileOpen ? 'translate-x-0' : '-translate-x-full',
+        )}
+        inert={!props.isMobileOpen}
+        aria-label="Application sidebar"
+      >
+        <SidebarContent {...props} showCloseButton />
+      </aside>
+    </>
+  )
+}

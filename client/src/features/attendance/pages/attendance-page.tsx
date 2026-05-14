@@ -106,7 +106,10 @@ const EmployeeAttendancePage = () => {
             </p>
           </div>
           <FilterSelect
+            ariaLabel="Filter attendance history by status"
             className="w-full sm:w-44"
+            id="self-attendance-status"
+            name="selfAttendanceStatus"
             value={status}
             onValueChange={(value) =>
               tableState.updateQuery({ status: value }, { resetPage: true })
@@ -245,10 +248,13 @@ const AdminAttendancePage = () => {
         description="Review attendance records, filter by team, and correct records when needed."
       />
 
-      <section className="space-y-4 rounded-2xl border border-default bg-surface p-4 shadow-soft">
-        <TableToolbar className="lg:grid-cols-[1fr_1fr_0.8fr_0.8fr_0.8fr]">
+      <section className="space-y-4 overflow-hidden rounded-2xl border border-default bg-surface p-4 shadow-soft">
+        <TableToolbar className="lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,0.8fr)_minmax(0,0.8fr)_minmax(0,0.8fr)]">
           <FilterSelect
+            ariaLabel="Filter attendance records by employee"
             icon={<Search className="h-4 w-4 text-muted" aria-hidden="true" />}
+            id="attendance-employee-filter"
+            name="attendanceEmployee"
             value={employeeId}
             onValueChange={(value) =>
               tableState.updateQuery({ employeeId: value }, { resetPage: true })
@@ -262,7 +268,10 @@ const AdminAttendancePage = () => {
             ]}
           />
           <FilterSelect
+            ariaLabel="Filter attendance records by department"
             icon={<Filter className="h-4 w-4 text-muted" aria-hidden="true" />}
+            id="attendance-department-filter"
+            name="attendanceDepartment"
             value={departmentId}
             onValueChange={(value) =>
               tableState.updateQuery(
@@ -279,6 +288,9 @@ const AdminAttendancePage = () => {
             ]}
           />
           <FilterSelect
+            ariaLabel="Filter attendance records by status"
+            id="attendance-status-filter"
+            name="attendanceStatus"
             value={status}
             onValueChange={(value) =>
               tableState.updateQuery({ status: value }, { resetPage: true })
@@ -293,7 +305,11 @@ const AdminAttendancePage = () => {
           />
           <DateRangeFilter
             from={from}
+            fromId="attendance-from"
             to={to}
+            toId="attendance-to"
+            fromName="attendanceFrom"
+            toName="attendanceTo"
             onFromChange={(value) =>
               tableState.updateQuery({ from: value }, { resetPage: true })
             }

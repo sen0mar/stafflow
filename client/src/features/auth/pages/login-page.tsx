@@ -124,6 +124,7 @@ export const LoginPage = () => {
                 <Input
                   autoComplete="email"
                   id="email"
+                  name="email"
                   onChange={(event) => setEmail(event.target.value)}
                   placeholder="you@company.com"
                   type="email"
@@ -136,6 +137,7 @@ export const LoginPage = () => {
                 <Input
                   autoComplete="current-password"
                   id="password"
+                  name="password"
                   onChange={(event) => setPassword(event.target.value)}
                   placeholder="Enter your password"
                   type="password"

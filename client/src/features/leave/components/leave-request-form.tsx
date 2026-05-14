@@ -50,7 +50,7 @@ export const LeaveRequestForm = ({
   return (
     <Form {...form}>
       <form
-        className="grid gap-4 lg:grid-cols-[1fr_1fr_1fr_auto]"
+        className="grid min-w-0 gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_auto]"
         onSubmit={form.handleSubmit((values) => {
           onSubmit(values)
           form.reset(defaultValues)
@@ -60,9 +60,12 @@ export const LeaveRequestForm = ({
           control={form.control}
           name="leaveTypeId"
           render={({ field }) => (
-            <FormItem>
+            <FormItem className="min-w-0">
               <FormLabel>Leave type</FormLabel>
-              <Select value={field.value} onValueChange={field.onChange}>
+              <Select
+                value={field.value}
+                onValueChange={field.onChange}
+              >
                 <FormControl>
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Select type" />
@@ -84,10 +87,10 @@ export const LeaveRequestForm = ({
           control={form.control}
           name="startDate"
           render={({ field }) => (
-            <FormItem>
+            <FormItem className="min-w-0">
               <FormLabel>Start date</FormLabel>
               <FormControl>
-                <Input type="date" {...field} />
+                <Input type="date" autoComplete="off" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -97,10 +100,10 @@ export const LeaveRequestForm = ({
           control={form.control}
           name="endDate"
           render={({ field }) => (
-            <FormItem>
+            <FormItem className="min-w-0">
               <FormLabel>End date</FormLabel>
               <FormControl>
-                <Input type="date" {...field} />
+                <Input type="date" autoComplete="off" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

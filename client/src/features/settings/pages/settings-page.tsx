@@ -218,7 +218,7 @@ const SectionHeader = ({
       <div className="rounded-xl bg-brand-soft p-2 text-brand">
         <Icon className="h-5 w-5" />
       </div>
-      <div>
+      <div className="min-w-0">
         <CardTitle>{title}</CardTitle>
         <CardDescription className="mt-1">{description}</CardDescription>
       </div>
@@ -362,7 +362,7 @@ export const SettingsPage = () => {
         </div>
       ) : null}
 
-      <Card className="border-default bg-surface">
+      <Card className="overflow-hidden border-default bg-surface">
         <SectionHeader
           description="Set the organization name and regional defaults."
           icon={Building2}
@@ -371,7 +371,7 @@ export const SettingsPage = () => {
         <CardContent>
           <Form {...companyForm}>
             <form
-              className="grid gap-4 lg:grid-cols-[1fr_1fr_120px_auto] lg:items-end"
+              className="grid min-w-0 gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_120px_auto] lg:items-end"
               onSubmit={companyForm.handleSubmit((values) =>
                 setPendingSave({ type: 'company', values }),
               )}
@@ -380,7 +380,7 @@ export const SettingsPage = () => {
                 control={companyForm.control}
                 name="name"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="min-w-0">
                     <FormLabel>Company name</FormLabel>
                     <FormControl>
                       <Input placeholder="Stafflow Demo Company" {...field} />
@@ -393,9 +393,12 @@ export const SettingsPage = () => {
                 control={companyForm.control}
                 name="timezone"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="min-w-0">
                     <FormLabel>Timezone</FormLabel>
-                    <Select value={field.value} onValueChange={field.onChange}>
+                    <Select
+                      value={field.value}
+                      onValueChange={field.onChange}
+                    >
                       <FormControl>
                         <SelectTrigger className="w-full">
                           <SelectValue />
@@ -417,7 +420,7 @@ export const SettingsPage = () => {
                 control={companyForm.control}
                 name="locale"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="min-w-0">
                     <FormLabel>Locale</FormLabel>
                     <FormControl>
                       <Input placeholder="en-US" {...field} />
@@ -434,7 +437,7 @@ export const SettingsPage = () => {
         </CardContent>
       </Card>
 
-      <Card className="border-default bg-surface">
+      <Card className="overflow-hidden border-default bg-surface">
         <SectionHeader
           description="Set the standard workday and employee clock-in availability."
           icon={CalendarClock}
@@ -448,15 +451,15 @@ export const SettingsPage = () => {
                 setPendingSave({ type: 'attendance', values }),
               )}
             >
-              <div className="grid gap-4 md:grid-cols-3">
+              <div className="grid min-w-0 gap-4 md:grid-cols-3">
                 <FormField
                   control={attendanceForm.control}
                   name="workdayStart"
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem className="min-w-0">
                       <FormLabel>Workday start</FormLabel>
                       <FormControl>
-                        <Input type="time" {...field} />
+                        <Input type="time" autoComplete="off" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -466,10 +469,10 @@ export const SettingsPage = () => {
                   control={attendanceForm.control}
                   name="workdayEnd"
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem className="min-w-0">
                       <FormLabel>Workday end</FormLabel>
                       <FormControl>
-                        <Input type="time" {...field} />
+                        <Input type="time" autoComplete="off" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -479,7 +482,7 @@ export const SettingsPage = () => {
                   control={attendanceForm.control}
                   name="workdayMinutes"
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem className="min-w-0">
                       <FormLabel>Workday minutes</FormLabel>
                       <FormControl>
                         <Input
@@ -497,12 +500,12 @@ export const SettingsPage = () => {
                   )}
                 />
               </div>
-              <div className="grid gap-4 md:grid-cols-2">
+              <div className="grid min-w-0 gap-4 md:grid-cols-2">
                 <FormField
                   control={attendanceForm.control}
                   name="lateGracePeriodMinutes"
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem className="min-w-0">
                       <FormLabel>Late grace period</FormLabel>
                       <FormControl>
                         <Input
@@ -523,7 +526,7 @@ export const SettingsPage = () => {
                   control={attendanceForm.control}
                   name="allowEmployeeClockIn"
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem className="min-w-0">
                       <FormLabel>Employee clock-in</FormLabel>
                       <Select
                         value={field.value ? 'enabled' : 'disabled'}
@@ -550,7 +553,7 @@ export const SettingsPage = () => {
                 control={attendanceForm.control}
                 name="weeklyWorkingDays"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="min-w-0">
                     <FormLabel>Weekly working days</FormLabel>
                     <div className="flex flex-wrap gap-2">
                       {weekdays.map((day) => {
@@ -601,7 +604,7 @@ export const SettingsPage = () => {
         </CardContent>
       </Card>
 
-      <Card className="border-default bg-surface">
+      <Card className="overflow-hidden border-default bg-surface">
         <SectionHeader
           description="Set default leave allowance behavior and the visible policy note."
           icon={FileText}
@@ -615,12 +618,12 @@ export const SettingsPage = () => {
                 setPendingSave({ type: 'leave', values }),
               )}
             >
-              <div className="grid gap-4 md:grid-cols-2">
+              <div className="grid min-w-0 gap-4 md:grid-cols-2">
                 <FormField
                   control={leaveForm.control}
                   name="defaultAnnualAllowanceDays"
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem className="min-w-0">
                       <FormLabel>Default allowance days</FormLabel>
                       <FormControl>
                         <Input
@@ -642,7 +645,7 @@ export const SettingsPage = () => {
                   control={leaveForm.control}
                   name="allowNegativeBalance"
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem className="min-w-0">
                       <FormLabel>Negative balance</FormLabel>
                       <Select
                         value={field.value ? 'allowed' : 'blocked'}
