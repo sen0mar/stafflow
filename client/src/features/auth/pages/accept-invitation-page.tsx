@@ -146,6 +146,7 @@ export const AcceptInvitationPage = () => {
                   <Input
                     autoComplete="new-password"
                     id="password"
+                    name="newPassword"
                     onChange={(event) => setPassword(event.target.value)}
                     placeholder="Create a password"
                     type="password"
@@ -158,6 +159,7 @@ export const AcceptInvitationPage = () => {
                   <Input
                     autoComplete="new-password"
                     id="confirmPassword"
+                    name="confirmPassword"
                     onChange={(event) =>
                       setConfirmPassword(event.target.value)
                     }

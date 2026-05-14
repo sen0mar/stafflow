@@ -255,15 +255,20 @@ export const EmployeesPage = () => {
         onGenerateLink={handleGenerateInvitationUrl}
       />
 
-      <section className="space-y-4 rounded-2xl border border-default bg-surface p-4 shadow-soft">
+      <section className="space-y-4 overflow-hidden rounded-2xl border border-default bg-surface p-4 shadow-soft">
         <TableToolbar className="lg:grid-cols-[minmax(0,1fr)_180px_180px_160px]">
           <SearchInput
             key={search}
+            id="employees-search"
+            name="employeesSearch"
             placeholder="Search employees"
             value={search}
             onDebouncedChange={handleSearchChange}
           />
           <FilterSelect
+            ariaLabel="Filter employees by department"
+            id="employees-department-filter"
+            name="employeesDepartment"
             value={departmentId}
             onValueChange={(value) =>
               tableState.updateQuery(
@@ -280,6 +285,9 @@ export const EmployeesPage = () => {
             ]}
           />
           <FilterSelect
+            ariaLabel="Filter employees by status"
+            id="employees-status-filter"
+            name="employeesStatus"
             value={status}
             onValueChange={(value) =>
               tableState.updateQuery({ status: value }, { resetPage: true })
@@ -292,6 +300,9 @@ export const EmployeesPage = () => {
             ]}
           />
           <FilterSelect
+            ariaLabel="Sort employees"
+            id="employees-sort"
+            name="employeesSort"
             value={sort}
             onValueChange={(value) =>
               tableState.updateQuery(

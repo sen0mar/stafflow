@@ -59,6 +59,7 @@ const useFormField = () => {
     id,
     name: fieldContext.name,
     formItemId: `${id}-form-item`,
+    formLabelId: `${id}-form-item-label`,
     formDescriptionId: `${id}-form-item-description`,
     formMessageId: `${id}-form-item-message`,
     ...fieldState,
@@ -91,12 +92,13 @@ function FormLabel({
   className,
   ...props
 }: React.ComponentProps<typeof LabelPrimitive.Root>) {
-  const { error, formItemId } = useFormField()
+  const { error, formItemId, formLabelId } = useFormField()
 
   return (
     <Label
       data-slot="form-label"
       data-error={!!error}
+      id={formLabelId}
       className={cn('data-[error=true]:text-destructive', className)}
       htmlFor={formItemId}
       {...props}
@@ -105,12 +107,14 @@ function FormLabel({
 }
 
 function FormControl({ ...props }: React.ComponentProps<typeof Slot.Root>) {
-  const { error, formItemId, formDescriptionId, formMessageId } = useFormField()
+  const { error, formItemId, formLabelId, formDescriptionId, formMessageId } =
+    useFormField()
 
   return (
     <Slot.Root
       data-slot="form-control"
       id={formItemId}
+      aria-labelledby={formLabelId}
       aria-describedby={
         !error
           ? `${formDescriptionId}`

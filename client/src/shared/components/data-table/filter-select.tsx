@@ -14,8 +14,12 @@ export interface FilterSelectOption<TValue extends string> {
 
 interface FilterSelectProps<TValue extends string> {
   ariaLabel?: string
+  ariaLabelledby?: string
+  autoComplete?: string
   className?: string
   icon?: ReactNode
+  id?: string
+  name?: string
   onValueChange: (value: TValue) => void
   options: FilterSelectOption<TValue>[]
   value: TValue
@@ -23,17 +27,28 @@ interface FilterSelectProps<TValue extends string> {
 
 export const FilterSelect = <TValue extends string>({
   ariaLabel,
+  ariaLabelledby,
+  autoComplete = 'off',
   className,
   icon,
+  id,
+  name,
   onValueChange,
   options,
   value,
 }: FilterSelectProps<TValue>) => (
   <Select
+    autoComplete={autoComplete}
     value={value}
     onValueChange={(nextValue) => onValueChange(nextValue as TValue)}
   >
-    <SelectTrigger aria-label={ariaLabel} className={className ?? 'w-full'}>
+    <SelectTrigger
+      aria-label={ariaLabel}
+      aria-labelledby={ariaLabelledby}
+      className={className ?? 'w-full'}
+      id={id}
+      data-field-name={name}
+    >
       {icon}
       <SelectValue />
     </SelectTrigger>

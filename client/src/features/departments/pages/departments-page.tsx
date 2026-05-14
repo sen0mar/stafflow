@@ -170,15 +170,17 @@ export const DepartmentsPage = () => {
         }
       />
 
-      <section className="space-y-4 rounded-2xl border border-default bg-surface p-4 shadow-soft">
+      <section className="space-y-4 overflow-hidden rounded-2xl border border-default bg-surface p-4 shadow-soft">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-          <div className="relative w-full lg:max-w-sm">
+          <div className="relative min-w-0 w-full lg:max-w-sm">
             <Search
               className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted"
               aria-hidden="true"
             />
             <Input
               className="pl-9"
+              id="departments-search"
+              name="departmentsSearch"
               placeholder="Search departments"
               value={search}
               onChange={(event) => handleSearchChange(event.target.value)}
@@ -188,7 +190,11 @@ export const DepartmentsPage = () => {
             value={status}
             onValueChange={(value) => handleStatusChange(value as StatusFilter)}
           >
-            <SelectTrigger className="w-full lg:w-44">
+            <SelectTrigger
+              aria-label="Filter departments by status"
+              id="departments-status-filter"
+              className="w-full lg:w-44"
+            >
               <SelectValue />
             </SelectTrigger>
             <SelectContent>

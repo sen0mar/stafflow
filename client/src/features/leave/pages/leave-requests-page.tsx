@@ -273,7 +273,7 @@ const EmployeeLeavePage = () => {
         description="Submit time off requests and track approval status."
       />
 
-      <section className="space-y-4 rounded-2xl border border-default bg-surface p-4 shadow-soft">
+      <section className="space-y-4 overflow-hidden rounded-2xl border border-default bg-surface p-4 shadow-soft">
         <div>
           <h2 className="text-lg font-semibold text-primary">Request leave</h2>
           <p className="mt-1 text-sm text-muted">
@@ -317,7 +317,10 @@ const EmployeeLeavePage = () => {
             </p>
           </div>
           <FilterSelect
+            ariaLabel="Filter my leave requests by status"
             className="w-full sm:w-44"
+            id="self-leave-status-filter"
+            name="selfLeaveStatus"
             value={status}
             onValueChange={(value) =>
               tableState.updateQuery({ status: value }, { resetPage: true })
@@ -555,10 +558,13 @@ const AdminLeavePage = () => {
         description="Review employee leave requests, manage leave types, and keep balances simple."
       />
 
-      <section className="space-y-4 rounded-2xl border border-default bg-surface p-4 shadow-soft">
-        <TableToolbar className="lg:grid-cols-[1fr_1fr_0.8fr]">
+      <section className="space-y-4 overflow-hidden rounded-2xl border border-default bg-surface p-4 shadow-soft">
+        <TableToolbar className="lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,0.8fr)]">
           <FilterSelect
+            ariaLabel="Filter leave requests by employee"
             icon={<Search className="h-4 w-4 text-muted" aria-hidden="true" />}
+            id="leave-employee-filter"
+            name="leaveEmployee"
             value={employeeId}
             onValueChange={(value) =>
               tableState.updateQuery({ employeeId: value }, { resetPage: true })
@@ -572,7 +578,10 @@ const AdminLeavePage = () => {
             ]}
           />
           <FilterSelect
+            ariaLabel="Filter leave requests by type"
             icon={<Filter className="h-4 w-4 text-muted" aria-hidden="true" />}
+            id="leave-type-filter"
+            name="leaveType"
             value={leaveTypeId}
             onValueChange={(value) =>
               tableState.updateQuery(
@@ -589,6 +598,9 @@ const AdminLeavePage = () => {
             ]}
           />
           <FilterSelect
+            ariaLabel="Filter leave requests by status"
+            id="leave-status-filter"
+            name="leaveStatus"
             value={status}
             onValueChange={(value) =>
               tableState.updateQuery({ status: value }, { resetPage: true })

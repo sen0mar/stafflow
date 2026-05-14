@@ -428,13 +428,16 @@ export const AuditLogsPage = () => {
         description="Review sensitive business and security activity recorded separately from technical logs."
       />
 
-      <section className="space-y-4 rounded-2xl border border-default bg-surface p-4 shadow-soft">
-        <div className="grid gap-3 xl:grid-cols-[1fr_1fr_1fr_1fr_0.8fr_0.8fr_auto]">
+      <section className="space-y-4 overflow-hidden rounded-2xl border border-default bg-surface p-4 shadow-soft">
+        <div className="grid min-w-0 gap-3 [&>*]:min-w-0 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,0.8fr)_minmax(0,0.8fr)_auto]">
           <div className="space-y-2">
             <Label htmlFor="audit-actor">Actor user ID</Label>
             <SearchInput
               key={`actor-${actorUserId}`}
               ariaLabel="Actor user ID"
+              hasVisibleLabel
+              id="audit-actor"
+              name="auditActorUserId"
               placeholder="User ID"
               value={actorUserId}
               onDebouncedChange={handleActorSearchChange}
@@ -442,8 +445,11 @@ export const AuditLogsPage = () => {
           </div>
 
           <div className="space-y-2">
-            <Label>Entity type</Label>
+            <Label id="audit-entity-type-label">Entity type</Label>
             <FilterSelect
+              ariaLabelledby="audit-entity-type-label"
+              id="audit-entity-type"
+              name="auditEntityType"
               value={entityType}
               onValueChange={(value) =>
                 tableState.updateQuery(
@@ -466,6 +472,9 @@ export const AuditLogsPage = () => {
             <SearchInput
               key={`entity-${entityId}`}
               ariaLabel="Entity ID"
+              hasVisibleLabel
+              id="audit-entity-id"
+              name="auditEntityId"
               placeholder="Entity ID"
               value={entityId}
               onDebouncedChange={handleEntitySearchChange}
@@ -473,11 +482,14 @@ export const AuditLogsPage = () => {
           </div>
 
           <div className="space-y-2">
-            <Label>Action</Label>
+            <Label id="audit-action-label">Action</Label>
             <FilterSelect
+              ariaLabelledby="audit-action-label"
               icon={
                 <Filter className="h-4 w-4 text-muted" aria-hidden="true" />
               }
+              id="audit-action"
+              name="auditAction"
               value={action}
               onValueChange={(value) =>
                 tableState.updateQuery({ action: value }, { resetPage: true })
@@ -495,7 +507,9 @@ export const AuditLogsPage = () => {
           <div className="space-y-2">
             <Label htmlFor="audit-from">From</Label>
             <Input
+              autoComplete="off"
               id="audit-from"
+              name="auditCreatedFrom"
               type="date"
               value={createdAtFrom}
               onChange={(event) =>
@@ -510,7 +524,9 @@ export const AuditLogsPage = () => {
           <div className="space-y-2">
             <Label htmlFor="audit-to">To</Label>
             <Input
+              autoComplete="off"
               id="audit-to"
+              name="auditCreatedTo"
               type="date"
               value={createdAtTo}
               onChange={(event) =>

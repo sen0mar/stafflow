@@ -99,15 +99,15 @@ export const EmployeeForm = ({
         </DialogHeader>
         <Form {...form}>
           <form className="grid gap-4" onSubmit={form.handleSubmit(onSubmit)}>
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid min-w-0 gap-4 md:grid-cols-2">
               <FormField
                 control={form.control}
                 name="firstName"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="min-w-0">
                     <FormLabel>First name</FormLabel>
                     <FormControl>
-                      <Input {...field} />
+                      <Input autoComplete="given-name" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -117,25 +117,29 @@ export const EmployeeForm = ({
                 control={form.control}
                 name="lastName"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="min-w-0">
                     <FormLabel>Last name</FormLabel>
                     <FormControl>
-                      <Input {...field} />
+                      <Input autoComplete="family-name" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid min-w-0 gap-4 md:grid-cols-2">
               <FormField
                 control={form.control}
                 name="employeeCode"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="min-w-0">
                     <FormLabel>Employee code</FormLabel>
                     <FormControl>
-                      <Input placeholder="EMP-001" {...field} />
+                      <Input
+                        autoComplete="off"
+                        placeholder="EMP-001"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -145,22 +149,27 @@ export const EmployeeForm = ({
                 control={form.control}
                 name="email"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="min-w-0">
                     <FormLabel>Email</FormLabel>
                     <FormControl>
-                      <Input disabled={isEditing} type="email" {...field} />
+                      <Input
+                        autoComplete="email"
+                        disabled={isEditing}
+                        type="email"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid min-w-0 gap-4 md:grid-cols-2">
               <FormField
                 control={form.control}
                 name="departmentId"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="min-w-0">
                     <FormLabel>Department</FormLabel>
                     <Select
                       value={field.value || unassignedDepartmentValue}
@@ -190,25 +199,29 @@ export const EmployeeForm = ({
                 control={form.control}
                 name="hireDate"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="min-w-0">
                     <FormLabel>Hire date</FormLabel>
                     <FormControl>
-                      <Input type="date" {...field} />
+                      <Input type="date" autoComplete="off" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid min-w-0 gap-4 md:grid-cols-2">
               <FormField
                 control={form.control}
                 name="jobTitle"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="min-w-0">
                     <FormLabel>Job title</FormLabel>
                     <FormControl>
-                      <Input placeholder="Operations Associate" {...field} />
+                      <Input
+                        autoComplete="organization-title"
+                        placeholder="Operations Associate"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -218,10 +231,10 @@ export const EmployeeForm = ({
                 control={form.control}
                 name="phone"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="min-w-0">
                     <FormLabel>Phone</FormLabel>
                     <FormControl>
-                      <Input {...field} />
+                      <Input autoComplete="tel" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

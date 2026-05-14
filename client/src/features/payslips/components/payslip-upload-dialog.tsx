@@ -129,12 +129,12 @@ export const PayslipUploadDialog = ({
                 </FormItem>
               )}
             />
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid min-w-0 gap-4 sm:grid-cols-2">
               <FormField
                 control={form.control}
                 name="month"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="min-w-0">
                     <FormLabel>Month</FormLabel>
                     <Select
                       value={String(field.value)}
@@ -161,13 +161,14 @@ export const PayslipUploadDialog = ({
                 control={form.control}
                 name="year"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="min-w-0">
                     <FormLabel>Year</FormLabel>
                     <FormControl>
                       <Input
                         inputMode="numeric"
                         max={2100}
                         min={2000}
+                        name={field.name}
                         type="number"
                         value={field.value}
                         onBlur={field.onBlur}
