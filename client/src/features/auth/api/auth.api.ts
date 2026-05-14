@@ -26,6 +26,11 @@ export interface LoginInput {
   password: string
 }
 
+export interface AcceptInvitationInput {
+  password: string
+  token: string
+}
+
 interface AuthResponse {
   data: {
     csrfToken?: string
@@ -56,6 +61,20 @@ export const login = async (input: LoginInput) => {
     skipUnauthorizedHandler: true,
   })
   setApiCsrfToken(response.data.csrfToken)
+
+  return response.data.user
+}
+
+export const acceptInvitation = async (input: AcceptInvitationInput) => {
+  const response = await apiClient<AuthResponse>('/auth/invitations/accept', {
+    body: {
+      password: input.password,
+      token: input.token,
+    },
+    method: 'POST',
+    skipUnauthorizedHandler: true,
+  })
+  clearApiCsrfToken()
 
   return response.data.user
 }

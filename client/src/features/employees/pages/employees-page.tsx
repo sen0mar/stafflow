@@ -1,4 +1,4 @@
-import { Plus, UsersRound } from 'lucide-react'
+import { Check, Copy, Plus, UsersRound } from 'lucide-react'
 import { useCallback, useState } from 'react'
 import { FilterSelect } from '@/shared/components/data-table/filter-select'
 import { Button } from '@/shared/components/ui/button'
@@ -56,8 +56,9 @@ export const EmployeesPage = () => {
   const [createdInvitation, setCreatedInvitation] = useState<{
     employeeName: string
     expiresAt: string
-    token: string
+    setupUrl: string
   } | null>(null)
+  const [copiedInvitationUrl, setCopiedInvitationUrl] = useState(false)
   const employeesQuery = useEmployees({
     departmentId: departmentId === allValue ? undefined : departmentId,
     limit: pageSize,
@@ -129,16 +130,33 @@ export const EmployeesPage = () => {
       },
       {
         onSuccess: (result) => {
+          const setupUrl = `${window.location.origin}/accept-invitation?token=${encodeURIComponent(result.invitation.token)}`
+
           setFormOpen(false)
           setPage(1)
+          setCopiedInvitationUrl(false)
           setCreatedInvitation({
             employeeName: result.employee.fullName,
             expiresAt: result.invitation.expiresAt,
-            token: result.invitation.token,
+            setupUrl,
           })
         },
       },
     )
+  }
+
+  const handleCopyInvitationUrl = async () => {
+    if (!createdInvitation) {
+      return
+    }
+
+    try {
+      await navigator.clipboard.writeText(createdInvitation.setupUrl)
+      setCopiedInvitationUrl(true)
+      window.setTimeout(() => setCopiedInvitationUrl(false), 2000)
+    } catch {
+      setCopiedInvitationUrl(false)
+    }
   }
 
   const handleDisable = (employee: Employee) => {
@@ -185,13 +203,28 @@ export const EmployeesPage = () => {
                 Invitation ready for {createdInvitation.employeeName}
               </h2>
               <p className="mt-1 text-sm text-muted">
-                Share this setup token through a secure channel. It expires on{' '}
+                Share this setup link through a secure channel. It expires on{' '}
                 {new Date(createdInvitation.expiresAt).toLocaleDateString()}.
               </p>
             </div>
-            <code className="overflow-auto rounded-xl border border-default bg-inset px-3 py-2 text-sm text-primary">
-              {createdInvitation.token}
-            </code>
+            <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center">
+              <code className="min-w-0 overflow-auto rounded-xl border border-default bg-inset px-3 py-2 text-sm text-primary">
+                {createdInvitation.setupUrl}
+              </code>
+              <Button
+                className="shrink-0"
+                type="button"
+                variant="outline"
+                onClick={handleCopyInvitationUrl}
+              >
+                {copiedInvitationUrl ? (
+                  <Check className="h-4 w-4" aria-hidden="true" />
+                ) : (
+                  <Copy className="h-4 w-4" aria-hidden="true" />
+                )}
+                {copiedInvitationUrl ? 'Copied' : 'Copy'}
+              </Button>
+            </div>
           </div>
         </section>
       ) : null}

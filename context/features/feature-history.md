@@ -44,6 +44,7 @@ Keep entries short. This file should explain what changed, not become a detailed
 - Feature 37: Recruiter README Polish — added a root project README with overview, stack, architecture, security, setup, deployment, screenshots, and QA notes, and replaced the client starter README with a project pointer.
 - Feature 38: Rate Limiting Scope Removal — removed Upstash/rate-limiting dependencies and scrubbed rate-limiting configuration and MVP claims from README and context docs.
 - Feature 39: Smoother Homepage Dots — refined the reactive homepage dot canvas so pointer movement still pushes dots away while removing the constant ripple shimmer.
+- Feature 40: Invitation Acceptance Page — added a public invitation setup page, wired invitation acceptance through the existing auth API, and changed employee creation to show a copyable setup link.
 
 ## Entry Format
 
