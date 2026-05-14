@@ -15,7 +15,9 @@ import {
   disableExistingEmployee,
   getEmployee,
   getEmployees,
+  getPendingEmployeeInvitations,
   getSelfEmployee,
+  regenerateEmployeeInvitation,
   updateEmployeeStatuses,
   updateExistingEmployee,
   updateSelfProfile,
@@ -68,6 +70,34 @@ export const createEmployeeController: RequestHandler = async (
 ) => {
   const { body } = createEmployeeSchema.parse({ body: request.body });
   const result = await createNewEmployee(body, getAuditContext(request));
+  const responseBody: ApiSuccess<typeof result> = {
+    data: result,
+  };
+
+  response.status(201).json(responseBody);
+};
+
+export const listEmployeeInvitationsController: RequestHandler = async (
+  _request,
+  response,
+) => {
+  const invitations = await getPendingEmployeeInvitations();
+  const responseBody: ApiSuccess<typeof invitations> = {
+    data: invitations,
+  };
+
+  response.status(200).json(responseBody);
+};
+
+export const regenerateEmployeeInvitationController: RequestHandler = async (
+  request,
+  response,
+) => {
+  const { params } = employeeIdSchema.parse({ params: request.params });
+  const result = await regenerateEmployeeInvitation(
+    params.id,
+    getAuditContext(request),
+  );
   const responseBody: ApiSuccess<typeof result> = {
     data: result,
   };

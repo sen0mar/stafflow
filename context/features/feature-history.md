@@ -45,6 +45,7 @@ Keep entries short. This file should explain what changed, not become a detailed
 - Feature 38: Rate Limiting Scope Removal — removed Upstash/rate-limiting dependencies and scrubbed rate-limiting configuration and MVP claims from README and context docs.
 - Feature 39: Smoother Homepage Dots — refined the reactive homepage dot canvas so pointer movement still pushes dots away while removing the constant ripple shimmer.
 - Feature 40: Invitation Acceptance Page — added a public invitation setup page, wired invitation acceptance through the existing auth API, and changed employee creation to show a copyable setup link.
+- Feature 41: Persistent Pending Invitations — added admin pending-invitation APIs, secure setup-link regeneration, and a persistent Employees page invitation list that hides accepted or expired invites.
 
 ## Entry Format
 

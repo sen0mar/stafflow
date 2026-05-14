@@ -6,10 +6,13 @@ import {
   disableEmployee,
   getEmployee,
   getEmployees,
+  getEmployeeInvitations,
   getSelfEmployee,
+  regenerateEmployeeInvitation,
   updateEmployee,
   updateEmployeeStatus,
   updateSelfProfile,
+  type EmployeeInvitation,
   type EmployeeListParams,
 } from '../api/employees.api'
 import { employeesKeys } from '../api/employees.keys'
@@ -34,6 +37,13 @@ export const useSelfEmployee = () =>
     queryKey: employeesKeys.self(),
   })
 
+export const useEmployeeInvitations = () =>
+  useQuery({
+    queryFn: getEmployeeInvitations,
+    queryKey: employeesKeys.invitations(),
+    refetchInterval: 15_000,
+  })
+
 export const useCreateEmployee = () => {
   const queryClient = useQueryClient()
 
@@ -42,9 +52,62 @@ export const useCreateEmployee = () => {
     onError: (error) => {
       toast.error(getSafeErrorMessage(error, 'Employee could not be created.'))
     },
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: employeesKeys.lists() })
+    onSuccess: async (result) => {
+      if (result.employee.account) {
+        const invitation: EmployeeInvitation = {
+          accountId: result.employee.account.id,
+          email: result.employee.account.email,
+          employeeId: result.employee.id,
+          employeeName: result.employee.fullName,
+          expiresAt: result.invitation.expiresAt,
+        }
+
+        queryClient.setQueryData<EmployeeInvitation[]>(
+          employeesKeys.invitations(),
+          (current = []) => [
+            invitation,
+            ...current.filter(
+              (item) => item.employeeId !== invitation.employeeId,
+            ),
+          ],
+        )
+      }
+
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: employeesKeys.lists() }),
+        queryClient.invalidateQueries({
+          queryKey: employeesKeys.invitations(),
+        }),
+      ])
       toast.success('Employee created.')
+    },
+  })
+}
+
+export const useRegenerateEmployeeInvitation = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: regenerateEmployeeInvitation,
+    onError: (error) => {
+      toast.error(
+        getSafeErrorMessage(error, 'Invitation link could not be generated.'),
+      )
+    },
+    onSuccess: async (result) => {
+      queryClient.setQueryData<EmployeeInvitation[]>(
+        employeesKeys.invitations(),
+        (current = []) => [
+          result.employee,
+          ...current.filter(
+            (item) => item.employeeId !== result.employee.employeeId,
+          ),
+        ],
+      )
+      await queryClient.invalidateQueries({
+        queryKey: employeesKeys.invitations(),
+      })
+      toast.success('Invitation link generated.')
     },
   })
 }

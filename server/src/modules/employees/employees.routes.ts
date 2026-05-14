@@ -8,7 +8,9 @@ import {
   disableEmployeeController,
   getEmployeeController,
   getSelfEmployeeController,
+  listEmployeeInvitationsController,
   listEmployeesController,
+  regenerateEmployeeInvitationController,
   updateEmployeeController,
   updateEmployeeStatusController,
   updateSelfProfileController,
@@ -38,6 +40,21 @@ export const createEmployeeRoutes = (): Router => {
     requireAuth,
     requirePermission("employees:read:any"),
     listEmployeesController,
+  );
+  router.get(
+    "/invitations",
+    attachAuth,
+    requireAuth,
+    requirePermission("employees:read:any"),
+    listEmployeeInvitationsController,
+  );
+  router.post(
+    "/:id/invitation",
+    attachAuth,
+    requireAuth,
+    requirePermission("employees:update:any"),
+    requireCsrf,
+    regenerateEmployeeInvitationController,
   );
   router.get(
     "/:id",

@@ -1,5 +1,5 @@
-import { Check, Copy, Plus, UsersRound } from 'lucide-react'
-import { useCallback, useState } from 'react'
+import { Plus, UsersRound } from 'lucide-react'
+import { useCallback, useMemo, useState } from 'react'
 import { FilterSelect } from '@/shared/components/data-table/filter-select'
 import { Button } from '@/shared/components/ui/button'
 import { SearchInput } from '@/shared/components/data-table/search-input'
@@ -15,15 +15,19 @@ import { useTableQueryState } from '@/shared/hooks/use-table-query-state'
 import { useDepartments } from '@/features/departments/hooks/use-departments'
 import type {
   Employee,
+  EmployeeInvitation,
   EmployeeSort,
   EmployeeStatus,
 } from '../api/employees.api'
 import { EmployeeForm } from '../components/employee-form'
+import { EmployeeInvitationsPanel } from '../components/employee-invitations-panel'
 import { EmployeeTable } from '../components/employee-table'
 import {
   useCreateEmployee,
   useDisableEmployee,
+  useEmployeeInvitations,
   useEmployees,
+  useRegenerateEmployeeInvitation,
   useUpdateEmployee,
   useUpdateEmployeeStatus,
 } from '../hooks/use-employees'
@@ -31,6 +35,7 @@ import type {
   CreateEmployeeFormValues,
   EmployeeFormValues,
 } from '../schemas/employee-form.schema'
+import { getInvitationSetupUrl } from '../lib/invitation-links'
 
 const pageSize = 10
 const allValue = 'all'
@@ -53,12 +58,12 @@ export const EmployeesPage = () => {
   const sort = tableState.getString('sort', 'name') as EmployeeSort
   const [formOpen, setFormOpen] = useState(false)
   const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null)
-  const [createdInvitation, setCreatedInvitation] = useState<{
-    employeeName: string
-    expiresAt: string
-    setupUrl: string
-  } | null>(null)
-  const [copiedInvitationUrl, setCopiedInvitationUrl] = useState(false)
+  const [setupUrlsByEmployeeId, setSetupUrlsByEmployeeId] = useState<
+    Record<string, string>
+  >({})
+  const [copiedInvitationEmployeeId, setCopiedInvitationEmployeeId] = useState<
+    string | null
+  >(null)
   const employeesQuery = useEmployees({
     departmentId: departmentId === allValue ? undefined : departmentId,
     limit: pageSize,
@@ -73,10 +78,19 @@ export const EmployeesPage = () => {
     pageSize: 100,
   })
   const createEmployee = useCreateEmployee()
+  const employeeInvitationsQuery = useEmployeeInvitations()
   const updateEmployee = useUpdateEmployee()
+  const regenerateInvitation = useRegenerateEmployeeInvitation()
   const updateEmployeeStatus = useUpdateEmployeeStatus()
   const disableEmployee = useDisableEmployee()
   const employees = employeesQuery.data?.data ?? []
+  const pendingInvitations = useMemo(() => {
+    const invitations = employeeInvitationsQuery.data ?? []
+
+    return [...invitations].sort((first, second) =>
+      first.employeeName.localeCompare(second.employeeName),
+    )
+  }, [employeeInvitationsQuery.data])
   const pagination = employeesQuery.data?.meta
   const departments = departmentsQuery.data?.data ?? []
   const { updateQuery } = tableState
@@ -130,33 +144,65 @@ export const EmployeesPage = () => {
       },
       {
         onSuccess: (result) => {
-          const setupUrl = `${window.location.origin}/accept-invitation?token=${encodeURIComponent(result.invitation.token)}`
-
+          const setupUrl = getInvitationSetupUrl(result.invitation.token)
           setFormOpen(false)
           setPage(1)
-          setCopiedInvitationUrl(false)
-          setCreatedInvitation({
-            employeeName: result.employee.fullName,
-            expiresAt: result.invitation.expiresAt,
-            setupUrl,
-          })
+          setSetupUrlsByEmployeeId((current) => ({
+            ...current,
+            [result.employee.id]: setupUrl,
+          }))
+          setCopiedInvitationEmployeeId(null)
         },
       },
     )
   }
 
-  const handleCopyInvitationUrl = async () => {
-    if (!createdInvitation) {
+  const handleGenerateInvitationUrl = (invitation: EmployeeInvitation) => {
+    const existingUrl = setupUrlsByEmployeeId[invitation.employeeId]
+
+    if (existingUrl) {
+      void handleCopyInvitationUrl(invitation.employeeId, existingUrl)
       return
     }
 
+    regenerateInvitation.mutate(invitation.employeeId, {
+      onSuccess: (result) => {
+        const setupUrl = getInvitationSetupUrl(result.invitation.token)
+
+        setSetupUrlsByEmployeeId((current) => ({
+          ...current,
+          [result.employee.employeeId]: setupUrl,
+        }))
+        void handleCopyInvitationUrl(result.employee.employeeId, setupUrl)
+      },
+    })
+  }
+
+  const handleCopyInvitationUrl = async (employeeId: string, setupUrl: string) => {
     try {
-      await navigator.clipboard.writeText(createdInvitation.setupUrl)
-      setCopiedInvitationUrl(true)
-      window.setTimeout(() => setCopiedInvitationUrl(false), 2000)
+      await navigator.clipboard.writeText(setupUrl)
+      setCopiedInvitationEmployeeId(employeeId)
+      window.setTimeout(() => {
+        setCopiedInvitationEmployeeId((current) =>
+          current === employeeId ? null : current,
+        )
+      }, 2000)
     } catch {
-      setCopiedInvitationUrl(false)
+      setCopiedInvitationEmployeeId(null)
     }
+  }
+
+  const handleDismissOneTimeUrl = (employeeId: string) => {
+    setSetupUrlsByEmployeeId((current) => {
+      const next = { ...current }
+
+      delete next[employeeId]
+
+      return next
+    })
+    setCopiedInvitationEmployeeId((current) =>
+      current === employeeId ? null : current,
+    )
   }
 
   const handleDisable = (employee: Employee) => {
@@ -195,39 +241,19 @@ export const EmployeesPage = () => {
         }
       />
 
-      {createdInvitation ? (
-        <section className="rounded-2xl border border-default bg-brand-soft p-4 shadow-soft">
-          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-            <div>
-              <h2 className="font-semibold text-primary">
-                Invitation ready for {createdInvitation.employeeName}
-              </h2>
-              <p className="mt-1 text-sm text-muted">
-                Share this setup link through a secure channel. It expires on{' '}
-                {new Date(createdInvitation.expiresAt).toLocaleDateString()}.
-              </p>
-            </div>
-            <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center">
-              <code className="min-w-0 overflow-auto rounded-xl border border-default bg-inset px-3 py-2 text-sm text-primary">
-                {createdInvitation.setupUrl}
-              </code>
-              <Button
-                className="shrink-0"
-                type="button"
-                variant="outline"
-                onClick={handleCopyInvitationUrl}
-              >
-                {copiedInvitationUrl ? (
-                  <Check className="h-4 w-4" aria-hidden="true" />
-                ) : (
-                  <Copy className="h-4 w-4" aria-hidden="true" />
-                )}
-                {copiedInvitationUrl ? 'Copied' : 'Copy'}
-              </Button>
-            </div>
-          </div>
-        </section>
-      ) : null}
+      <EmployeeInvitationsPanel
+        copiedEmployeeId={copiedInvitationEmployeeId}
+        generatingEmployeeId={
+          regenerateInvitation.isPending
+            ? (regenerateInvitation.variables ?? null)
+            : null
+        }
+        hasError={employeeInvitationsQuery.isError}
+        invitations={pendingInvitations}
+        setupUrlsByEmployeeId={setupUrlsByEmployeeId}
+        onDismissLink={handleDismissOneTimeUrl}
+        onGenerateLink={handleGenerateInvitationUrl}
+      />
 
       <section className="space-y-4 rounded-2xl border border-default bg-surface p-4 shadow-soft">
         <TableToolbar className="lg:grid-cols-[minmax(0,1fr)_180px_180px_160px]">

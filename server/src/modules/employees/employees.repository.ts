@@ -145,6 +145,62 @@ export const findDepartmentForEmployee = (departmentId: string) =>
     where: { id: departmentId },
   });
 
+export const listPendingEmployeeInvitations = async () =>
+  prisma.invitationToken.findMany({
+    orderBy: { createdAt: "desc" },
+    select: {
+      expiresAt: true,
+      user: {
+        select: {
+          email: true,
+          id: true,
+          employee: {
+            select: {
+              firstName: true,
+              id: true,
+              lastName: true,
+            },
+          },
+        },
+      },
+    },
+    where: {
+      acceptedAt: null,
+      expiresAt: { gt: new Date() },
+      role: "EMPLOYEE",
+      userId: { not: null },
+      user: {
+        status: "INVITED",
+        employee: {
+          isNot: null,
+        },
+      },
+    },
+  });
+
+export const findInvitedEmployeeForInvitation = (employeeId: string) =>
+  prisma.employee.findFirst({
+    select: {
+      id: true,
+      firstName: true,
+      lastName: true,
+      user: {
+        select: {
+          email: true,
+          id: true,
+          status: true,
+        },
+      },
+      userId: true,
+    },
+    where: {
+      id: employeeId,
+      user: {
+        status: "INVITED",
+      },
+    },
+  });
+
 export const createEmployeeAuditLog = ({
   action,
   actorUserId,
@@ -286,6 +342,65 @@ export const createInvitedEmployeeAccount = async ({
     });
 
     return employee;
+  });
+
+export const regenerateEmployeeInvitationToken = async ({
+  actorUserId,
+  email,
+  employeeId,
+  expiresAt,
+  ipAddress,
+  tokenHash,
+  userAgent,
+  userId,
+}: {
+  actorUserId: string | null;
+  email: string;
+  employeeId: string;
+  expiresAt: Date;
+  ipAddress?: string;
+  tokenHash: string;
+  userAgent?: string;
+  userId: string;
+}) =>
+  prisma.$transaction(async (tx) => {
+    const now = new Date();
+
+    await tx.invitationToken.updateMany({
+      data: {
+        expiresAt: now,
+      },
+      where: {
+        acceptedAt: null,
+        expiresAt: { gt: now },
+        userId,
+      },
+    });
+    await tx.invitationToken.create({
+      data: {
+        createdById: actorUserId,
+        email,
+        expiresAt,
+        role: "EMPLOYEE",
+        tokenHash,
+        userId,
+      },
+      select: {
+        id: true,
+      },
+    });
+    await createUserAuditLogForEmployee({
+      action: "INVITATION_REGENERATED",
+      actorUserId,
+      entityId: userId,
+      ipAddress,
+      metadata: {
+        employeeId,
+        expiresAt: expiresAt.toISOString(),
+      },
+      tx,
+      userAgent,
+    });
   });
 
 export const updateEmployee = (id: string, input: UpdateEmployeeInput) =>

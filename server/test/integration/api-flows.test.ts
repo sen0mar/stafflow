@@ -200,6 +200,7 @@ describeWithTestDatabase("core API flows", () => {
 
     const forbiddenRequests = [
       agent.get("/employees"),
+      agent.get("/employees/invitations"),
       agent.get(`/employees/${otherEmployee.id}`),
       agent.get("/attendance"),
       agent.get("/leave-requests"),
@@ -215,6 +216,98 @@ describeWithTestDatabase("core API flows", () => {
         expect(body.error.code).toBe("FORBIDDEN");
       });
     }
+  });
+
+  it("lets admins manage pending employee invitations securely", async () => {
+    const { admin } = await seedUsers();
+    const { agent, csrfToken } = await login(admin.email);
+    const createResponse = await agent
+      .post("/employees")
+      .set("x-csrf-token", csrfToken)
+      .send({
+        email: "invited.employee.integration@example.com",
+        employeeCode: "IT-EMP-INVITED",
+        firstName: "Nora",
+        lastName: "Stone",
+      })
+      .expect(201);
+    const createdEmployee = createResponse.body.data.employee as {
+      id: string;
+    };
+    const firstToken = createResponse.body.data.invitation.token as string;
+
+    await agent
+      .get("/employees/invitations")
+      .expect(200)
+      .expect(({ body }) => {
+        expect(body.data).toEqual([
+          expect.objectContaining({
+            email: "invited.employee.integration@example.com",
+            employeeId: createdEmployee.id,
+            employeeName: "Nora Stone",
+          }),
+        ]);
+        expect(body.data[0]).not.toHaveProperty("token");
+      });
+
+    const regenerateResponse = await agent
+      .post(`/employees/${createdEmployee.id}/invitation`)
+      .set("x-csrf-token", csrfToken)
+      .expect(201);
+    const regeneratedToken = regenerateResponse.body.data.invitation
+      .token as string;
+
+    expect(regeneratedToken).not.toBe(firstToken);
+
+    await request(app)
+      .post("/auth/invitations/accept")
+      .send({ password: "NewStafflowPass", token: firstToken })
+      .expect(400);
+    await request(app)
+      .post("/auth/invitations/accept")
+      .send({ password: "NewStafflowPass", token: regeneratedToken })
+      .expect(200);
+
+    await agent
+      .get("/employees/invitations")
+      .expect(200)
+      .expect(({ body }) => {
+        expect(body.data).toEqual([]);
+      });
+  });
+
+  it("excludes expired invitations from the pending invitation list", async () => {
+    const { admin } = await seedUsers();
+    const { agent, csrfToken } = await login(admin.email);
+    const createResponse = await agent
+      .post("/employees")
+      .set("x-csrf-token", csrfToken)
+      .send({
+        email: "expired.invite.integration@example.com",
+        employeeCode: "IT-EMP-EXPIRED",
+        firstName: "Ezra",
+        lastName: "Vale",
+      })
+      .expect(201);
+    const createdEmployee = createResponse.body.data.employee as {
+      account: { id: string };
+    };
+
+    await prisma.invitationToken.updateMany({
+      data: {
+        expiresAt: new Date(Date.now() - 60_000),
+      },
+      where: {
+        userId: createdEmployee.account.id,
+      },
+    });
+
+    await agent
+      .get("/employees/invitations")
+      .expect(200)
+      .expect(({ body }) => {
+        expect(body.data).toEqual([]);
+      });
   });
 
   it("allows admins to create, read, update, and disable employees", async () => {

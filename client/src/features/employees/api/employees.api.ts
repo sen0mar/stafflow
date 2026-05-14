@@ -87,12 +87,28 @@ export interface UpdateSelfProfileInput {
   phone?: string | null
 }
 
+export interface EmployeeInvitation {
+  accountId: string
+  email: string
+  employeeId: string
+  employeeName: string
+  expiresAt: string
+}
+
 interface ApiResponse<TData> {
   data: TData
 }
 
 interface CreateEmployeeResponse {
   employee: Employee
+  invitation: {
+    expiresAt: string
+    token: string
+  }
+}
+
+export interface RegenerateEmployeeInvitationResponse {
+  employee: EmployeeInvitation
   invitation: {
     expiresAt: string
     token: string
@@ -150,6 +166,23 @@ export const createEmployee = async (input: CreateEmployeeInput) => {
       method: 'POST',
     },
   )
+
+  return response.data
+}
+
+export const getEmployeeInvitations = async () => {
+  const response =
+    await apiClient<ApiResponse<EmployeeInvitation[]>>('/employees/invitations')
+
+  return response.data
+}
+
+export const regenerateEmployeeInvitation = async (id: string) => {
+  const response = await apiClient<
+    ApiResponse<RegenerateEmployeeInvitationResponse>
+  >(`/employees/${id}/invitation`, {
+    method: 'POST',
+  })
 
   return response.data
 }
