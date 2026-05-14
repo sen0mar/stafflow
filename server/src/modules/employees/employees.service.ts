@@ -19,6 +19,9 @@ import {
   findDepartmentForEmployee,
   findEmployeeByCode,
   findEmployeeById,
+  findInvitedEmployeeForInvitation,
+  listPendingEmployeeInvitations,
+  regenerateEmployeeInvitationToken,
   listEmployees,
   updateEmployee,
   updateEmployeeAndAccountStatus,
@@ -70,6 +73,31 @@ const toEmployeeDto = (employee: EmployeeRecord) => ({
   terminationDate: employee.terminationDate?.toISOString() ?? null,
   updatedAt: employee.updatedAt.toISOString(),
 });
+
+const toInvitationDto = (invitation: {
+  expiresAt: Date;
+  user: {
+    email: string;
+    employee: {
+      firstName: string;
+      id: string;
+      lastName: string;
+    } | null;
+    id: string;
+  } | null;
+}) => {
+  if (!invitation.user?.employee) {
+    return null;
+  }
+
+  return {
+    accountId: invitation.user.id,
+    email: invitation.user.email,
+    employeeId: invitation.user.employee.id,
+    employeeName: `${invitation.user.employee.firstName} ${invitation.user.employee.lastName}`,
+    expiresAt: invitation.expiresAt.toISOString(),
+  };
+};
 
 const assertEmployeeExists = async (id: string) => {
   const employee = await findEmployeeById(id);
@@ -221,6 +249,65 @@ export const createNewEmployee = async (
 
   return {
     employee: toEmployeeDto(employee),
+    invitation: {
+      expiresAt: expiresAt.toISOString(),
+      token: invitationToken,
+    },
+  };
+};
+
+export const getPendingEmployeeInvitations = async () => {
+  const invitations = await listPendingEmployeeInvitations();
+  const seenAccountIds = new Set<string>();
+
+  return invitations.flatMap((invitation) => {
+    const dto = toInvitationDto(invitation);
+
+    if (!dto || seenAccountIds.has(dto.accountId)) {
+      return [];
+    }
+
+    seenAccountIds.add(dto.accountId);
+
+    return [dto];
+  });
+};
+
+export const regenerateEmployeeInvitation = async (
+  employeeId: string,
+  auditContext: AuditContext,
+) => {
+  const employee = await findInvitedEmployeeForInvitation(employeeId);
+
+  if (!employee?.user || !employee.userId) {
+    throw new AppError({
+      code: "INVITED_EMPLOYEE_NOT_FOUND",
+      message: "An invited employee account was not found.",
+      statusCode: 404,
+    });
+  }
+
+  const invitationToken = createSessionToken();
+  const tokenHash = hashSessionToken(invitationToken);
+  const expiresAt = new Date(Date.now() + invitationTtlMs);
+
+  await regenerateEmployeeInvitationToken({
+    ...auditContext,
+    email: employee.user.email,
+    employeeId: employee.id,
+    expiresAt,
+    tokenHash,
+    userId: employee.userId,
+  });
+
+  return {
+    employee: {
+      accountId: employee.user.id,
+      email: employee.user.email,
+      employeeId: employee.id,
+      employeeName: `${employee.firstName} ${employee.lastName}`,
+      expiresAt: expiresAt.toISOString(),
+    },
     invitation: {
       expiresAt: expiresAt.toISOString(),
       token: invitationToken,
