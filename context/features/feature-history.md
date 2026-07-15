@@ -48,6 +48,7 @@ Keep entries short. This file should explain what changed, not become a detailed
 - Feature 41: Persistent Pending Invitations — added admin pending-invitation APIs, secure setup-link regeneration, and a persistent Employees page invitation list that hides accepted or expired invites.
 - Feature 42: Mobile Form and Chrome Issues Cleanup — fixed mobile control overflow, added stronger form labels and autocomplete hints, made the mobile sidebar focus-safe, and verified the admin pages in a mobile browser viewport.
 - Feature 43: README and Screenshot Refresh — rewrote the root project guide in simpler, more complete language and replaced outdated reference images with current light/dark homepage and admin dashboard screenshots captured from the running app.
+- Feature 44: 4K Layout Density — added a dedicated wide-screen scale tier, fluid authenticated layouts, a wider desktop sidebar, and expanded homepage containers while preserving existing desktop and mobile sizing.
 
 ## Entry Format
 

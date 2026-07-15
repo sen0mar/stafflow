@@ -11,7 +11,7 @@ export const HomePage = () => (
     <div className="relative z-10">
       <LandingHeader />
       <HeroSection />
-      <section className="mx-auto grid max-w-[1440px] gap-5 px-5 py-5 sm:px-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 xl:px-8 2xl:max-w-[1760px] 2xl:gap-6 2xl:px-10">
+      <section className="mx-auto grid max-w-[1440px] gap-5 px-5 py-5 sm:px-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 xl:px-8 2xl:max-w-[1760px] 2xl:gap-6 2xl:px-10 min-[2200px]:!max-w-[2200px]">
         {modules.map((module) => (
           <FeatureCard
             key={module.title}

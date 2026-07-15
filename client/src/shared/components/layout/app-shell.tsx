@@ -28,7 +28,7 @@ export const AppShell = () => {
 
   return (
     <div className="min-h-screen bg-base text-primary">
-      <div className="grid min-h-screen lg:grid-cols-[280px_1fr]">
+      <div className="grid min-h-screen lg:grid-cols-[280px_1fr] min-[2200px]:!grid-cols-[320px_1fr]">
         <Sidebar
           email={user?.email}
           isLoggingOut={logoutMutation.isPending}
@@ -44,8 +44,8 @@ export const AppShell = () => {
             role={user?.role}
             onOpenSidebar={() => setIsSidebarOpen(true)}
           />
-          <main className="px-5 py-6 sm:px-6 lg:px-8">
-            <div className="mx-auto max-w-7xl">
+          <main className="px-5 py-6 sm:px-6 lg:px-8 2xl:px-10">
+            <div className="mx-auto max-w-7xl 2xl:max-w-[1760px] min-[2200px]:!max-w-none">
               <Outlet />
             </div>
           </main>

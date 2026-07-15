@@ -196,6 +196,8 @@ Do not modify generated shadcn/ui foundation components unless a task explicitly
 ## Spacing and Density
 
 - Page max width for landing pages: around `max-w-7xl` to `max-w-[1440px]`.
+- Authenticated app content should keep the standard desktop width at normal breakpoints, expand to a centered maximum around `1760px` on `2xl` viewports, and become fluid inside its page padding from `2200px` upward; the topbar and page content must share the same width constraint.
+- At viewport widths of `2200px` and above, use a `125%` root type scale so rem-based typography, controls, spacing, and cards retain appropriate visual density on 4K-class displays. Public landing containers may expand to around `2200px` at the same tier.
 - Dashboard horizontal content padding: `px-6` to `px-8` on desktop.
 - Card padding: `p-5` or `p-6` for panels, `p-4` for compact stats.
 - Grid gaps: `gap-4` to `gap-6`.

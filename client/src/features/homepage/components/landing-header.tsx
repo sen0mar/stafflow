@@ -6,7 +6,7 @@ import { LandingBrandMark } from './landing-brand-mark'
 
 export const LandingHeader = () => (
   <header className="border-b border-default bg-overlay backdrop-blur">
-    <div className="mx-auto flex max-w-[1440px] items-center justify-between px-5 py-4 sm:px-6 lg:px-8 2xl:max-w-[1760px] 2xl:px-10">
+    <div className="mx-auto flex max-w-[1440px] items-center justify-between px-5 py-4 sm:px-6 lg:px-8 2xl:max-w-[1760px] 2xl:px-10 min-[2200px]:!max-w-[2200px]">
       <LandingBrandMark />
       <div className="flex items-center gap-3">
         <ThemeToggle />

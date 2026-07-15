@@ -9,8 +9,8 @@ interface TopbarProps {
 }
 
 export const Topbar = ({ email, role, onOpenSidebar }: TopbarProps) => (
-  <header className="sticky top-0 z-30 border-b border-default bg-overlay px-5 py-3 backdrop-blur sm:px-6 lg:px-8">
-    <div className="mx-auto flex max-w-7xl items-center justify-between gap-4">
+  <header className="sticky top-0 z-30 border-b border-default bg-overlay px-5 py-3 backdrop-blur sm:px-6 lg:px-8 2xl:px-10">
+    <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 2xl:max-w-[1760px] min-[2200px]:!max-w-none">
       <div className="flex min-w-0 items-center gap-3">
         <Button
           aria-label="Open navigation"
