@@ -1,0 +1,11 @@
+{
+  "description": "Stafflow public auth entry points",
+  "expression": "(http.request.uri.path in {\"/auth/login\" \"/auth/forgot-password\" \"/auth/reset-password\" \"/auth/invitations/accept\"})",
+  "action": "block",
+  "ratelimit": {
+    "characteristics": ["cf.colo.id", "ip.src"],
+    "period": 10,
+    "requests_per_period": 5,
+    "mitigation_timeout": 10
+  }
+}

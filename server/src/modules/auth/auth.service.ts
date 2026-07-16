@@ -39,6 +39,10 @@ import {
 } from "./auth.repository";
 
 const demoSessionLimitPerUser = 100;
+// Fixed cost-12 hash used only to keep missing-user logins on the same bcrypt
+// verification path as bad-password logins. It is not a credential.
+const dummyPasswordHash =
+  "$2b$12$ucEMJzebu4xs6MrPsO8UJOQ5fTYPni.PaUs7h7sVX5O2FDV7E9B4i";
 
 interface AuditContext {
   actorUserId: string | null;
@@ -90,6 +94,7 @@ export const login = async (input: LoginInput) => {
   const user = await findUserByEmailForAuth(input.email);
 
   if (!user) {
+    await verifyPassword(input.password, dummyPasswordHash);
     throw invalidCredentialsError();
   }
 

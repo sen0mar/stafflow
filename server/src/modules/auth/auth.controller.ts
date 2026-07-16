@@ -7,6 +7,7 @@ import {
   setSessionCookie,
 } from "../../core/auth/session.service";
 import { AppError } from "../../core/errors/app-error";
+import { markExpectedAuthFailure } from "../../core/logger/expected-auth-failure";
 import { logger } from "../../core/logger/logger";
 import type { ApiSuccess } from "../../core/types/api-response";
 import type { PublicAuthUser } from "../../core/auth/auth.types";
@@ -60,6 +61,7 @@ export const loginController: RequestHandler = async (request, response) => {
       error.code !== undefined &&
       failedLoginCodes.has(error.code)
     ) {
+      markExpectedAuthFailure(request, response);
       logger.warn(
         {
           email: body.email,

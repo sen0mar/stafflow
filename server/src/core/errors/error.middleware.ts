@@ -3,6 +3,7 @@ import { ZodError } from "zod";
 
 import { env } from "../../config/env";
 import type { ApiError } from "../types/api-response";
+import { isExpectedAuthFailure } from "../logger/expected-auth-failure";
 import { logger } from "../logger/logger";
 import { AppError } from "./app-error";
 
@@ -42,7 +43,7 @@ export const globalErrorHandler: ErrorRequestHandler = (
       ? error.details
       : undefined;
 
-  if (shouldLogError(statusCode)) {
+  if (shouldLogError(statusCode) && !isExpectedAuthFailure(response)) {
     logger[statusCode >= 500 ? "error" : "warn"](
       {
         ...(statusCode >= 500 ? { err: error } : { code }),

@@ -1,0 +1,83 @@
+import request from "supertest";
+import { vi } from "vitest";
+
+import { AppError } from "../../core/errors/app-error";
+
+vi.mock("./auth.service", () => ({
+  acceptInvitation: vi.fn(),
+  changePassword: vi.fn(),
+  forgotPassword: vi.fn(),
+  login: vi.fn().mockResolvedValue({
+    token: "test-session-token",
+    user: {
+      email: "employee@example.com",
+      employee: null,
+      id: "user-id",
+      role: "EMPLOYEE",
+      status: "ACTIVE",
+    },
+  }),
+  logout: vi.fn(),
+  resetPassword: vi.fn(),
+}));
+
+import { createApp } from "../../app";
+import { login } from "./auth.service";
+import { logger } from "../../core/logger/logger";
+
+describe("public auth request hardening", () => {
+  it("does not let a cross-site-style form login establish a session", async () => {
+    const response = await request(createApp())
+      .post("/auth/login")
+      .type("form")
+      .send({ email: "employee@example.com", password: "password" })
+      .expect(415);
+
+    expect(login).not.toHaveBeenCalled();
+    expect(response.headers["set-cookie"]).toBeUndefined();
+  });
+
+  it.each([
+    "/auth/forgot-password",
+    "/auth/reset-password",
+    "/auth/invitations/accept",
+  ])("rejects form bodies on the public token endpoint %s", async (path) => {
+    await request(createApp())
+      .post(path)
+      .type("form")
+      .send({
+        email: "employee@example.com",
+        password: "password",
+        token: "a".repeat(43),
+      })
+      .expect(415)
+      .expect(({ body }) => {
+        expect(body.error.code).toBe("UNSUPPORTED_MEDIA_TYPE");
+      });
+  });
+
+  it("emits one log event for an expected failed login", async () => {
+    vi.mocked(login).mockRejectedValueOnce(
+      new AppError({
+        code: "INVALID_CREDENTIALS",
+        message: "Email or password is incorrect.",
+        statusCode: 401,
+      }),
+    );
+    const warnSpy = vi.spyOn(logger, "warn");
+
+    await request(createApp())
+      .post("/auth/login")
+      .send({ email: "missing@example.com", password: "password" })
+      .expect(401);
+
+    expect(warnSpy).toHaveBeenCalledTimes(1);
+    expect(warnSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        email: "missing@example.com",
+        reason: "INVALID_CREDENTIALS",
+      }),
+      "Login attempt failed",
+    );
+  });
+});

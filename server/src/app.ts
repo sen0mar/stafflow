@@ -23,7 +23,6 @@ export const createApp = (): Express => {
   app.use(corsMiddleware);
   app.use(cookieParser());
   app.use(express.json());
-  app.use(express.urlencoded({ extended: true }));
 
   app.use(createRoutes());
   app.use(notFoundHandler);

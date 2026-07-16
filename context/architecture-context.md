@@ -82,6 +82,8 @@ Auth model:
 - Frontend route guards are UX-only; the backend is the security boundary.
 - Public demo mode must prevent storage abuse through disabled uploads, strict quotas, automatic cleanup, or another explicit guardrail before unrestricted R2 writes are exposed.
 - Public demo mode must reject employee/account creation, invitation generation and acceptance, account-status mutations, and account elevation with `DEMO_READ_ONLY`.
+- Public auth request bodies are JSON-only and bounded at validation. Missing-user login attempts perform the same cost-12 bcrypt comparison path as bad-password attempts.
+- Login, forgot-password, reset-password, and invitation-acceptance traffic must be throttled at the provider edge across application instances. The production target is a Cloudflare-proxied API custom domain with the default Render hostname disabled; the deploy-time rule is documented under `deployment/`.
 
 ### Public Demo Mutation Policy
 
@@ -247,6 +249,7 @@ Recommended domain setup:
 - Production auth cookies use `SameSite=None; Secure` so credentialed Vercel-to-Render requests can carry the HTTP-only session cookie.
 - Auth responses may include a non-secret CSRF token for state-changing requests; the session token must remain HTTP-only and never be returned in JSON.
 - Configure Express `trust proxy` correctly on Render so secure cookies and client IPs work as intended.
+- Activate and verify the provider-level public-auth rate-limit rule in `deployment/public-auth-edge-throttling.md`; repository code does not imply that external Cloudflare state is active.
 
 Environment variables must be validated at server startup. Missing required variables should fail fast.
 

@@ -1,36 +1,64 @@
 import { z } from "zod";
 
+export const authInputLimits = {
+  emailCharacters: 254,
+  passwordBytes: 72,
+  passwordCharacters: 72,
+  tokenCharacters: 128,
+} as const;
+
+const emailSchema = z
+  .string()
+  .trim()
+  .max(authInputLimits.emailCharacters)
+  .email()
+  .toLowerCase();
+
+const passwordSchema = z
+  .string()
+  .min(1)
+  .max(authInputLimits.passwordCharacters)
+  .refine(
+    (password) =>
+      Buffer.byteLength(password, "utf8") <= authInputLimits.passwordBytes,
+    {
+      message: `Password must be ${authInputLimits.passwordBytes} bytes or fewer.`,
+    },
+  );
+
+const tokenSchema = z.string().min(32).max(authInputLimits.tokenCharacters);
+
 export const loginSchema = z.object({
   body: z.object({
-    email: z.string().trim().email().toLowerCase(),
-    password: z.string().min(1),
+    email: emailSchema,
+    password: passwordSchema,
   }),
 });
 
 export const changePasswordSchema = z.object({
   body: z.object({
-    currentPassword: z.string().min(1),
-    newPassword: z.string().min(1),
+    currentPassword: passwordSchema,
+    newPassword: passwordSchema,
   }),
 });
 
 export const forgotPasswordSchema = z.object({
   body: z.object({
-    email: z.string().trim().email().toLowerCase(),
+    email: emailSchema,
   }),
 });
 
 export const resetPasswordSchema = z.object({
   body: z.object({
-    newPassword: z.string().min(1),
-    token: z.string().min(32),
+    newPassword: passwordSchema,
+    token: tokenSchema,
   }),
 });
 
 export const acceptInvitationSchema = z.object({
   body: z.object({
-    password: z.string().min(1),
-    token: z.string().min(32),
+    password: passwordSchema,
+    token: tokenSchema,
   }),
 });
 

@@ -199,3 +199,5 @@ The intended production setup is:
 Set `CLIENT_URL` to the exact deployed frontend origin. Configure `VITE_API_URL` in the Vercel project when the API uses a separate Render origin. Production cookies require HTTPS, and the frontend and API must use matching credentialed CORS settings.
 
 For a public portfolio deployment, keep `DEMO_MODE=true` so public credentials cannot create, activate, disable, or elevate reusable private accounts. Keep `DEMO_UPLOADS_ENABLED=false` unless a separate upload quota and cleanup policy has been put in place.
+
+Public auth throttling is a provider control, not process-local middleware. Follow [the Cloudflare edge-throttling runbook](deployment/public-auth-edge-throttling.md), including disabling the direct Render hostname, before considering login and token traffic externally bounded.
