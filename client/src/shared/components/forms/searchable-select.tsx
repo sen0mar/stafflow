@@ -97,7 +97,7 @@ export const SearchableSelect = ({
       <Popover.Portal>
         <Popover.Content
           align="start"
-          className="z-50 w-[var(--radix-popover-trigger-width)] min-w-56 rounded-md border border-default bg-popover p-1 text-primary shadow-md"
+          className="z-50 w-[var(--radix-popover-trigger-width)] min-w-56 rounded-md border border-default bg-popover p-1 text-primary shadow-card"
           sideOffset={4}
         >
           <div className="relative p-1">

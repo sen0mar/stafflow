@@ -9,7 +9,7 @@ Use the reference images in the `context/images/` folder as the source of truth 
 - `context/images/homepage/homepage-dark-reference.png`
 - `context/images/homepage/homepage-light-reference.png`
 
-The visual language is a clean modern SaaS employee-management product: rounded cards, soft borders, subtle shadows, muted burnt-orange brand accents, readable dashboard density, and matching black/grey/orange dark/light mode layouts.
+The visual language is a clean modern SaaS employee-management product: rounded cards, soft borders, minimal neutral elevation, muted burnt-orange brand accents, readable dashboard density, and matching black/grey/orange dark/light mode layouts.
 
 ## Theme
 
@@ -58,9 +58,9 @@ If the project uses Tailwind v4, map these variables with `@theme inline`. If th
 | Chart secondary               | `--chart-secondary`       | `#737373`                                                                         |
 | Chart blue                    | `--chart-blue`            | `#a3a3a3`                                                                         |
 | Chart teal                    | `--chart-teal`            | `#2dd4bf`                                                                         |
-| Card shadow                   | `--shadow-card`           | `0 24px 80px rgba(0, 0, 0, 0.35)`                                                 |
-| Soft shadow                   | `--shadow-soft`           | `0 14px 40px rgba(0, 0, 0, 0.24)`                                                 |
-| Brand glow shadow             | `--shadow-glow`           | `0 0 38px rgba(229, 121, 34, 0.22)`                                               |
+| Layered surface shadow        | `--shadow-card`           | `0 4px 12px rgba(0, 0, 0, 0.28)`                                                  |
+| Subtle surface shadow         | `--shadow-soft`           | `0 1px 2px rgba(0, 0, 0, 0.24)`                                                   |
+| Compact accent elevation      | `--shadow-glow`           | `0 2px 6px rgba(0, 0, 0, 0.30)`                                                   |
 | Primary gradient              | `--gradient-primary`      | `linear-gradient(180deg, #ee9a54 0%, #e57922 50%, #c8661d 100%)`                  |
 | Hero radial gradient          | `--gradient-hero`         | `radial-gradient(circle at 75% 35%, rgba(229, 121, 34, 0.18), transparent 36%)`   |
 
@@ -103,9 +103,9 @@ If the project uses Tailwind v4, map these variables with `@theme inline`. If th
 | Chart secondary               | `--chart-secondary`       | `#8c8780`                                                                               |
 | Chart blue                    | `--chart-blue`            | `#525252`                                                                               |
 | Chart teal                    | `--chart-teal`            | `#0f766e`                                                                               |
-| Card shadow                   | `--shadow-card`           | `0 18px 50px rgba(23, 23, 23, 0.10)`                                                    |
-| Soft shadow                   | `--shadow-soft`           | `0 10px 28px rgba(23, 23, 23, 0.08)`                                                    |
-| Brand glow shadow             | `--shadow-glow`           | `0 0 32px rgba(208, 106, 28, 0.16)`                                                     |
+| Layered surface shadow        | `--shadow-card`           | `0 4px 12px rgba(23, 23, 23, 0.06)`                                                     |
+| Subtle surface shadow         | `--shadow-soft`           | `0 1px 2px rgba(23, 23, 23, 0.05)`                                                      |
+| Compact accent elevation      | `--shadow-glow`           | `0 2px 6px rgba(23, 23, 23, 0.10)`                                                      |
 | Primary gradient              | `--gradient-primary`      | `linear-gradient(180deg, #df8a42 0%, #d06a1c 54%, #b65a18 100%)`                        |
 | Hero radial gradient          | `--gradient-hero`         | `radial-gradient(circle at 72% 34%, rgba(208, 106, 28, 0.12), transparent 38%)`         |
 
@@ -117,6 +117,8 @@ If the project uses Tailwind v4, map these variables with `@theme inline`. If th
 - Use `bg-brand-soft` for selected sidebar items, icon wells, pills, and subtle active states.
 - Use `text-brand` for links, active labels, chart labels, and brand-emphasis text.
 - Use `border-default` for cards and panels; use `border-subtle` for internal dividers.
+- Keep ordinary bordered controls flat. Use `shadow-soft` only for a restrained depth cue and reserve `shadow-card` for layered surfaces such as dialogs, menus, mobile navigation, and the landing preview.
+- `shadow-glow` is a compact neutral lift for branded controls and marks; it must not create a colored halo around their edges.
 - Use `text-muted` for metadata and secondary descriptions.
 - Use `state-*` tokens for badges, validation, destructive actions, and status indicators.
 - Dashboard charts must use chart tokens, not arbitrary palette values.
@@ -184,7 +186,7 @@ Do not modify generated shadcn/ui foundation components unless a task explicitly
 - Sidebar-first layout with dashboard content to the right.
 - Sidebar uses brand, navigation links, active item highlight, and collapse affordance.
 - Main content uses stat cards, attendance chart, leave request list, recent employees, and department distribution.
-- Cards use soft borders, layered surfaces, and restrained shadows.
+- Cards use soft borders and layered surfaces. Most cards use no shadow or `shadow-soft`; stronger elevation is reserved for surfaces that sit above surrounding content.
 - Keep lists compact, readable, and aligned; avoid crowded text blocks.
 
 ### Employee Pages
@@ -205,7 +207,7 @@ Do not modify generated shadcn/ui foundation components unless a task explicitly
 
 ## Buttons and Interactions
 
-- Primary buttons use the brand gradient, white text, soft glow, and hover lift/brightness.
+- Primary buttons use the brand gradient, white text, compact neutral elevation, and hover lift/brightness.
 - Secondary buttons use transparent or surface backgrounds with default borders.
 - Active sidebar items use brand soft background, brand text, and a subtle left accent bar.
 - Focus rings should use the brand ring token and be visible in both modes.
