@@ -10,6 +10,7 @@ import {
   createLeaveRequestController,
   createLeaveTypeController,
   deleteLeaveTypeController,
+  getLeaveTypeController,
   getLeaveRequestController,
   listLeaveRequestsController,
   listLeaveTypesController,
@@ -22,6 +23,7 @@ export const createLeaveTypeRoutes = (): Router => {
   const router = Router();
 
   router.get("/", attachAuth, requireAuth, listLeaveTypesController);
+  router.get("/:id", attachAuth, requireAuth, getLeaveTypeController);
   router.post(
     "/",
     attachAuth,

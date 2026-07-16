@@ -19,14 +19,7 @@ import {
   FormMessage,
 } from '@/shared/components/ui/form'
 import { Input } from '@/shared/components/ui/input'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/shared/components/ui/select'
-import type { Department } from '@/features/departments/api/departments.api'
+import { DepartmentSelector } from '@/features/departments/components/department-selector'
 import type { Employee } from '../api/employees.api'
 import {
   createEmployeeFormSchema,
@@ -36,7 +29,6 @@ import {
 } from '../schemas/employee-form.schema'
 
 interface EmployeeFormProps {
-  departments: Department[]
   employee?: Employee | null
   isSubmitting: boolean
   onOpenChange: (open: boolean) => void
@@ -60,7 +52,6 @@ const getDefaultValues = (
 })
 
 export const EmployeeForm = ({
-  departments,
   employee,
   isSubmitting,
   onOpenChange,
@@ -168,26 +159,15 @@ export const EmployeeForm = ({
                 render={({ field }) => (
                   <FormItem className="min-w-0">
                     <FormLabel>Department</FormLabel>
-                    <Select
-                      value={field.value || unassignedDepartmentValue}
-                      onValueChange={field.onChange}
-                    >
-                      <FormControl>
-                        <SelectTrigger className="w-full">
-                          <SelectValue />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value={unassignedDepartmentValue}>
-                          Unassigned
-                        </SelectItem>
-                        {departments.map((department) => (
-                          <SelectItem key={department.id} value={department.id}>
-                            {department.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <FormControl>
+                      <DepartmentSelector
+                        unassignedOption
+                        ariaLabel="Select employee department"
+                        id="employee-department"
+                        value={field.value || unassignedDepartmentValue}
+                        onValueChange={field.onChange}
+                      />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}

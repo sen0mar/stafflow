@@ -1,4 +1,4 @@
-import { CalendarDays, Filter, Plus, Search } from 'lucide-react'
+import { CalendarDays, Plus } from 'lucide-react'
 import { useState } from 'react'
 import { PageHeader } from '@/shared/components/layout/page-header'
 import { FilterSelect } from '@/shared/components/data-table/filter-select'
@@ -25,7 +25,7 @@ import {
 } from '@/shared/components/ui/table'
 import { useCurrentUser } from '@/features/auth/hooks/use-current-user'
 import { useDemoMode } from '@/features/auth/hooks/use-auth-config'
-import { useEmployees } from '@/features/employees/hooks/use-employees'
+import { EmployeeSelector } from '@/features/employees/components/employee-selector'
 import { useTableQueryState } from '@/shared/hooks/use-table-query-state'
 import { formatDateOnly } from '@/shared/lib/dates'
 import { getAllowedQueryValue } from '@/shared/lib/query-values'
@@ -38,6 +38,7 @@ import { LeaveRequestForm } from '../components/leave-request-form'
 import { LeaveReviewDialog } from '../components/leave-review-dialog'
 import { LeaveStatusBadge } from '../components/leave-status-badge'
 import { LeaveTypeFormDialog } from '../components/leave-type-form-dialog'
+import { LeaveTypeSelector } from '../components/leave-type-selector'
 import {
   useApproveLeaveRequest,
   useCancelLeaveRequest,
@@ -258,7 +259,6 @@ const EmployeeLeavePage = () => {
     page,
     status: getStatusFilter(status),
   })
-  const leaveTypesQuery = useLeaveTypes({ isActive: true, limit: 100, page: 1 })
   const createRequest = useCreateLeaveRequest()
   const cancelRequest = useCancelLeaveRequest()
   const requests = getVisibleRequests(selfRequestsQuery.data?.data ?? [])
@@ -292,7 +292,6 @@ const EmployeeLeavePage = () => {
           </div>
           <LeaveRequestForm
             isSubmitting={createRequest.isPending}
-            leaveTypes={leaveTypesQuery.data?.data ?? []}
             onSubmit={handleSubmit}
           />
         </section>
@@ -531,13 +530,6 @@ const AdminLeavePage = () => {
     page,
     status: getStatusFilter(status),
   })
-  const leaveTypesQuery = useLeaveTypes({ limit: 100, page: 1 })
-  const employeesQuery = useEmployees({
-    limit: 100,
-    page: 1,
-    sort: 'name',
-    status: 'ACTIVE',
-  })
   const approveRequest = useApproveLeaveRequest()
   const rejectRequest = useRejectLeaveRequest()
   const requests = getVisibleRequests(leaveRequestsQuery.data?.data ?? [])
@@ -585,28 +577,19 @@ const AdminLeavePage = () => {
 
       <section className="space-y-4 overflow-hidden rounded-2xl border border-default bg-surface p-4 shadow-soft">
         <TableToolbar className="lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,0.8fr)]">
-          <FilterSelect
+          <EmployeeSelector
+            allOption
             ariaLabel="Filter leave requests by employee"
-            icon={<Search className="h-4 w-4 text-muted" aria-hidden="true" />}
             id="leave-employee-filter"
-            name="leaveEmployee"
             value={employeeId}
             onValueChange={(value) =>
               tableState.updateQuery({ employeeId: value }, { resetPage: true })
             }
-            options={[
-              { label: 'All employees', value: 'all' },
-              ...(employeesQuery.data?.data.map((employee) => ({
-                label: employee.fullName,
-                value: employee.id,
-              })) ?? []),
-            ]}
           />
-          <FilterSelect
+          <LeaveTypeSelector
+            allOption
             ariaLabel="Filter leave requests by type"
-            icon={<Filter className="h-4 w-4 text-muted" aria-hidden="true" />}
             id="leave-type-filter"
-            name="leaveType"
             value={leaveTypeId}
             onValueChange={(value) =>
               tableState.updateQuery(
@@ -614,13 +597,6 @@ const AdminLeavePage = () => {
                 { resetPage: true },
               )
             }
-            options={[
-              { label: 'All leave types', value: 'all' },
-              ...(leaveTypesQuery.data?.data.map((leaveType) => ({
-                label: leaveType.name,
-                value: leaveType.id,
-              })) ?? []),
-            ]}
           />
           <FilterSelect
             ariaLabel="Filter leave requests by status"

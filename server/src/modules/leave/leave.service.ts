@@ -333,6 +333,12 @@ export const getLeaveTypes = async (input: ListLeaveTypesInput) => {
   });
 };
 
+export const getLeaveType = async (id: string) => {
+  const leaveType = await assertLeaveTypeExists(id);
+
+  return toLeaveTypeDto(leaveType);
+};
+
 export const createNewLeaveType = async (
   input: CreateLeaveTypeInput,
   auditContext: AuditContext,

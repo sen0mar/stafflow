@@ -13,7 +13,7 @@ import {
 } from '@/shared/components/layout/page-state'
 import { useTableQueryState } from '@/shared/hooks/use-table-query-state'
 import { getAllowedQueryValue } from '@/shared/lib/query-values'
-import { useDepartments } from '@/features/departments/hooks/use-departments'
+import { DepartmentSelector } from '@/features/departments/components/department-selector'
 import { useDemoMode } from '@/features/auth/hooks/use-auth-config'
 import type {
   Employee,
@@ -94,11 +94,6 @@ export const EmployeesPage = () => {
     sort,
     status: status === allValue ? undefined : status,
   })
-  const departmentsQuery = useDepartments({
-    isActive: true,
-    page: 1,
-    pageSize: 100,
-  })
   const createEmployee = useCreateEmployee()
   const employeeInvitationsQuery = useEmployeeInvitations()
   const updateEmployee = useUpdateEmployee()
@@ -114,7 +109,6 @@ export const EmployeesPage = () => {
     )
   }, [employeeInvitationsQuery.data])
   const pagination = employeesQuery.data?.meta
-  const departments = departmentsQuery.data?.data ?? []
   const { updateQuery } = tableState
   const setPage = useCallback(
     (nextPage: number) => {
@@ -294,10 +288,10 @@ export const EmployeesPage = () => {
             value={search}
             onDebouncedChange={handleSearchChange}
           />
-          <FilterSelect
+          <DepartmentSelector
+            allOption
             ariaLabel="Filter employees by department"
             id="employees-department-filter"
-            name="employeesDepartment"
             value={departmentId}
             onValueChange={(value) =>
               tableState.updateQuery(
@@ -305,13 +299,6 @@ export const EmployeesPage = () => {
                 { resetPage: true },
               )
             }
-            options={[
-              { label: 'All departments', value: allValue },
-              ...departments.map((department) => ({
-                label: department.name,
-                value: department.id,
-              })),
-            ]}
           />
           <FilterSelect
             ariaLabel="Filter employees by status"
@@ -386,7 +373,6 @@ export const EmployeesPage = () => {
 
       {!demoMode ? (
         <EmployeeForm
-          departments={departments}
           employee={editingEmployee}
           isSubmitting={createEmployee.isPending || updateEmployee.isPending}
           open={formOpen}

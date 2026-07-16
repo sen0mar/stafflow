@@ -1,4 +1,4 @@
-import { CalendarCheck, Filter, Search } from 'lucide-react'
+import { CalendarCheck } from 'lucide-react'
 import { useState } from 'react'
 import { DateRangeFilter } from '@/shared/components/data-table/date-range-filter'
 import { FilterSelect } from '@/shared/components/data-table/filter-select'
@@ -14,8 +14,8 @@ import { useTableQueryState } from '@/shared/hooks/use-table-query-state'
 import { getAllowedQueryValue } from '@/shared/lib/query-values'
 import { useCurrentUser } from '@/features/auth/hooks/use-current-user'
 import { useDemoMode } from '@/features/auth/hooks/use-auth-config'
-import { useDepartments } from '@/features/departments/hooks/use-departments'
-import { useEmployees } from '@/features/employees/hooks/use-employees'
+import { DepartmentSelector } from '@/features/departments/components/department-selector'
+import { EmployeeSelector } from '@/features/employees/components/employee-selector'
 import type { AttendanceRecord, AttendanceStatus } from '../api/attendance.api'
 import { AdminCorrectionDialog } from '../components/admin-correction-dialog'
 import { AttendanceActionConfirmDialog } from '../components/attendance-action-confirm-dialog'
@@ -206,17 +206,6 @@ const AdminAttendancePage = () => {
     status: getStatusFilter(status),
     to: to || undefined,
   })
-  const employeesQuery = useEmployees({
-    limit: 100,
-    page: 1,
-    sort: 'name',
-    status: 'ACTIVE',
-  })
-  const departmentsQuery = useDepartments({
-    isActive: true,
-    page: 1,
-    pageSize: 100,
-  })
   const updateAttendance = useUpdateAttendanceRecord()
   const records = attendanceQuery.data?.data ?? []
   const pagination = attendanceQuery.data?.meta
@@ -262,28 +251,19 @@ const AdminAttendancePage = () => {
 
       <section className="space-y-4 overflow-hidden rounded-2xl border border-default bg-surface p-4 shadow-soft">
         <TableToolbar className="lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,0.8fr)_minmax(0,0.8fr)_minmax(0,0.8fr)]">
-          <FilterSelect
+          <EmployeeSelector
+            allOption
             ariaLabel="Filter attendance records by employee"
-            icon={<Search className="h-4 w-4 text-muted" aria-hidden="true" />}
             id="attendance-employee-filter"
-            name="attendanceEmployee"
             value={employeeId}
             onValueChange={(value) =>
               tableState.updateQuery({ employeeId: value }, { resetPage: true })
             }
-            options={[
-              { label: 'All employees', value: 'all' },
-              ...(employeesQuery.data?.data.map((employee) => ({
-                label: employee.fullName,
-                value: employee.id,
-              })) ?? []),
-            ]}
           />
-          <FilterSelect
+          <DepartmentSelector
+            allOption
             ariaLabel="Filter attendance records by department"
-            icon={<Filter className="h-4 w-4 text-muted" aria-hidden="true" />}
             id="attendance-department-filter"
-            name="attendanceDepartment"
             value={departmentId}
             onValueChange={(value) =>
               tableState.updateQuery(
@@ -291,13 +271,6 @@ const AdminAttendancePage = () => {
                 { resetPage: true },
               )
             }
-            options={[
-              { label: 'All departments', value: 'all' },
-              ...(departmentsQuery.data?.data.map((department) => ({
-                label: department.name,
-                value: department.id,
-              })) ?? []),
-            ]}
           />
           <FilterSelect
             ariaLabel="Filter attendance records by status"

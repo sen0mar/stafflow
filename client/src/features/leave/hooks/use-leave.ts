@@ -9,6 +9,7 @@ import {
   createLeaveType,
   deleteLeaveType,
   getLeaveRequest,
+  getLeaveType,
   getLeaveRequests,
   getLeaveTypes,
   getSelfLeaveRequests,
@@ -36,6 +37,13 @@ export const useLeaveTypes = (params: LeaveTypeListParams) =>
   useQuery({
     queryFn: () => getLeaveTypes(params),
     queryKey: leaveKeys.leaveTypeList(params),
+  })
+
+export const useLeaveType = (id: string, enabled = true) =>
+  useQuery({
+    enabled,
+    queryFn: () => getLeaveType(id),
+    queryKey: leaveKeys.leaveTypeDetail(id),
   })
 
 export const useSelfLeaveRequests = (params: SelfLeaveRequestListParams) =>

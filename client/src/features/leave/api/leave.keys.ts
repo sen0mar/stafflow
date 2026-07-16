@@ -7,6 +7,9 @@ import type {
 export const leaveKeys = {
   all: () => ['leave'] as const,
   leaveTypes: () => [...leaveKeys.all(), 'types'] as const,
+  leaveTypeDetail: (id: string) =>
+    [...leaveKeys.leaveTypeDetails(), id] as const,
+  leaveTypeDetails: () => [...leaveKeys.leaveTypes(), 'detail'] as const,
   leaveTypeList: (params: LeaveTypeListParams) =>
     [...leaveKeys.leaveTypes(), 'list', params] as const,
   requestDetail: (id: string) => [...leaveKeys.requestDetails(), id] as const,

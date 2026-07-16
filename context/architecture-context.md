@@ -252,6 +252,7 @@ The app should feel fast under normal single-company usage. Performance is achie
 Frontend performance rules:
 
 - Use TanStack Query for server state and cache invalidation.
+- Relationship selectors whose cardinality is not strictly capped use debounced server search with a small bounded first page and a detail lookup to preserve selected values outside the current result page; they never fetch every page to build an option list.
 - Use Zustand only for client/UI state.
 - Avoid fetching all records when a paginated table is needed.
 - Use route-level code splitting where appropriate.

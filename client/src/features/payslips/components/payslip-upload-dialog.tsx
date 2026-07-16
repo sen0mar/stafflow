@@ -20,6 +20,7 @@ import {
   FormMessage,
 } from '@/shared/components/ui/form'
 import { Input } from '@/shared/components/ui/input'
+import { EmployeeSelector } from '@/features/employees/components/employee-selector'
 import {
   Select,
   SelectContent,
@@ -27,7 +28,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/shared/components/ui/select'
-import type { Employee } from '@/features/employees/api/employees.api'
 import {
   maxPayslipUploadBytes,
   payslipUploadSchema,
@@ -35,8 +35,6 @@ import {
 } from '../schemas/payslip-upload.schema'
 
 interface PayslipUploadDialogProps {
-  employees: Employee[]
-  isLoadingEmployees: boolean
   isSubmitting: boolean
   onOpenChange: (open: boolean) => void
   onSubmit: (values: PayslipUploadValues) => void
@@ -66,8 +64,6 @@ const defaultValues: Partial<PayslipUploadValues> = {
 }
 
 export const PayslipUploadDialog = ({
-  employees,
-  isLoadingEmployees,
   isSubmitting,
   onOpenChange,
   onSubmit,
@@ -101,30 +97,12 @@ export const PayslipUploadDialog = ({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Employee</FormLabel>
-                  <Select
-                    disabled={isLoadingEmployees}
+                  <EmployeeSelector
+                    ariaLabel="Select payslip employee"
+                    id="payslip-employee"
                     value={field.value}
                     onValueChange={field.onChange}
-                  >
-                    <FormControl>
-                      <SelectTrigger className="w-full">
-                        <SelectValue
-                          placeholder={
-                            isLoadingEmployees
-                              ? 'Loading employees'
-                              : 'Select employee'
-                          }
-                        />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {employees.map((employee) => (
-                        <SelectItem key={employee.id} value={employee.id}>
-                          {employee.fullName} · {employee.employeeCode}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  />
                   <FormMessage />
                 </FormItem>
               )}

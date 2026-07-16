@@ -18,6 +18,7 @@ import {
   createSelfLeaveRequest,
   deleteExistingLeaveType,
   getLeaveRequestDetail,
+  getLeaveType,
   getLeaveRequestList,
   getLeaveTypes,
   getSelfLeaveRequests,
@@ -39,6 +40,17 @@ export const listLeaveTypesController: RequestHandler = async (
   const leaveTypes = await getLeaveTypes(query);
 
   response.status(200).json(leaveTypes);
+};
+
+export const getLeaveTypeController: RequestHandler = async (
+  request,
+  response,
+) => {
+  const { params } = leaveIdSchema.parse({ params: request.params });
+  const leaveType = await getLeaveType(params.id);
+  const responseBody: ApiSuccess<typeof leaveType> = { data: leaveType };
+
+  response.status(200).json(responseBody);
 };
 
 export const createLeaveTypeController: RequestHandler = async (

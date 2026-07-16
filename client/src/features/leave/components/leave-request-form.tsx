@@ -10,15 +10,8 @@ import {
   FormMessage,
 } from '@/shared/components/ui/form'
 import { Input } from '@/shared/components/ui/input'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/shared/components/ui/select'
 import { Textarea } from '@/shared/components/ui/textarea'
-import type { LeaveType } from '../api/leave.api'
+import { LeaveTypeSelector } from './leave-type-selector'
 import {
   leaveRequestFormSchema,
   MAX_LEAVE_REQUEST_CALENDAR_DAYS,
@@ -27,7 +20,6 @@ import {
 
 interface LeaveRequestFormProps {
   isSubmitting: boolean
-  leaveTypes: LeaveType[]
   onSubmit: (values: LeaveRequestFormValues) => void
 }
 
@@ -40,7 +32,6 @@ const defaultValues: LeaveRequestFormValues = {
 
 export const LeaveRequestForm = ({
   isSubmitting,
-  leaveTypes,
   onSubmit,
 }: LeaveRequestFormProps) => {
   const form = useForm<LeaveRequestFormValues>({
@@ -63,20 +54,15 @@ export const LeaveRequestForm = ({
           render={({ field }) => (
             <FormItem className="min-w-0">
               <FormLabel>Leave type</FormLabel>
-              <Select value={field.value} onValueChange={field.onChange}>
-                <FormControl>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select type" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {leaveTypes.map((leaveType) => (
-                    <SelectItem key={leaveType.id} value={leaveType.id}>
-                      {leaveType.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <FormControl>
+                <LeaveTypeSelector
+                  activeOnly
+                  ariaLabel="Select leave type"
+                  id="leave-request-type"
+                  value={field.value}
+                  onValueChange={field.onChange}
+                />
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}
@@ -108,11 +94,7 @@ export const LeaveRequestForm = ({
           )}
         />
         <div className="flex items-end">
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={isSubmitting || leaveTypes.length === 0}
-          >
+          <Button type="submit" className="w-full" disabled={isSubmitting}>
             {isSubmitting ? 'Submitting...' : 'Submit request'}
           </Button>
         </div>

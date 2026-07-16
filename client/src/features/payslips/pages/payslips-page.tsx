@@ -20,7 +20,6 @@ import { PaginationControls } from '@/shared/components/data-table/pagination-co
 import { PageHeader } from '@/shared/components/layout/page-header'
 import { useCurrentUser } from '@/features/auth/hooks/use-current-user'
 import { useDemoMode } from '@/features/auth/hooks/use-auth-config'
-import { useEmployees } from '@/features/employees/hooks/use-employees'
 import { useTableQueryState } from '@/shared/hooks/use-table-query-state'
 import { getRolePermissions, hasPermission } from '@/shared/lib/permissions'
 import { getAllowedQueryValue } from '@/shared/lib/query-values'
@@ -255,15 +254,6 @@ export const PayslipsPage = () => {
     },
     hasCurrentUser && !canReadAny,
   )
-  const employeesQuery = useEmployees(
-    {
-      limit: 100,
-      page: 1,
-      sort: 'name',
-      status: 'ACTIVE',
-    },
-    hasCurrentUser && canUpload,
-  )
   const uploadPayslip = useUploadPayslip()
   const deletePayslip = useDeletePayslip()
   const downloadPayslip = useDownloadPayslip()
@@ -431,8 +421,6 @@ export const PayslipsPage = () => {
 
       {!demoMode ? (
         <PayslipUploadDialog
-          employees={employeesQuery.data?.data ?? []}
-          isLoadingEmployees={employeesQuery.isLoading}
           isSubmitting={uploadPayslip.isPending}
           open={uploadOpen}
           onOpenChange={setUploadOpen}

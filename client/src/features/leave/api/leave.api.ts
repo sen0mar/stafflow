@@ -165,6 +165,12 @@ export const getLeaveTypes = async (params: LeaveTypeListParams) => {
   return response
 }
 
+export const getLeaveType = async (id: string) => {
+  const response = await apiClient<ApiResponse<LeaveType>>(`/leave-types/${id}`)
+
+  return response.data
+}
+
 export const createLeaveType = async (input: CreateLeaveTypeInput) => {
   const response = await apiClient<ApiResponse<LeaveType>>('/leave-types', {
     body: { ...input },
