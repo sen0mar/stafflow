@@ -160,7 +160,6 @@ export const DepartmentsPage = () => {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Organization"
         title="Departments"
         description="Manage the department structure employees will be assigned to."
         actions={

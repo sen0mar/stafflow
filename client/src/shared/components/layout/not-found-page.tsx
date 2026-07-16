@@ -7,7 +7,6 @@ export const NotFoundPage = () => (
   <main className="flex min-h-screen items-center justify-center px-5 py-10">
     <div className="w-full max-w-xl">
       <RoutePlaceholder
-        eyebrow="Route not found"
         title="This page is not available"
         description="The requested route does not match the current Stafflow placeholder scaffold."
         icon={AlertCircle}

@@ -249,7 +249,6 @@ export const EmployeesPage = () => {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Organization"
         title="Employees"
         description="Manage employee profiles, department assignments, account status, and invitations."
         actions={

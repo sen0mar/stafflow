@@ -71,7 +71,6 @@ export const EmployeeLeaveRequests = () => {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Self-service"
         title="Leave Requests"
         description="Submit time off requests and track approval status."
       />

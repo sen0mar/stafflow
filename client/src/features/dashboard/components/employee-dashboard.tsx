@@ -84,7 +84,6 @@ export const EmployeeDashboard = () => {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Employee dashboard"
         title={
           summary ? `Welcome, ${summary.profileSummary.name}` : 'Dashboard'
         }

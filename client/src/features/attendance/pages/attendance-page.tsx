@@ -87,7 +87,6 @@ const EmployeeAttendancePage = () => {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Self-service"
         title="Attendance"
         description="Clock in, clock out, and review your attendance history."
       />
@@ -244,7 +243,6 @@ const AdminAttendancePage = () => {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Admin"
         title="Attendance"
         description="Review attendance records, filter by team, and correct records when needed."
       />

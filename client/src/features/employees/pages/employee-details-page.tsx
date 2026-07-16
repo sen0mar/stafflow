@@ -22,7 +22,6 @@ export const EmployeeDetailsPage = () => {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Employee record"
         title={employee?.fullName ?? 'Employee details'}
         description="Review account status, profile details, and assignment information."
         actions={

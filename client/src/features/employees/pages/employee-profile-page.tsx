@@ -57,7 +57,6 @@ export const EmployeeProfilePage = () => {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Self service"
         title="Profile"
         description="View your employee profile and update allowed personal details."
       />

@@ -146,8 +146,7 @@ export const SettingsPage = () => {
   return (
     <div className="space-y-6">
       <div>
-        <p className="text-sm font-medium text-brand">Admin settings</p>
-        <h1 className="mt-2 text-2xl font-semibold tracking-normal text-primary">
+        <h1 className="text-2xl font-semibold tracking-normal text-primary">
           Settings
         </h1>
         <p className="mt-2 max-w-3xl text-sm leading-6 text-muted">

@@ -76,6 +76,7 @@ Keep entries short. This file should explain what changed, not become a detailed
 - Feature 69: Audit Section 25 Risk-Focused Tests — added an auditable P0/P1 regression matrix, restored and verified the clean npm/client test baseline, and reordered CI into fast static/build/unit checks followed by guarded database integration and non-repeating smoke checks.
 - Feature 70: Audit Section 26 Environment and Docs Sync — completed safe local/client/production environment examples and provider ownership mapping, aligned demo/password-recovery/security claims with exact regression evidence, and added a deployment verification checklist separating code controls from external activation.
 - Feature 71: Subtle UI Shadows — replaced broad surface and brand-glow shadows with compact neutral elevation, flattened bordered form controls, normalized layered overlays, and tightened the public homepage footer spacing.
+- Feature 72: Page Header Cleanup — removed redundant role/context eyebrow labels across admin, employee, settings, and not-found pages, and removed the unused employee and payslip shortcuts from the admin dashboard header while preserving actions on their owning pages.
 
 ## Entry Format
 

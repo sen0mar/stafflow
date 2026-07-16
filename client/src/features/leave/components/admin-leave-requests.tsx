@@ -102,7 +102,6 @@ export const AdminLeaveRequests = () => {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Admin"
         title="Leave Requests"
         description="Review employee leave requests, manage leave types, and keep balances simple."
       />

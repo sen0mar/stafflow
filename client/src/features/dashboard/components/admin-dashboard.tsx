@@ -3,14 +3,11 @@ import {
   CalendarCheck,
   CalendarDays,
   Clock3,
-  FileText,
   Inbox,
   UserRound,
-  UserRoundPlus,
   UsersRound,
 } from 'lucide-react'
 import { Avatar, AvatarFallback } from '@/shared/components/ui/avatar'
-import { Button } from '@/shared/components/ui/button'
 import { PageHeader } from '@/shared/components/layout/page-header'
 import { formatDate } from '@/shared/lib/dates'
 import { AttendanceChart } from './attendance-chart'
@@ -55,19 +52,8 @@ export const AdminDashboard = () => {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Admin dashboard"
         title="Dashboard"
         description="Monitor attendance, leave activity, employee movement, and team distribution."
-        actions={[
-          <Button key="add-employee" type="button">
-            <UserRoundPlus className="h-4 w-4" aria-hidden="true" />
-            Add employee
-          </Button>,
-          <Button key="upload-payslip" type="button" variant="outline">
-            <FileText className="h-4 w-4" aria-hidden="true" />
-            Upload payslip
-          </Button>,
-        ]}
       />
 
       {dashboardQuery.isLoading ? <DashboardLoading /> : null}

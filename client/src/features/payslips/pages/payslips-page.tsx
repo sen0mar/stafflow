@@ -304,7 +304,6 @@ export const PayslipsPage = () => {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow={canReadAny ? 'Payroll files' : 'Self service'}
         title="Payslips"
         description={
           canReadAny

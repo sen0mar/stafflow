@@ -171,7 +171,6 @@ export const AuditLogsPage = () => {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Admin"
         title="Audit Logs"
         description="Review sensitive business and security activity recorded separately from technical logs."
       />
