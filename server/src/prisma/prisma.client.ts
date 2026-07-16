@@ -13,6 +13,7 @@ const adapter = new PrismaPg({
 
 export const prisma = globalForPrisma.prisma ?? new PrismaClient({ adapter });
 
+// Retained for the Section 24 readiness probe, which must verify database access.
 export const checkDatabaseConnection = async () => {
   await prisma.$queryRaw`SELECT 1`;
 };

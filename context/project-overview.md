@@ -119,7 +119,7 @@ Employee flow:
 - React + TypeScript + Vite frontend.
 - Tailwind CSS and shadcn/ui component foundation.
 - TanStack Query for server state.
-- Zustand for local client/UI state.
+- Local client/UI state stays in React unless a demonstrated shared-state need justifies adding a dedicated store library.
 - Native `fetch` wrapper for API requests. No Axios.
 - Express + TypeScript backend.
 - PostgreSQL on Neon with Prisma ORM.

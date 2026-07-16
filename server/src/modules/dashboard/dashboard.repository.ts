@@ -1,8 +1,4 @@
-import type {
-  AttendanceStatus,
-  EmploymentStatus,
-  LeaveRequestStatus,
-} from "@prisma/client";
+import type { EmploymentStatus, LeaveRequestStatus } from "@prisma/client";
 
 import { prisma } from "../../prisma/prisma.client";
 import { SETTINGS_SINGLETON_IDS } from "../settings/settings.constants";
@@ -256,10 +252,3 @@ export const getEmployeeLatestPayslips = (employeeId: string, take = 3) =>
       status: "ACTIVE",
     },
   });
-
-export type AttendanceStatusCount = {
-  _count: {
-    _all: number;
-  };
-  status: AttendanceStatus;
-};

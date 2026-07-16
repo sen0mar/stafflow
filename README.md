@@ -47,7 +47,7 @@ There is no public sign-up page. Outside the public demo, new accounts are creat
 ## Technology
 
 - **Frontend:** React, TypeScript, Vite, React Router, Tailwind CSS, and shadcn/ui primitives
-- **Data and forms:** TanStack Query, Zustand, React Hook Form, and Zod
+- **Data and forms:** TanStack Query, React state, React Hook Form, and Zod
 - **Backend:** Node.js, Express, TypeScript, and native `fetch`
 - **Database:** PostgreSQL on Neon with Prisma ORM and Prisma migrations
 - **Authentication:** database-backed sessions stored in HTTP-only cookies

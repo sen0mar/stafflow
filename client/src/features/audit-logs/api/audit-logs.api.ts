@@ -1,8 +1,5 @@
 import { apiClient } from '@/shared/lib/api-client'
-import type {
-  PaginatedResponse,
-  PaginationMeta,
-} from '@/shared/types/pagination'
+import type { PaginatedResponse } from '@/shared/types/pagination'
 
 export interface AuditLogActor {
   email: string
@@ -24,8 +21,6 @@ export interface AuditLog {
   userAgent: string | null
 }
 
-export type Pagination = PaginationMeta
-
 export interface AuditLogListParams {
   action?: string
   actorUserId?: string
@@ -35,11 +30,6 @@ export interface AuditLogListParams {
   entityType?: string
   limit: number
   page: number
-}
-
-export interface AuditLogListResponse {
-  data: AuditLog[]
-  meta: Pagination
 }
 
 interface ApiResponse<TData> {

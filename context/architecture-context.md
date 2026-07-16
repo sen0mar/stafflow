@@ -8,7 +8,7 @@
 | Routing              | React Router                      | Protected app routes and feature pages                                                                             |
 | UI                   | Tailwind CSS + shadcn/ui          | Styling, reusable primitives, dashboard components                                                                 |
 | Server state         | TanStack Query                    | API fetching, caching, invalidation, loading/error state                                                           |
-| Client state         | Zustand                           | Lightweight UI/application state such as sidebar, theme, filters, and local preferences                            |
+| Client state         | React state                       | Local UI state; add a dedicated shared-state library only when a concrete cross-feature need appears               |
 | Forms and validation | React Hook Form + Zod             | Form state, client validation, shared schema-style validation where useful                                         |
 | API                  | Node.js + Express.js + TypeScript | REST API, auth/session handling, RBAC, business workflows                                                          |
 | Database             | PostgreSQL on Neon                | Relational data for users, employees, departments, attendance, leave, payslips, settings, sessions, and audit logs |
@@ -192,7 +192,7 @@ Each frontend feature may contain:
 - `pages` — route-level page components.
 - `schemas` — Zod schemas and form validation.
 - `types` — feature-local types.
-- `stores` — Zustand stores only when local/global client state is truly needed.
+- `stores` — dedicated client-state stores only when a concrete local/global shared-state need justifies them.
 
 Backend modules should mirror the domain structure:
 
@@ -255,7 +255,7 @@ Frontend performance rules:
 
 - Use TanStack Query for server state and cache invalidation.
 - Relationship selectors whose cardinality is not strictly capped use debounced server search with a small bounded first page and a detail lookup to preserve selected values outside the current result page; they never fetch every page to build an option list.
-- Use Zustand only for client/UI state.
+- Keep local UI state in React; introduce a dedicated client-state store only for a demonstrated cross-feature need.
 - Avoid fetching all records when a paginated table is needed.
 - Use route-level code splitting where appropriate.
 - Use skeleton states for slow network actions.

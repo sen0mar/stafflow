@@ -5,8 +5,6 @@ import type {
 
 export const attendanceKeys = {
   all: () => ['attendance'] as const,
-  detail: (id: string) => [...attendanceKeys.details(), id] as const,
-  details: () => [...attendanceKeys.all(), 'detail'] as const,
   list: (params: AttendanceListParams) =>
     [...attendanceKeys.lists(), params] as const,
   lists: () => [...attendanceKeys.all(), 'list'] as const,

@@ -96,11 +96,6 @@ export interface SelfLeaveRequestListParams {
   status?: LeaveRequestStatus
 }
 
-export interface LeaveTypeListResponse {
-  data: LeaveType[]
-  meta: Pagination
-}
-
 export interface LeaveRequestListResponse {
   data: LeaveRequest[]
   meta: Pagination
@@ -267,14 +262,6 @@ export const getLeaveRequests = async (params: LeaveRequestListParams) => {
   )
 
   return response
-}
-
-export const getLeaveRequest = async (id: string) => {
-  const response = await apiClient<ApiResponse<LeaveRequest>>(
-    `/leave-requests/${id}`,
-  )
-
-  return response.data
 }
 
 export const approveLeaveRequest = async ({

@@ -5,7 +5,6 @@ import { getSafeErrorMessage } from '@/shared/lib/api-errors'
 import {
   clockIn,
   clockOut,
-  getAttendanceRecord,
   getAttendanceRecords,
   getSelfAttendanceHistory,
   getSelfTodayAttendance,
@@ -47,13 +46,6 @@ export const useAttendanceRecords = (
     enabled,
     queryFn: () => getAttendanceRecords(params),
     queryKey: attendanceKeys.list(params),
-  })
-
-export const useAttendanceRecord = (id: string, enabled = true) =>
-  useQuery({
-    enabled,
-    queryFn: () => getAttendanceRecord(id),
-    queryKey: attendanceKeys.detail(id),
   })
 
 export const useClockIn = () => {
@@ -98,12 +90,9 @@ export const useUpdateAttendanceRecord = () => {
         getSafeErrorMessage(error, 'Attendance record could not be updated.'),
       )
     },
-    onSuccess: async (record) => {
+    onSuccess: async () => {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: attendanceKeys.lists() }),
-        queryClient.invalidateQueries({
-          queryKey: attendanceKeys.detail(record.id),
-        }),
         queryClient.invalidateQueries({ queryKey: attendanceKeys.self() }),
         queryClient.invalidateQueries({
           queryKey: dashboardKeys.employeeSummary(),

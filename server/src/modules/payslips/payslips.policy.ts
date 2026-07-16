@@ -22,8 +22,5 @@ export const canReadPayslipForEmployee = (
   (hasPermission(auth.permissions, "payslips:read:self") &&
     auth.employeeId === targetEmployeeId);
 
-export const canUploadPayslips = (auth: AuthContext): boolean =>
-  hasPermission(auth.permissions, "payslips:upload");
-
 export const canDeletePayslips = (auth: AuthContext): boolean =>
   hasPermission(auth.permissions, "payslips:delete");

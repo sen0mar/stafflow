@@ -8,7 +8,6 @@ import {
   createLeaveRequest,
   createLeaveType,
   deleteLeaveType,
-  getLeaveRequest,
   getLeaveType,
   getLeaveRequests,
   getLeaveTypes,
@@ -56,13 +55,6 @@ export const useLeaveRequests = (params: LeaveRequestListParams) =>
   useQuery({
     queryFn: () => getLeaveRequests(params),
     queryKey: leaveKeys.requestList(params),
-  })
-
-export const useLeaveRequest = (id: string, enabled = true) =>
-  useQuery({
-    enabled,
-    queryFn: () => getLeaveRequest(id),
-    queryKey: leaveKeys.requestDetail(id),
   })
 
 export const useCreateLeaveType = () => {
@@ -160,13 +152,8 @@ export const useApproveLeaveRequest = () => {
         getSafeErrorMessage(error, 'Leave request could not be approved.'),
       )
     },
-    onSuccess: async (leaveRequest) => {
-      await Promise.all([
-        invalidateLeaveViews(queryClient),
-        queryClient.invalidateQueries({
-          queryKey: leaveKeys.requestDetail(leaveRequest.id),
-        }),
-      ])
+    onSuccess: async () => {
+      await invalidateLeaveViews(queryClient)
       toast.success('Leave request approved.')
     },
   })
@@ -182,13 +169,8 @@ export const useRejectLeaveRequest = () => {
         getSafeErrorMessage(error, 'Leave request could not be rejected.'),
       )
     },
-    onSuccess: async (leaveRequest) => {
-      await Promise.all([
-        invalidateLeaveViews(queryClient),
-        queryClient.invalidateQueries({
-          queryKey: leaveKeys.requestDetail(leaveRequest.id),
-        }),
-      ])
+    onSuccess: async () => {
+      await invalidateLeaveViews(queryClient)
       toast.success('Leave request rejected.')
     },
   })

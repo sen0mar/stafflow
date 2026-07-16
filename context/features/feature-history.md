@@ -69,6 +69,7 @@ Keep entries short. This file should explain what changed, not become a detailed
 - Feature 62: Searchable Relationship Selectors — replaced first-page employee, department, and leave-type option ceilings with accessible debounced server-backed selectors using bounded 20-row searches and selected-value detail preservation across attendance, leave, payslips, and employee management.
 - Feature 63: Frontend Auth and Filter Reliability — made protected auth failures fail closed with retry, kept authenticated UI intact on failed logout, synchronized URL-backed search drafts across navigation and resets, and restricted client page parsing to positive safe integers.
 - Feature 64: Idle Homepage Canvas Scheduling — replaced the homepage dot canvas's perpetual animation loop with a single-frame event-driven scheduler, added visibility and reduced-motion lifecycle handling, and verified idle, interaction, resize, theme, and high-DPI behavior with deterministic coverage.
+- Feature 65: Audit Section 21 Dead Code Cleanup — removed verified-unreachable client artifacts and app exports, trimmed test-only policy helpers while preserving runtime ownership defenses, removed unused direct Zustand and coverage dependencies from canonical npm metadata, and documented the deferred Section 24 database readiness export.
 
 ## Entry Format
 

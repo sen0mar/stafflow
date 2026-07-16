@@ -12,8 +12,6 @@ export const leaveKeys = {
   leaveTypeDetails: () => [...leaveKeys.leaveTypes(), 'detail'] as const,
   leaveTypeList: (params: LeaveTypeListParams) =>
     [...leaveKeys.leaveTypes(), 'list', params] as const,
-  requestDetail: (id: string) => [...leaveKeys.requestDetails(), id] as const,
-  requestDetails: () => [...leaveKeys.requests(), 'detail'] as const,
   requestList: (params: LeaveRequestListParams) =>
     [...leaveKeys.requestLists(), params] as const,
   requestLists: () => [...leaveKeys.requests(), 'list'] as const,

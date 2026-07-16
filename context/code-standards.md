@@ -30,8 +30,8 @@
 - Keep feature components small and named after their responsibility.
 - Prefer controlled form libraries for real forms: React Hook Form + Zod.
 - Use TanStack Query for server state, mutations, cache invalidation, loading state, and error state.
-- Use Zustand only for client/UI state that does not belong to the server.
-- Do not store server data in Zustand unless there is a very specific reason.
+- Keep local client/UI state in React until a demonstrated cross-feature need justifies a dedicated store library.
+- Keep server data in TanStack Query rather than duplicating it in a client-state store.
 - Do not use Axios. Use a small typed wrapper around native `fetch`.
 - All API requests that require auth cookies must use `credentials: "include"`.
 - Keep query keys centralized per feature.

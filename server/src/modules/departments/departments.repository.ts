@@ -200,5 +200,3 @@ export const countDepartmentEmployees = (departmentId: string) =>
   prisma.employee.count({
     where: { departmentId },
   });
-
-export type DepartmentRecord = Awaited<ReturnType<typeof findDepartmentById>>;

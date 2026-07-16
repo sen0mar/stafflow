@@ -1,8 +1,5 @@
 import { apiClient } from '@/shared/lib/api-client'
-import type {
-  PaginatedResponse,
-  PaginationMeta,
-} from '@/shared/types/pagination'
+import type { PaginatedResponse } from '@/shared/types/pagination'
 
 export interface PayslipEmployee {
   department: {
@@ -35,8 +32,6 @@ export interface Payslip {
   year: number
 }
 
-export type Pagination = PaginationMeta
-
 export interface PayslipListParams {
   employeeId?: string
   limit: number
@@ -51,11 +46,6 @@ export interface SelfPayslipListParams {
   month?: number
   page: number
   year?: number
-}
-
-export interface PayslipListResponse {
-  data: Payslip[]
-  meta: Pagination
 }
 
 export interface UploadPayslipInput {

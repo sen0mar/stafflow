@@ -142,14 +142,6 @@ export const getAttendanceRecords = async (params: AttendanceListParams) => {
   return response
 }
 
-export const getAttendanceRecord = async (id: string) => {
-  const response = await apiClient<ApiResponse<AttendanceRecord>>(
-    `/attendance/${id}`,
-  )
-
-  return response.data
-}
-
 export const updateAttendanceRecord = async ({
   id,
   ...input
