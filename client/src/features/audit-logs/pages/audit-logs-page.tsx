@@ -441,7 +441,6 @@ export const AuditLogsPage = () => {
           <div className="space-y-2">
             <Label htmlFor="audit-actor">Actor user ID</Label>
             <SearchInput
-              key={`actor-${actorUserId}`}
               ariaLabel="Actor user ID"
               hasVisibleLabel
               id="audit-actor"
@@ -478,7 +477,6 @@ export const AuditLogsPage = () => {
           <div className="space-y-2">
             <Label htmlFor="audit-entity-id">Entity ID</Label>
             <SearchInput
-              key={`entity-${entityId}`}
               ariaLabel="Entity ID"
               hasVisibleLabel
               id="audit-entity-id"

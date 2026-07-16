@@ -23,7 +23,7 @@ export const getQueryNumber = (
 ) => {
   const value = Number(searchParams.get(key))
 
-  return Number.isFinite(value) && value > 0 ? value : fallback
+  return Number.isSafeInteger(value) && value > 0 ? value : fallback
 }
 
 export const getQueryDate = (searchParams: URLSearchParams, key: string) =>

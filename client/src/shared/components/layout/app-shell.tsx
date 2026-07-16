@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Outlet, useNavigate } from 'react-router-dom'
+import { toast } from 'sonner'
 import { useCurrentUser } from '@/features/auth/hooks/use-current-user'
 import { useDemoMode } from '@/features/auth/hooks/use-auth-config'
 import { useLogout } from '@/features/auth/hooks/use-logout'
@@ -15,6 +16,11 @@ export const AppShell = () => {
   const demoMode = useDemoMode()
   const logoutMutation = useLogout()
   const user = currentUserQuery.data
+
+  if (!user) {
+    return null
+  }
+
   const visibleNavItems = appNavItems.filter(
     (item) =>
       (!item.adminOnly || user?.role === 'ADMIN') &&
@@ -23,7 +29,12 @@ export const AppShell = () => {
 
   const handleLogout = () => {
     logoutMutation.mutate(undefined, {
-      onSettled: () => {
+      onError: () => {
+        toast.error(
+          'Sign out failed. Your session is still active. Please try again.',
+        )
+      },
+      onSuccess: () => {
         navigate('/login', { replace: true })
       },
     })
@@ -33,18 +44,18 @@ export const AppShell = () => {
     <div className="min-h-screen bg-base text-primary">
       <div className="grid min-h-screen lg:grid-cols-[280px_1fr] min-[2200px]:!grid-cols-[320px_1fr]">
         <Sidebar
-          email={user?.email}
+          email={user.email}
           isLoggingOut={logoutMutation.isPending}
           isMobileOpen={isSidebarOpen}
           navItems={visibleNavItems}
-          role={user?.role}
+          role={user.role}
           onCloseMobile={() => setIsSidebarOpen(false)}
           onLogout={handleLogout}
         />
         <div className="min-w-0">
           <Topbar
-            email={user?.email}
-            role={user?.role}
+            email={user.email}
+            role={user.role}
             onOpenSidebar={() => setIsSidebarOpen(true)}
           />
           {demoMode ? <DemoModeBanner /> : null}

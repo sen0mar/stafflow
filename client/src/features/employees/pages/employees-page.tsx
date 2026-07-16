@@ -281,7 +281,6 @@ export const EmployeesPage = () => {
       <section className="space-y-4 overflow-hidden rounded-2xl border border-default bg-surface p-4 shadow-soft">
         <TableToolbar className="lg:grid-cols-[minmax(0,1fr)_180px_180px_160px]">
           <SearchInput
-            key={search}
             id="employees-search"
             name="employeesSearch"
             placeholder="Search employees"

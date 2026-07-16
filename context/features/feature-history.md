@@ -67,6 +67,7 @@ Keep entries short. This file should explain what changed, not become a detailed
 - Feature 60: Generic Request Validation — bounded safe pagination and shared scalar inputs at API schemas, restricted reflected request IDs, validated client URL filter unions, and added boundary-focused regression coverage.
 - Feature 61: Deterministic Singleton Settings — enforced stable company, attendance, and leave settings IDs with a fail-closed migration and read-only deployment preflight; serialized first access and audited updates; switched all readers to deterministic lookups; verified Unit 11 attendance enforcement; and labeled non-operational company/leave fields as metadata.
 - Feature 62: Searchable Relationship Selectors — replaced first-page employee, department, and leave-type option ceilings with accessible debounced server-backed selectors using bounded 20-row searches and selected-value detail preservation across attendance, leave, payslips, and employee management.
+- Feature 63: Frontend Auth and Filter Reliability — made protected auth failures fail closed with retry, kept authenticated UI intact on failed logout, synchronized URL-backed search drafts across navigation and resets, and restricted client page parsing to positive safe integers.
 
 ## Entry Format
 

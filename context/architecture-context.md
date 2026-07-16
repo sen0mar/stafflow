@@ -82,6 +82,7 @@ Auth model:
 - The database stores a hash of the session token, not the raw session token.
 - Session invalidation must be possible after logout, password change, account disable, and suspicious activity.
 - Frontend route guards are UX-only; the backend is the security boundary.
+- Protected frontend routes mount only after `/auth/me` confirms a user. HTTP 401 is treated as unauthenticated, while network and non-401 failures show a full-page retry state without mounting the app shell. Logout clears cached auth state and navigates away only after the server confirms session revocation.
 - Public demo mode must prevent storage abuse through disabled uploads, strict quotas, automatic cleanup, or another explicit guardrail before unrestricted R2 writes are exposed.
 - Public demo mode must reject employee/account creation, invitation generation and acceptance, account-status mutations, and account elevation with `DEMO_READ_ONLY`.
 - Public auth request bodies are JSON-only and bounded at validation. Missing-user login attempts perform the same cost-12 bcrypt comparison path as bad-password attempts.
@@ -225,6 +226,7 @@ API rules:
 - Use `multipart/form-data` for payslip uploads.
 - Use pagination on all list endpoints.
 - Accept pagination pages only as safe integers from 1 through 10,000; with the shared 100-row limit ceiling, Prisma offsets therefore remain finite and safely bounded.
+- URL-backed frontend page state accepts only positive safe integers and falls back before issuing a list request.
 - Use search and filters through query parameters.
 - Bound API IDs to 128 characters, search terms to 200 characters, emails to 254 characters, and public invitation tokens to 128 characters through shared boundary schemas.
 - Use consistent error responses.
@@ -258,6 +260,7 @@ Frontend performance rules:
 - Use route-level code splitting where appropriate.
 - Use skeleton states for slow network actions.
 - Debounce search inputs.
+- Keep debounced search drafts synchronized with external URL/filter values so history navigation and parent-driven resets cannot leave stale controls visible.
 - Memoize expensive derived values only when there is a measured or obvious benefit.
 - Virtualize large tables when row counts can become large.
 - Keep feature components small and reusable.

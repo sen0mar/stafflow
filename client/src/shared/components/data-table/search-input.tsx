@@ -26,12 +26,27 @@ export const SearchInput = ({
   placeholder,
   value,
 }: SearchInputProps) => {
-  const [draftValue, setDraftValue] = useState(value)
+  const [draftState, setDraftState] = useState({
+    draftValue: value,
+    externalValue: value,
+  })
+  const draftValue =
+    draftState.externalValue === value ? draftState.draftValue : value
   const debouncedValue = useDebouncedValue(draftValue, debounceMs)
 
+  if (draftState.externalValue !== value) {
+    setDraftState({ draftValue: value, externalValue: value })
+  }
+
   useEffect(() => {
-    onDebouncedChange(debouncedValue)
-  }, [debouncedValue, onDebouncedChange])
+    if (
+      draftState.externalValue === value &&
+      draftState.draftValue === debouncedValue &&
+      debouncedValue !== value
+    ) {
+      onDebouncedChange(debouncedValue)
+    }
+  }, [debouncedValue, draftState, onDebouncedChange, value])
 
   return (
     <div className="relative min-w-0">
@@ -52,7 +67,12 @@ export const SearchInput = ({
         name={name ?? id}
         placeholder={placeholder}
         value={draftValue}
-        onChange={(event) => setDraftValue(event.target.value)}
+        onChange={(event) => {
+          setDraftState({
+            draftValue: event.target.value,
+            externalValue: value,
+          })
+        }}
       />
     </div>
   )

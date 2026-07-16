@@ -333,7 +333,6 @@ export const PayslipsPage = () => {
           {canReadAny ? (
             <div className="min-w-0 w-full lg:max-w-sm">
               <SearchInput
-                key={search}
                 id="payslips-search"
                 name="payslipsSearch"
                 placeholder="Search employee or file"
