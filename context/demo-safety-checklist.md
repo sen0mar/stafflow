@@ -4,16 +4,20 @@ Use this checklist before sharing the public portfolio demo and after any auth, 
 
 ## Access Model
 
-- Public sign-up is not available. The backend exposes login, password reset, logout, password change, and `/auth/me`, but no `/auth/register` or general user role/status mutation route. Invitation acceptance exists only outside demo mode.
+- Public sign-up is not available. In demo mode the backend exposes login, logout, `/auth/me`, authenticated app configuration, read routes, and the non-mutating CSRF bootstrap; password reset, password change, and invitation mutations are blocked.
 - The login page must not include a registration CTA, create-account link, or company onboarding path.
 - Company onboarding is intentionally absent. The demo is a single seeded workspace, not a self-service SaaS workspace.
 - Outside demo mode, users are created only by admin employee creation flows, controlled invitation/password setup flows, seed scripts, or the demo bootstrap script.
 
-## Demo Identity Policy
+## Demo Read-Only Policy
 
-- With `DEMO_MODE=true`, the backend must return `DEMO_READ_ONLY` for employee/account creation, invitation generation or acceptance, employee/account status mutations, and employee disable operations.
+- With `DEMO_MODE=true`, the backend must return `DEMO_READ_ONLY` for every persistent business or identity mutation across auth, employees, departments, attendance, leave, payslips, and settings.
+- Login and logout are the bounded session lifecycle exception. GET routes, `/auth/me`, authenticated app configuration, and the non-mutating CSRF bootstrap remain available.
+- Demo login skips the persistent `lastLoginAt` update and retains at most the newest 100 session rows per shared demo account after each successful login.
+- Forgot/reset-password, password change, invitation create/regenerate/accept, and profile changes are blocked because they mutate credentials/identity or can grow token, session, audit, and application tables.
 - The MVP exposes no general `/users/:id` role or status mutation route. Public demo credentials cannot elevate an identity to `ADMIN`.
-- Frontend hiding is optional UX only. The API guard is the security boundary, and blocked mutations must not persist users, passwords, roles, statuses, sessions, or invitation tokens.
+- A concise authenticated banner explains the policy and mutation controls are disabled or hidden, but the API middleware is the security boundary. Blocked requests must not reach controllers, repositories, storage writes, or audit writes.
+- Interactive public mutations require documented quotas plus an automated full-state reset for the seeded workspace before they can be enabled. The development-only user reset script is not an adequate public reset mechanism.
 
 ## Demo Upload Policy
 

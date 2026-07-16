@@ -12,6 +12,7 @@ import {
 } from '@/shared/components/layout/page-state'
 import { useTableQueryState } from '@/shared/hooks/use-table-query-state'
 import { useCurrentUser } from '@/features/auth/hooks/use-current-user'
+import { useDemoMode } from '@/features/auth/hooks/use-auth-config'
 import { useDepartments } from '@/features/departments/hooks/use-departments'
 import { useEmployees } from '@/features/employees/hooks/use-employees'
 import type { AttendanceRecord, AttendanceStatus } from '../api/attendance.api'
@@ -60,6 +61,7 @@ const EmptyAttendance = ({ isAdmin }: { isAdmin?: boolean }) => (
 )
 
 const EmployeeAttendancePage = () => {
+  const demoMode = useDemoMode()
   const tableState = useTableQueryState()
   const page = tableState.getNumber('page', 1)
   const status = tableState.getString('status', 'all') as StatusFilter
@@ -92,6 +94,7 @@ const EmployeeAttendancePage = () => {
         isClockingIn={clockIn.isPending}
         isClockingOut={clockOut.isPending}
         isLoading={todayQuery.isLoading}
+        readOnly={demoMode}
         today={todayQuery.data}
         onClockIn={() => setConfirmAction('clock-in')}
         onClockOut={() => setConfirmAction('clock-out')}
@@ -147,34 +150,37 @@ const EmployeeAttendancePage = () => {
         ) : null}
       </section>
 
-      <AttendanceActionConfirmDialog
-        action={confirmAction}
-        isSubmitting={clockIn.isPending || clockOut.isPending}
-        open={Boolean(confirmAction)}
-        onOpenChange={(open) => {
-          if (!open) {
-            setConfirmAction(null)
-          }
-        }}
-        onConfirm={() => {
-          if (confirmAction === 'clock-in') {
-            clockIn.mutate(undefined, {
-              onSettled: () => setConfirmAction(null),
-            })
-          }
+      {!demoMode ? (
+        <AttendanceActionConfirmDialog
+          action={confirmAction}
+          isSubmitting={clockIn.isPending || clockOut.isPending}
+          open={Boolean(confirmAction)}
+          onOpenChange={(open) => {
+            if (!open) {
+              setConfirmAction(null)
+            }
+          }}
+          onConfirm={() => {
+            if (confirmAction === 'clock-in') {
+              clockIn.mutate(undefined, {
+                onSettled: () => setConfirmAction(null),
+              })
+            }
 
-          if (confirmAction === 'clock-out') {
-            clockOut.mutate(undefined, {
-              onSettled: () => setConfirmAction(null),
-            })
-          }
-        }}
-      />
+            if (confirmAction === 'clock-out') {
+              clockOut.mutate(undefined, {
+                onSettled: () => setConfirmAction(null),
+              })
+            }
+          }}
+        />
+      ) : null}
     </div>
   )
 }
 
 const AdminAttendancePage = () => {
+  const demoMode = useDemoMode()
   const tableState = useTableQueryState()
   const page = tableState.getNumber('page', 1)
   const employeeId = tableState.getString('employeeId', 'all')
@@ -333,7 +339,7 @@ const AdminAttendancePage = () => {
         {records.length > 0 ? (
           <>
             <AttendanceHistoryTable
-              isAdmin
+              isAdmin={!demoMode}
               records={records}
               onCorrect={openCorrection}
             />
@@ -348,13 +354,15 @@ const AdminAttendancePage = () => {
         ) : null}
       </section>
 
-      <AdminCorrectionDialog
-        isSubmitting={updateAttendance.isPending}
-        open={correctionOpen}
-        record={correctingRecord}
-        onOpenChange={setCorrectionOpen}
-        onSubmit={handleCorrectionSubmit}
-      />
+      {!demoMode ? (
+        <AdminCorrectionDialog
+          isSubmitting={updateAttendance.isPending}
+          open={correctionOpen}
+          record={correctingRecord}
+          onOpenChange={setCorrectionOpen}
+          onSubmit={handleCorrectionSubmit}
+        />
+      ) : null}
     </div>
   )
 }

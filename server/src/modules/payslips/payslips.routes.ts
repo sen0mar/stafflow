@@ -6,6 +6,7 @@ import { attachAuth, requireAuth } from "../../core/auth/auth.middleware";
 import { requireCsrf } from "../../core/auth/csrf.service";
 import { requirePermission } from "../../core/auth/permissions";
 import { AppError } from "../../core/errors/app-error";
+import { requireDemoMutationAllowed } from "../../core/security/demo-read-only.middleware";
 import {
   createPayslipController,
   deletePayslipController,
@@ -74,6 +75,7 @@ export const createPayslipRoutes = (): Router => {
     requireAuth,
     requirePermission("payslips:upload"),
     requireCsrf,
+    requireDemoMutationAllowed,
     uploadPayslipFile,
     createPayslipController,
   );
@@ -90,6 +92,7 @@ export const createPayslipRoutes = (): Router => {
     requireAuth,
     requirePermission("payslips:delete"),
     requireCsrf,
+    requireDemoMutationAllowed,
     deletePayslipController,
   );
 

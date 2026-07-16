@@ -44,6 +44,20 @@ interface LogoutResponse {
   }
 }
 
+interface AuthConfigResponse {
+  data: {
+    demoMode: boolean
+  }
+}
+
+export const getAuthConfig = async () => {
+  const response = await apiClient<AuthConfigResponse>('/auth/config', {
+    skipUnauthorizedHandler: true,
+  })
+
+  return response.data
+}
+
 export const getCurrentUser = async () => {
   const response = await apiClient<AuthResponse>('/auth/me')
   setApiCsrfToken(response.data.csrfToken)

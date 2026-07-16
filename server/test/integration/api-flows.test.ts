@@ -271,6 +271,202 @@ describeWithTestDatabase("core API flows", () => {
     }
   });
 
+  it("enforces the demo read-only route matrix across every mutating module", async () => {
+    const { admin, employeeUser } = await seedUsers();
+    const adminAuth = await login(admin.email);
+    const employeeAuth = await login(employeeUser.email);
+    const originalDemoMode = env.DEMO_MODE;
+
+    env.DEMO_MODE = true;
+
+    try {
+      await request(app)
+        .get("/auth/config")
+        .expect(200)
+        .expect(({ body }) => {
+          expect(body).toEqual({ data: { demoMode: true } });
+        });
+      await adminAuth.agent.get("/auth/me").expect(200);
+
+      const routeMatrix = [
+        {
+          module: "auth forgot password",
+          request: request(app)
+            .post("/auth/forgot-password")
+            .send({ email: admin.email }),
+        },
+        {
+          module: "auth reset password",
+          request: request(app)
+            .post("/auth/reset-password")
+            .send({ password: "ReplacementPassword", token: "token" }),
+        },
+        {
+          module: "auth invitation acceptance",
+          request: request(app)
+            .post("/auth/invitations/accept")
+            .send({ password: "ReplacementPassword", token: "token" }),
+        },
+        {
+          module: "auth password change",
+          request: adminAuth.agent
+            .post("/auth/change-password")
+            .set("x-csrf-token", adminAuth.csrfToken)
+            .send({
+              currentPassword: testPassword,
+              newPassword: "ReplacementPassword",
+            }),
+        },
+        {
+          module: "employee self profile",
+          request: employeeAuth.agent
+            .patch("/employees/me/profile")
+            .set("x-csrf-token", employeeAuth.csrfToken)
+            .send({ firstName: "Changed", lastName: "Employee" }),
+        },
+        {
+          module: "employee create",
+          request: adminAuth.agent
+            .post("/employees")
+            .set("x-csrf-token", adminAuth.csrfToken),
+        },
+        {
+          module: "employee invitation",
+          request: adminAuth.agent
+            .post("/employees/route-id/invitation")
+            .set("x-csrf-token", adminAuth.csrfToken),
+        },
+        {
+          module: "employee update",
+          request: adminAuth.agent
+            .patch("/employees/route-id")
+            .set("x-csrf-token", adminAuth.csrfToken),
+        },
+        {
+          module: "employee status",
+          request: adminAuth.agent
+            .patch("/employees/route-id/status")
+            .set("x-csrf-token", adminAuth.csrfToken),
+        },
+        {
+          module: "employee disable",
+          request: adminAuth.agent
+            .delete("/employees/route-id")
+            .set("x-csrf-token", adminAuth.csrfToken),
+        },
+        {
+          module: "department create",
+          request: adminAuth.agent
+            .post("/departments")
+            .set("x-csrf-token", adminAuth.csrfToken),
+        },
+        {
+          module: "department update",
+          request: adminAuth.agent
+            .patch("/departments/route-id")
+            .set("x-csrf-token", adminAuth.csrfToken),
+        },
+        {
+          module: "department delete",
+          request: adminAuth.agent
+            .delete("/departments/route-id")
+            .set("x-csrf-token", adminAuth.csrfToken),
+        },
+        {
+          module: "attendance clock in",
+          request: employeeAuth.agent
+            .post("/attendance/clock-in")
+            .set("x-csrf-token", employeeAuth.csrfToken),
+        },
+        {
+          module: "attendance clock out",
+          request: employeeAuth.agent
+            .post("/attendance/clock-out")
+            .set("x-csrf-token", employeeAuth.csrfToken),
+        },
+        {
+          module: "attendance correction",
+          request: adminAuth.agent
+            .patch("/attendance/route-id")
+            .set("x-csrf-token", adminAuth.csrfToken),
+        },
+        {
+          module: "leave type create",
+          request: adminAuth.agent
+            .post("/leave-types")
+            .set("x-csrf-token", adminAuth.csrfToken),
+        },
+        {
+          module: "leave type update",
+          request: adminAuth.agent
+            .patch("/leave-types/route-id")
+            .set("x-csrf-token", adminAuth.csrfToken),
+        },
+        {
+          module: "leave type delete",
+          request: adminAuth.agent
+            .delete("/leave-types/route-id")
+            .set("x-csrf-token", adminAuth.csrfToken),
+        },
+        {
+          module: "leave request create",
+          request: employeeAuth.agent
+            .post("/leave-requests")
+            .set("x-csrf-token", employeeAuth.csrfToken),
+        },
+        {
+          module: "leave request cancel",
+          request: employeeAuth.agent
+            .patch("/leave-requests/route-id/cancel")
+            .set("x-csrf-token", employeeAuth.csrfToken),
+        },
+        {
+          module: "leave request approve",
+          request: adminAuth.agent
+            .patch("/leave-requests/route-id/approve")
+            .set("x-csrf-token", adminAuth.csrfToken),
+        },
+        {
+          module: "leave request reject",
+          request: adminAuth.agent
+            .patch("/leave-requests/route-id/reject")
+            .set("x-csrf-token", adminAuth.csrfToken),
+        },
+        {
+          module: "payslip upload",
+          request: adminAuth.agent
+            .post("/payslips")
+            .set("x-csrf-token", adminAuth.csrfToken),
+        },
+        {
+          module: "payslip delete",
+          request: adminAuth.agent
+            .delete("/payslips/route-id")
+            .set("x-csrf-token", adminAuth.csrfToken),
+        },
+        ...["company", "attendance", "leave"].map((settingsModule) => ({
+          module: `settings ${settingsModule}`,
+          request: adminAuth.agent
+            .patch(`/settings/${settingsModule}`)
+            .set("x-csrf-token", adminAuth.csrfToken),
+        })),
+      ];
+
+      for (const route of routeMatrix) {
+        await route.request.expect(403).expect(({ body }) => {
+          expect(body.error.code, route.module).toBe("DEMO_READ_ONLY");
+        });
+      }
+
+      await adminAuth.agent
+        .post("/auth/logout")
+        .set("x-csrf-token", adminAuth.csrfToken)
+        .expect(200);
+    } finally {
+      env.DEMO_MODE = originalDemoMode;
+    }
+  });
+
   it("allows employee self access without trusting request employee ids", async () => {
     const { employee, employeeUser } = await seedUsers();
     const { agent } = await login(employeeUser.email);

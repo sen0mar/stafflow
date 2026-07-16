@@ -13,6 +13,7 @@ import {
 } from '@/shared/components/layout/page-state'
 import { useTableQueryState } from '@/shared/hooks/use-table-query-state'
 import { useDepartments } from '@/features/departments/hooks/use-departments'
+import { useDemoMode } from '@/features/auth/hooks/use-auth-config'
 import type {
   Employee,
   EmployeeInvitation,
@@ -50,6 +51,7 @@ const getDepartmentValue = (value?: string | null) =>
   value && value !== 'unassigned' ? value : null
 
 export const EmployeesPage = () => {
+  const demoMode = useDemoMode()
   const tableState = useTableQueryState()
   const page = tableState.getNumber('page', 1)
   const search = tableState.getString('search')
@@ -237,26 +239,30 @@ export const EmployeesPage = () => {
         title="Employees"
         description="Manage employee profiles, department assignments, account status, and invitations."
         actions={
-          <Button type="button" onClick={openCreateDialog}>
-            <Plus className="h-4 w-4" aria-hidden="true" />
-            Create employee
-          </Button>
+          !demoMode ? (
+            <Button type="button" onClick={openCreateDialog}>
+              <Plus className="h-4 w-4" aria-hidden="true" />
+              Create employee
+            </Button>
+          ) : null
         }
       />
 
-      <EmployeeInvitationsPanel
-        copiedEmployeeId={copiedInvitationEmployeeId}
-        generatingEmployeeId={
-          regenerateInvitation.isPending
-            ? (regenerateInvitation.variables ?? null)
-            : null
-        }
-        hasError={employeeInvitationsQuery.isError}
-        invitations={pendingInvitations}
-        setupUrlsByEmployeeId={setupUrlsByEmployeeId}
-        onDismissLink={handleDismissOneTimeUrl}
-        onGenerateLink={handleGenerateInvitationUrl}
-      />
+      {!demoMode ? (
+        <EmployeeInvitationsPanel
+          copiedEmployeeId={copiedInvitationEmployeeId}
+          generatingEmployeeId={
+            regenerateInvitation.isPending
+              ? (regenerateInvitation.variables ?? null)
+              : null
+          }
+          hasError={employeeInvitationsQuery.isError}
+          invitations={pendingInvitations}
+          setupUrlsByEmployeeId={setupUrlsByEmployeeId}
+          onDismissLink={handleDismissOneTimeUrl}
+          onGenerateLink={handleGenerateInvitationUrl}
+        />
+      ) : null}
 
       <section className="space-y-4 overflow-hidden rounded-2xl border border-default bg-surface p-4 shadow-soft">
         <TableToolbar className="lg:grid-cols-[minmax(0,1fr)_180px_180px_160px]">
@@ -341,6 +347,7 @@ export const EmployeesPage = () => {
         {employees.length > 0 ? (
           <>
             <EmployeeTable
+              canManage={!demoMode}
               employees={employees}
               onDisable={handleDisable}
               onEdit={openEditDialog}
@@ -357,14 +364,16 @@ export const EmployeesPage = () => {
         ) : null}
       </section>
 
-      <EmployeeForm
-        departments={departments}
-        employee={editingEmployee}
-        isSubmitting={createEmployee.isPending || updateEmployee.isPending}
-        open={formOpen}
-        onOpenChange={setFormOpen}
-        onSubmit={handleSubmit}
-      />
+      {!demoMode ? (
+        <EmployeeForm
+          departments={departments}
+          employee={editingEmployee}
+          isSubmitting={createEmployee.isPending || updateEmployee.isPending}
+          open={formOpen}
+          onOpenChange={setFormOpen}
+          onSubmit={handleSubmit}
+        />
+      ) : null}
     </div>
   )
 }

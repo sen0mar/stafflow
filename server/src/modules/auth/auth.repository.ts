@@ -61,6 +61,28 @@ export const createSession = async ({
     },
   });
 
+export const pruneUserSessions = async ({
+  keep,
+  userId,
+}: {
+  keep: number;
+  userId: string;
+}) => {
+  const retainedSessions = await prisma.session.findMany({
+    orderBy: { createdAt: "desc" },
+    select: { id: true },
+    take: keep,
+    where: { userId },
+  });
+
+  await prisma.session.deleteMany({
+    where: {
+      id: { notIn: retainedSessions.map(({ id }) => id) },
+      userId,
+    },
+  });
+};
+
 // Track successful login time separately from session creation for auditability.
 export const updateLastLoginAt = async (userId: string) =>
   prisma.user.update({

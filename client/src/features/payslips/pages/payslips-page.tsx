@@ -19,6 +19,7 @@ import {
 import { PaginationControls } from '@/shared/components/data-table/pagination-controls'
 import { PageHeader } from '@/shared/components/layout/page-header'
 import { useCurrentUser } from '@/features/auth/hooks/use-current-user'
+import { useDemoMode } from '@/features/auth/hooks/use-auth-config'
 import { useEmployees } from '@/features/employees/hooks/use-employees'
 import { useTableQueryState } from '@/shared/hooks/use-table-query-state'
 import { getRolePermissions, hasPermission } from '@/shared/lib/permissions'
@@ -191,6 +192,7 @@ const PayslipsTable = ({
 )
 
 export const PayslipsPage = () => {
+  const demoMode = useDemoMode()
   const tableState = useTableQueryState()
   const page = tableState.getNumber('page', 1)
   const search = tableState.getString('search')
@@ -205,8 +207,8 @@ export const PayslipsPage = () => {
     : []
   const hasCurrentUser = currentUserQuery.isSuccess
   const canReadAny = hasPermission(permissions, 'payslips:read:any')
-  const canUpload = hasPermission(permissions, 'payslips:upload')
-  const canDelete = hasPermission(permissions, 'payslips:delete')
+  const canUpload = !demoMode && hasPermission(permissions, 'payslips:upload')
+  const canDelete = !demoMode && hasPermission(permissions, 'payslips:delete')
   const listParams = {
     limit: pageSize,
     month: getMonthValue(month),
@@ -401,14 +403,16 @@ export const PayslipsPage = () => {
         ) : null}
       </section>
 
-      <PayslipUploadDialog
-        employees={employeesQuery.data?.data ?? []}
-        isLoadingEmployees={employeesQuery.isLoading}
-        isSubmitting={uploadPayslip.isPending}
-        open={uploadOpen}
-        onOpenChange={setUploadOpen}
-        onSubmit={handleUpload}
-      />
+      {!demoMode ? (
+        <PayslipUploadDialog
+          employees={employeesQuery.data?.data ?? []}
+          isLoadingEmployees={employeesQuery.isLoading}
+          isSubmitting={uploadPayslip.isPending}
+          open={uploadOpen}
+          onOpenChange={setUploadOpen}
+          onSubmit={handleUpload}
+        />
+      ) : null}
       <PayslipPreviewDialog
         fileName={previewPayslip?.fileName ?? null}
         open={Boolean(previewPayslip)}

@@ -4,6 +4,7 @@ import { toast } from 'sonner'
 
 import { AcceptInvitationPage } from './accept-invitation-page'
 import { useAcceptInvitation } from '../hooks/use-accept-invitation'
+import { useDemoMode } from '../hooks/use-auth-config'
 
 const mutate = vi.fn()
 
@@ -16,6 +17,10 @@ vi.mock('sonner', () => ({
 
 vi.mock('../hooks/use-accept-invitation', () => ({
   useAcceptInvitation: vi.fn(),
+}))
+
+vi.mock('../hooks/use-auth-config', () => ({
+  useDemoMode: vi.fn(),
 }))
 
 const asAcceptInvitationResult = (value: unknown) =>
@@ -31,6 +36,7 @@ const renderPage = (path = '/accept-invitation?token=invite-token') =>
 describe('AcceptInvitationPage', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    vi.mocked(useDemoMode).mockReturnValue(false)
     vi.mocked(useAcceptInvitation).mockReturnValue(
       asAcceptInvitationResult({
         isPending: false,
@@ -43,6 +49,19 @@ describe('AcceptInvitationPage', () => {
     renderPage('/accept-invitation')
 
     expect(screen.getByText('Invalid invitation link')).toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: 'Set password' }),
+    ).not.toBeInTheDocument()
+  })
+
+  it('disables invitation acceptance in demo mode', () => {
+    vi.mocked(useDemoMode).mockReturnValue(true)
+
+    renderPage()
+
+    expect(
+      screen.getByText('Invitations are disabled in the public demo'),
+    ).toBeInTheDocument()
     expect(
       screen.queryByRole('button', { name: 'Set password' }),
     ).not.toBeInTheDocument()

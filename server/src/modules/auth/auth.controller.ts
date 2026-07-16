@@ -1,5 +1,6 @@
 import type { RequestHandler } from "express";
 
+import { env } from "../../config/env";
 import { setCsrfCookie, clearCsrfCookie } from "../../core/auth/csrf.service";
 import {
   clearSessionCookie,
@@ -29,6 +30,14 @@ interface AuthResponse {
   csrfToken?: string;
   user: PublicAuthUser;
 }
+
+export const authConfigController: RequestHandler = (_request, response) => {
+  const responseBody: ApiSuccess<{ demoMode: boolean }> = {
+    data: { demoMode: env.DEMO_MODE },
+  };
+
+  response.status(200).json(responseBody);
+};
 
 const failedLoginCodes = new Set(["ACCOUNT_NOT_ACTIVE", "INVALID_CREDENTIALS"]);
 

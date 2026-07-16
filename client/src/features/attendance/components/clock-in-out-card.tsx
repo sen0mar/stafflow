@@ -12,6 +12,7 @@ interface ClockInOutCardProps {
   isLoading: boolean
   onClockIn: () => void
   onClockOut: () => void
+  readOnly?: boolean
   today: AttendanceRecord | null | undefined
 }
 
@@ -21,6 +22,7 @@ export const ClockInOutCard = ({
   isLoading,
   onClockIn,
   onClockOut,
+  readOnly = false,
   today,
 }: ClockInOutCardProps) => {
   const hasActiveClockIn = Boolean(today?.clockInAt && !today.clockOutAt)
@@ -56,7 +58,8 @@ export const ClockInOutCard = ({
               isClockingIn ||
               isClockingOut ||
               hasActiveClockIn ||
-              hasCompletedRecord
+              hasCompletedRecord ||
+              readOnly
             }
             onClick={onClockIn}
           >
@@ -67,7 +70,11 @@ export const ClockInOutCard = ({
             type="button"
             variant="outline"
             disabled={
-              isLoading || isClockingIn || isClockingOut || !hasActiveClockIn
+              isLoading ||
+              isClockingIn ||
+              isClockingOut ||
+              !hasActiveClockIn ||
+              readOnly
             }
             onClick={onClockOut}
           >

@@ -18,6 +18,7 @@ import {
 } from '@/shared/components/layout/page-state'
 import { getRolePermissions, hasPermission } from '@/shared/lib/permissions'
 import { useCurrentUser } from '@/features/auth/hooks/use-current-user'
+import { useDemoMode } from '@/features/auth/hooks/use-auth-config'
 import type { Department } from '../api/departments.api'
 import { DeleteDepartmentDialog } from '../components/delete-department-dialog'
 import { DepartmentFormDialog } from '../components/department-form-dialog'
@@ -65,6 +66,7 @@ const DepartmentsEmpty = ({ canManage }: { canManage: boolean }) => (
 )
 
 export const DepartmentsPage = () => {
+  const demoMode = useDemoMode()
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState('')
   const [status, setStatus] = useState<StatusFilter>('all')
@@ -79,7 +81,8 @@ export const DepartmentsPage = () => {
   const permissions = currentUserQuery.data
     ? getRolePermissions(currentUserQuery.data.role)
     : []
-  const canManage = hasPermission(permissions, 'departments:manage')
+  const canManage =
+    !demoMode && hasPermission(permissions, 'departments:manage')
   const departmentsQuery = useDepartments({
     isActive: getIsActiveFilter(status),
     page,
@@ -235,20 +238,26 @@ export const DepartmentsPage = () => {
         ) : null}
       </section>
 
-      <DepartmentFormDialog
-        department={editingDepartment}
-        isSubmitting={createDepartment.isPending || updateDepartment.isPending}
-        open={formOpen}
-        onOpenChange={setFormOpen}
-        onSubmit={handleSubmit}
-      />
-      <DeleteDepartmentDialog
-        department={deletingDepartment}
-        isDeleting={deleteDepartment.isPending}
-        open={deleteOpen}
-        onConfirm={handleDelete}
-        onOpenChange={setDeleteOpen}
-      />
+      {canManage ? (
+        <DepartmentFormDialog
+          department={editingDepartment}
+          isSubmitting={
+            createDepartment.isPending || updateDepartment.isPending
+          }
+          open={formOpen}
+          onOpenChange={setFormOpen}
+          onSubmit={handleSubmit}
+        />
+      ) : null}
+      {canManage ? (
+        <DeleteDepartmentDialog
+          department={deletingDepartment}
+          isDeleting={deleteDepartment.isPending}
+          open={deleteOpen}
+          onConfirm={handleDelete}
+          onOpenChange={setDeleteOpen}
+        />
+      ) : null}
     </div>
   )
 }

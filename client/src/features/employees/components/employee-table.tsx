@@ -16,6 +16,7 @@ import type { Employee } from '../api/employees.api'
 import { EmployeeStatusBadge } from './employee-status-badge'
 
 interface EmployeeTableProps {
+  canManage?: boolean
   employees: Employee[]
   onDisable: (employee: Employee) => void
   onEdit: (employee: Employee) => void
@@ -23,6 +24,7 @@ interface EmployeeTableProps {
 }
 
 export const EmployeeTable = ({
+  canManage = true,
   employees,
   onDisable,
   onEdit,
@@ -95,11 +97,13 @@ export const EmployeeTable = ({
                 View details
               </Link>
             </DropdownMenuItem>
-            <DropdownMenuItem onSelect={() => onEdit(employee)}>
-              <Edit3 className="h-4 w-4" aria-hidden="true" />
-              Edit
-            </DropdownMenuItem>
-            {employee.status === 'ACTIVE' ? (
+            {canManage ? (
+              <DropdownMenuItem onSelect={() => onEdit(employee)}>
+                <Edit3 className="h-4 w-4" aria-hidden="true" />
+                Edit
+              </DropdownMenuItem>
+            ) : null}
+            {canManage && employee.status === 'ACTIVE' ? (
               <DropdownMenuItem
                 variant="destructive"
                 onSelect={() => onDisable(employee)}
@@ -107,12 +111,12 @@ export const EmployeeTable = ({
                 <PowerOff className="h-4 w-4" aria-hidden="true" />
                 Disable
               </DropdownMenuItem>
-            ) : (
+            ) : canManage ? (
               <DropdownMenuItem onSelect={() => onEnable(employee)}>
                 <Power className="h-4 w-4" aria-hidden="true" />
                 Enable
               </DropdownMenuItem>
-            )}
+            ) : null}
           </DropdownMenuContent>
         </DropdownMenu>
       ),

@@ -9,6 +9,7 @@ import { Label } from '@/shared/components/ui/label'
 import { ThemeToggle } from '@/shared/components/ui/theme-toggle'
 import { getSafeErrorMessage } from '@/shared/lib/api-errors'
 import { useAcceptInvitation } from '../hooks/use-accept-invitation'
+import { useDemoMode } from '../hooks/use-auth-config'
 
 const minPasswordLength = 12
 const maxBcryptPasswordBytes = 72
@@ -19,6 +20,7 @@ export const AcceptInvitationPage = () => {
   const location = useLocation()
   const navigate = useNavigate()
   const acceptInvitation = useAcceptInvitation()
+  const demoMode = useDemoMode()
   const token = useMemo(
     () => new URLSearchParams(location.search).get('token')?.trim() ?? '',
     [location.search],
@@ -31,7 +33,7 @@ export const AcceptInvitationPage = () => {
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
 
-    if (missingToken) {
+    if (missingToken || demoMode) {
       return
     }
 
@@ -111,20 +113,24 @@ export const AcceptInvitationPage = () => {
               <h2 className="mt-4 text-2xl font-semibold tracking-normal text-primary">
                 {isComplete
                   ? 'Your password is ready'
-                  : missingToken
-                    ? 'Invalid invitation link'
-                    : 'Choose a password'}
+                  : demoMode
+                    ? 'Invitations are disabled in the public demo'
+                    : missingToken
+                      ? 'Invalid invitation link'
+                      : 'Choose a password'}
               </h2>
               <p className="mt-2 text-sm leading-6 text-muted">
                 {isComplete
                   ? 'Use your employee email and new password to access your workspace.'
-                  : missingToken
-                    ? 'Ask your admin for a fresh setup link, then open it from the message they send you.'
-                    : 'Use at least 12 characters. This password will be used for future sign-ins.'}
+                  : demoMode
+                    ? 'Sign in with a seeded demo account to explore the read-only workspace.'
+                    : missingToken
+                      ? 'Ask your admin for a fresh setup link, then open it from the message they send you.'
+                      : 'Use at least 12 characters. This password will be used for future sign-ins.'}
               </p>
             </div>
 
-            {isComplete || missingToken ? (
+            {isComplete || missingToken || demoMode ? (
               <Button
                 className="w-full"
                 type="button"

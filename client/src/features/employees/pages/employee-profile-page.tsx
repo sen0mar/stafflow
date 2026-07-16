@@ -14,6 +14,7 @@ import {
 import { Input } from '@/shared/components/ui/input'
 import { Skeleton } from '@/shared/components/ui/skeleton'
 import { PageHeader } from '@/shared/components/layout/page-header'
+import { useDemoMode } from '@/features/auth/hooks/use-auth-config'
 import { EmployeeProfileCard } from '../components/employee-profile-card'
 import { useSelfEmployee, useUpdateSelfProfile } from '../hooks/use-employees'
 import {
@@ -22,6 +23,7 @@ import {
 } from '../schemas/employee-form.schema'
 
 export const EmployeeProfilePage = () => {
+  const demoMode = useDemoMode()
   const selfEmployeeQuery = useSelfEmployee()
   const updateProfile = useUpdateSelfProfile()
   const employee = selfEmployeeQuery.data
@@ -76,61 +78,63 @@ export const EmployeeProfilePage = () => {
       {employee ? (
         <>
           <EmployeeProfileCard employee={employee} />
-          <section className="rounded-2xl border border-default bg-surface p-4 shadow-soft">
-            <h2 className="font-semibold text-primary">Editable profile</h2>
-            <Form {...form}>
-              <form
-                className="mt-4 grid gap-4 md:grid-cols-2"
-                onSubmit={form.handleSubmit(handleSubmit)}
-              >
-                <FormField
-                  control={form.control}
-                  name="firstName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>First name</FormLabel>
-                      <FormControl>
-                        <Input autoComplete="given-name" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="lastName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Last name</FormLabel>
-                      <FormControl>
-                        <Input autoComplete="family-name" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="phone"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Phone</FormLabel>
-                      <FormControl>
-                        <Input autoComplete="tel" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <div className="flex items-end">
-                  <Button type="submit" disabled={updateProfile.isPending}>
-                    <Save className="h-4 w-4" aria-hidden="true" />
-                    {updateProfile.isPending ? 'Saving...' : 'Save profile'}
-                  </Button>
-                </div>
-              </form>
-            </Form>
-          </section>
+          {!demoMode ? (
+            <section className="rounded-2xl border border-default bg-surface p-4 shadow-soft">
+              <h2 className="font-semibold text-primary">Editable profile</h2>
+              <Form {...form}>
+                <form
+                  className="mt-4 grid gap-4 md:grid-cols-2"
+                  onSubmit={form.handleSubmit(handleSubmit)}
+                >
+                  <FormField
+                    control={form.control}
+                    name="firstName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>First name</FormLabel>
+                        <FormControl>
+                          <Input autoComplete="given-name" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="lastName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Last name</FormLabel>
+                        <FormControl>
+                          <Input autoComplete="family-name" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="phone"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Phone</FormLabel>
+                        <FormControl>
+                          <Input autoComplete="tel" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <div className="flex items-end">
+                    <Button type="submit" disabled={updateProfile.isPending}>
+                      <Save className="h-4 w-4" aria-hidden="true" />
+                      {updateProfile.isPending ? 'Saving...' : 'Save profile'}
+                    </Button>
+                  </div>
+                </form>
+              </Form>
+            </section>
+          ) : null}
         </>
       ) : null}
     </div>

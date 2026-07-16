@@ -9,8 +9,10 @@ import {
   useUpdateEmployeeStatus,
 } from '../hooks/use-employees'
 import { EmployeeProfileCard } from '../components/employee-profile-card'
+import { useDemoMode } from '@/features/auth/hooks/use-auth-config'
 
 export const EmployeeDetailsPage = () => {
+  const demoMode = useDemoMode()
   const { id } = useParams()
   const employeeQuery = useEmployee(id ?? '', Boolean(id))
   const disableEmployee = useDisableEmployee()
@@ -49,46 +51,48 @@ export const EmployeeDetailsPage = () => {
       {employee ? (
         <>
           <EmployeeProfileCard employee={employee} />
-          <section className="rounded-2xl border border-default bg-surface p-4 shadow-soft">
-            <h2 className="font-semibold text-primary">Admin actions</h2>
-            <div className="mt-4 flex flex-wrap gap-2">
-              <Button asChild type="button" variant="outline">
-                <Link to="/app/employees">
-                  <Edit3 className="h-4 w-4" aria-hidden="true" />
-                  Edit from list
-                </Link>
-              </Button>
-              {employee.status === 'ACTIVE' ? (
-                <Button
-                  type="button"
-                  variant="destructive"
-                  disabled={disableEmployee.isPending}
-                  onClick={() => disableEmployee.mutate(employee.id)}
-                >
-                  <PowerOff className="h-4 w-4" aria-hidden="true" />
-                  Disable employee
+          {!demoMode ? (
+            <section className="rounded-2xl border border-default bg-surface p-4 shadow-soft">
+              <h2 className="font-semibold text-primary">Admin actions</h2>
+              <div className="mt-4 flex flex-wrap gap-2">
+                <Button asChild type="button" variant="outline">
+                  <Link to="/app/employees">
+                    <Edit3 className="h-4 w-4" aria-hidden="true" />
+                    Edit from list
+                  </Link>
                 </Button>
-              ) : (
-                <Button
-                  type="button"
-                  disabled={updateEmployeeStatus.isPending}
-                  onClick={() =>
-                    updateEmployeeStatus.mutate({
-                      accountStatus:
-                        employee.account?.status === 'DISABLED'
-                          ? 'ACTIVE'
-                          : employee.account?.status,
-                      employeeStatus: 'ACTIVE',
-                      id: employee.id,
-                    })
-                  }
-                >
-                  <Power className="h-4 w-4" aria-hidden="true" />
-                  Enable employee
-                </Button>
-              )}
-            </div>
-          </section>
+                {employee.status === 'ACTIVE' ? (
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    disabled={disableEmployee.isPending}
+                    onClick={() => disableEmployee.mutate(employee.id)}
+                  >
+                    <PowerOff className="h-4 w-4" aria-hidden="true" />
+                    Disable employee
+                  </Button>
+                ) : (
+                  <Button
+                    type="button"
+                    disabled={updateEmployeeStatus.isPending}
+                    onClick={() =>
+                      updateEmployeeStatus.mutate({
+                        accountStatus:
+                          employee.account?.status === 'DISABLED'
+                            ? 'ACTIVE'
+                            : employee.account?.status,
+                        employeeStatus: 'ACTIVE',
+                        id: employee.id,
+                      })
+                    }
+                  >
+                    <Power className="h-4 w-4" aria-hidden="true" />
+                    Enable employee
+                  </Button>
+                )}
+              </div>
+            </section>
+          ) : null}
         </>
       ) : null}
     </div>

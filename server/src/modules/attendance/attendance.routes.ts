@@ -3,6 +3,7 @@ import { Router } from "express";
 import { attachAuth, requireAuth } from "../../core/auth/auth.middleware";
 import { requireCsrf } from "../../core/auth/csrf.service";
 import { requirePermission } from "../../core/auth/permissions";
+import { requireDemoMutationAllowed } from "../../core/security/demo-read-only.middleware";
 import {
   clockInController,
   clockOutController,
@@ -36,6 +37,7 @@ export const createAttendanceRoutes = (): Router => {
     requireAuth,
     requirePermission("attendance:clock:self"),
     requireCsrf,
+    requireDemoMutationAllowed,
     clockInController,
   );
   router.post(
@@ -44,6 +46,7 @@ export const createAttendanceRoutes = (): Router => {
     requireAuth,
     requirePermission("attendance:clock:self"),
     requireCsrf,
+    requireDemoMutationAllowed,
     clockOutController,
   );
   router.get(
@@ -66,6 +69,7 @@ export const createAttendanceRoutes = (): Router => {
     requireAuth,
     requirePermission("attendance:update:any"),
     requireCsrf,
+    requireDemoMutationAllowed,
     updateAttendanceController,
   );
 

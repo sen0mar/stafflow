@@ -3,6 +3,7 @@ import { Router } from "express";
 import { attachAuth, requireAuth } from "../../core/auth/auth.middleware";
 import { requireCsrf } from "../../core/auth/csrf.service";
 import { requirePermission } from "../../core/auth/permissions";
+import { requireDemoMutationAllowed } from "../../core/security/demo-read-only.middleware";
 import {
   getAttendanceSettingsController,
   getCompanySettingsController,
@@ -29,6 +30,7 @@ export const createSettingsRoutes = (): Router => {
     requireAuth,
     requireSettingsAccess,
     requireCsrf,
+    requireDemoMutationAllowed,
     updateCompanySettingsController,
   );
   router.get(
@@ -44,6 +46,7 @@ export const createSettingsRoutes = (): Router => {
     requireAuth,
     requireSettingsAccess,
     requireCsrf,
+    requireDemoMutationAllowed,
     updateAttendanceSettingsController,
   );
   router.get(
@@ -59,6 +62,7 @@ export const createSettingsRoutes = (): Router => {
     requireAuth,
     requireSettingsAccess,
     requireCsrf,
+    requireDemoMutationAllowed,
     updateLeaveSettingsController,
   );
 

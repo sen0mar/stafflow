@@ -34,8 +34,11 @@ import {
   revokeSession,
   revokeUserSessions,
   updateLastLoginAt,
+  pruneUserSessions,
   updatePasswordHash,
 } from "./auth.repository";
+
+const demoSessionLimitPerUser = 100;
 
 interface AuditContext {
   actorUserId: string | null;
@@ -115,7 +118,11 @@ export const login = async (input: LoginInput) => {
     tokenHash,
     userId: user.id,
   });
-  await updateLastLoginAt(user.id);
+  if (env.DEMO_MODE) {
+    await pruneUserSessions({ keep: demoSessionLimitPerUser, userId: user.id });
+  } else {
+    await updateLastLoginAt(user.id);
+  }
 
   return {
     token,

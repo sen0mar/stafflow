@@ -270,7 +270,7 @@ export const SettingsPage = () => {
     updateLeaveMutation.isPending
 
   const handleConfirmSave = () => {
-    if (!pendingSave) {
+    if (!pendingSave || demoMode) {
       return
     }
 
@@ -349,19 +349,6 @@ export const SettingsPage = () => {
         </p>
       </div>
 
-      {demoMode ? (
-        <div className="flex items-start gap-3 rounded-2xl border border-default bg-brand-soft p-4 text-sm text-primary">
-          <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-brand" />
-          <div>
-            <p className="font-medium">Demo mode is enabled.</p>
-            <p className="mt-1 text-muted">
-              Settings changes are audited and may be reset with the demo seed
-              data.
-            </p>
-          </div>
-        </div>
-      ) : null}
-
       <Card className="overflow-hidden border-default bg-surface">
         <SectionHeader
           description="Set the organization name and regional defaults."
@@ -372,9 +359,11 @@ export const SettingsPage = () => {
           <Form {...companyForm}>
             <form
               className="grid min-w-0 gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_120px_auto] lg:items-end"
-              onSubmit={companyForm.handleSubmit((values) =>
-                setPendingSave({ type: 'company', values }),
-              )}
+              onSubmit={companyForm.handleSubmit((values) => {
+                if (!demoMode) {
+                  setPendingSave({ type: 'company', values })
+                }
+              })}
             >
               <FormField
                 control={companyForm.control}
@@ -426,7 +415,10 @@ export const SettingsPage = () => {
                   </FormItem>
                 )}
               />
-              <Button type="submit" disabled={updateCompanyMutation.isPending}>
+              <Button
+                type="submit"
+                disabled={demoMode || updateCompanyMutation.isPending}
+              >
                 {updateCompanyMutation.isPending ? 'Saving...' : 'Save company'}
               </Button>
             </form>
@@ -444,9 +436,11 @@ export const SettingsPage = () => {
           <Form {...attendanceForm}>
             <form
               className="space-y-5"
-              onSubmit={attendanceForm.handleSubmit((values) =>
-                setPendingSave({ type: 'attendance', values }),
-              )}
+              onSubmit={attendanceForm.handleSubmit((values) => {
+                if (!demoMode) {
+                  setPendingSave({ type: 'attendance', values })
+                }
+              })}
             >
               <div className="grid min-w-0 gap-4 md:grid-cols-3">
                 <FormField
@@ -589,7 +583,7 @@ export const SettingsPage = () => {
               <div className="flex justify-end">
                 <Button
                   type="submit"
-                  disabled={updateAttendanceMutation.isPending}
+                  disabled={demoMode || updateAttendanceMutation.isPending}
                 >
                   {updateAttendanceMutation.isPending
                     ? 'Saving...'
@@ -611,9 +605,11 @@ export const SettingsPage = () => {
           <Form {...leaveForm}>
             <form
               className="space-y-5"
-              onSubmit={leaveForm.handleSubmit((values) =>
-                setPendingSave({ type: 'leave', values }),
-              )}
+              onSubmit={leaveForm.handleSubmit((values) => {
+                if (!demoMode) {
+                  setPendingSave({ type: 'leave', values })
+                }
+              })}
             >
               <div className="grid min-w-0 gap-4 md:grid-cols-2">
                 <FormField
@@ -683,7 +679,10 @@ export const SettingsPage = () => {
                 )}
               />
               <div className="flex justify-end">
-                <Button type="submit" disabled={updateLeaveMutation.isPending}>
+                <Button
+                  type="submit"
+                  disabled={demoMode || updateLeaveMutation.isPending}
+                >
                   {updateLeaveMutation.isPending ? 'Saving...' : 'Save leave'}
                 </Button>
               </div>

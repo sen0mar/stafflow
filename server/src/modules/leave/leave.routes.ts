@@ -3,6 +3,7 @@ import { Router } from "express";
 import { attachAuth, requireAuth } from "../../core/auth/auth.middleware";
 import { requireCsrf } from "../../core/auth/csrf.service";
 import { requirePermission } from "../../core/auth/permissions";
+import { requireDemoMutationAllowed } from "../../core/security/demo-read-only.middleware";
 import {
   approveLeaveRequestController,
   cancelLeaveRequestController,
@@ -27,6 +28,7 @@ export const createLeaveTypeRoutes = (): Router => {
     requireAuth,
     requirePermission("leave:types:manage"),
     requireCsrf,
+    requireDemoMutationAllowed,
     createLeaveTypeController,
   );
   router.patch(
@@ -35,6 +37,7 @@ export const createLeaveTypeRoutes = (): Router => {
     requireAuth,
     requirePermission("leave:types:manage"),
     requireCsrf,
+    requireDemoMutationAllowed,
     updateLeaveTypeController,
   );
   router.delete(
@@ -43,6 +46,7 @@ export const createLeaveTypeRoutes = (): Router => {
     requireAuth,
     requirePermission("leave:types:manage"),
     requireCsrf,
+    requireDemoMutationAllowed,
     deleteLeaveTypeController,
   );
 
@@ -65,6 +69,7 @@ export const createLeaveRequestRoutes = (): Router => {
     requireAuth,
     requirePermission("leave:create:self"),
     requireCsrf,
+    requireDemoMutationAllowed,
     createLeaveRequestController,
   );
   router.patch(
@@ -73,6 +78,7 @@ export const createLeaveRequestRoutes = (): Router => {
     requireAuth,
     requirePermission("leave:create:self"),
     requireCsrf,
+    requireDemoMutationAllowed,
     cancelLeaveRequestController,
   );
   router.get(
@@ -95,6 +101,7 @@ export const createLeaveRequestRoutes = (): Router => {
     requireAuth,
     requirePermission("leave:approve:any"),
     requireCsrf,
+    requireDemoMutationAllowed,
     approveLeaveRequestController,
   );
   router.patch(
@@ -103,6 +110,7 @@ export const createLeaveRequestRoutes = (): Router => {
     requireAuth,
     requirePermission("leave:reject:any"),
     requireCsrf,
+    requireDemoMutationAllowed,
     rejectLeaveRequestController,
   );
 

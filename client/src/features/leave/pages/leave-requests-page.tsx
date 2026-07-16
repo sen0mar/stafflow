@@ -24,6 +24,7 @@ import {
   TableRow,
 } from '@/shared/components/ui/table'
 import { useCurrentUser } from '@/features/auth/hooks/use-current-user'
+import { useDemoMode } from '@/features/auth/hooks/use-auth-config'
 import { useEmployees } from '@/features/employees/hooks/use-employees'
 import { useTableQueryState } from '@/shared/hooks/use-table-query-state'
 import type {
@@ -243,6 +244,7 @@ const LeaveRequestsTable = ({
 )
 
 const EmployeeLeavePage = () => {
+  const demoMode = useDemoMode()
   const tableState = useTableQueryState()
   const page = tableState.getNumber('page', 1)
   const status = tableState.getString('status', 'all') as StatusFilter
@@ -273,19 +275,23 @@ const EmployeeLeavePage = () => {
         description="Submit time off requests and track approval status."
       />
 
-      <section className="space-y-4 overflow-hidden rounded-2xl border border-default bg-surface p-4 shadow-soft">
-        <div>
-          <h2 className="text-lg font-semibold text-primary">Request leave</h2>
-          <p className="mt-1 text-sm text-muted">
-            Choose a leave type and date range.
-          </p>
-        </div>
-        <LeaveRequestForm
-          isSubmitting={createRequest.isPending}
-          leaveTypes={leaveTypesQuery.data?.data ?? []}
-          onSubmit={handleSubmit}
-        />
-      </section>
+      {!demoMode ? (
+        <section className="space-y-4 overflow-hidden rounded-2xl border border-default bg-surface p-4 shadow-soft">
+          <div>
+            <h2 className="text-lg font-semibold text-primary">
+              Request leave
+            </h2>
+            <p className="mt-1 text-sm text-muted">
+              Choose a leave type and date range.
+            </p>
+          </div>
+          <LeaveRequestForm
+            isSubmitting={createRequest.isPending}
+            leaveTypes={leaveTypesQuery.data?.data ?? []}
+            onSubmit={handleSubmit}
+          />
+        </section>
+      ) : null}
 
       {balances.length > 0 ? (
         <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
@@ -348,7 +354,7 @@ const EmployeeLeavePage = () => {
         {requests.length > 0 ? (
           <>
             <LeaveRequestsTable
-              canCancel
+              canCancel={!demoMode}
               noteMode="review"
               requests={requests}
               onCancel={(request) => cancelRequest.mutate(request.id)}
@@ -368,6 +374,7 @@ const EmployeeLeavePage = () => {
 }
 
 const LeaveTypeManagement = () => {
+  const demoMode = useDemoMode()
   const [formOpen, setFormOpen] = useState(false)
   const [editingLeaveType, setEditingLeaveType] = useState<LeaveType | null>(
     null,
@@ -413,10 +420,12 @@ const LeaveTypeManagement = () => {
             Manage request categories and allowances.
           </p>
         </div>
-        <Button type="button" onClick={openCreate}>
-          <Plus className="h-4 w-4" aria-hidden="true" />
-          Create type
-        </Button>
+        {!demoMode ? (
+          <Button type="button" onClick={openCreate}>
+            <Plus className="h-4 w-4" aria-hidden="true" />
+            Create type
+          </Button>
+        ) : null}
       </div>
       {leaveTypesQuery.isLoading ? <TableSkeleton /> : null}
       {leaveTypes.length > 0 ? (
@@ -428,22 +437,26 @@ const LeaveTypeManagement = () => {
                 <TableHead>Allowance</TableHead>
                 <TableHead>Payment</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                {!demoMode ? (
+                  <TableHead className="text-right">Actions</TableHead>
+                ) : null}
               </TableRow>
             </TableHeader>
             <TableBody>
               {leaveTypes.map((leaveType) => (
                 <TableRow key={leaveType.id}>
-                  <TableCell>
-                    <div>
-                      <p className="font-medium text-primary">
-                        {leaveType.name}
-                      </p>
-                      <p className="text-xs text-muted">
-                        {leaveType.description ?? 'No description'}
-                      </p>
-                    </div>
-                  </TableCell>
+                  {!demoMode ? (
+                    <TableCell>
+                      <div>
+                        <p className="font-medium text-primary">
+                          {leaveType.name}
+                        </p>
+                        <p className="text-xs text-muted">
+                          {leaveType.description ?? 'No description'}
+                        </p>
+                      </div>
+                    </TableCell>
+                  ) : null}
                   <TableCell>{leaveType.annualAllowance ?? 0} days</TableCell>
                   <TableCell>{leaveType.isPaid ? 'Paid' : 'Unpaid'}</TableCell>
                   <TableCell>
@@ -478,18 +491,21 @@ const LeaveTypeManagement = () => {
           </Table>
         </div>
       ) : null}
-      <LeaveTypeFormDialog
-        isSubmitting={createLeaveType.isPending || updateLeaveType.isPending}
-        leaveType={editingLeaveType}
-        open={formOpen}
-        onOpenChange={setFormOpen}
-        onSubmit={handleSubmit}
-      />
+      {!demoMode ? (
+        <LeaveTypeFormDialog
+          isSubmitting={createLeaveType.isPending || updateLeaveType.isPending}
+          leaveType={editingLeaveType}
+          open={formOpen}
+          onOpenChange={setFormOpen}
+          onSubmit={handleSubmit}
+        />
+      ) : null}
     </section>
   )
 }
 
 const AdminLeavePage = () => {
+  const demoMode = useDemoMode()
   const tableState = useTableQueryState()
   const page = tableState.getNumber('page', 1)
   const employeeId = tableState.getString('employeeId', 'all')
@@ -628,7 +644,7 @@ const AdminLeavePage = () => {
         {requests.length > 0 ? (
           <>
             <LeaveRequestsTable
-              canReview
+              canReview={!demoMode}
               noteMode="reason"
               requests={requests}
               onApprove={(request) => openReview('approve', request)}
@@ -647,19 +663,21 @@ const AdminLeavePage = () => {
 
       <LeaveTypeManagement />
 
-      <LeaveReviewDialog
-        action={reviewAction}
-        isSubmitting={approveRequest.isPending || rejectRequest.isPending}
-        open={Boolean(reviewAction)}
-        request={reviewRequest}
-        onOpenChange={(open) => {
-          if (!open) {
-            setReviewAction(null)
-            setReviewRequest(null)
-          }
-        }}
-        onSubmit={handleReviewSubmit}
-      />
+      {!demoMode ? (
+        <LeaveReviewDialog
+          action={reviewAction}
+          isSubmitting={approveRequest.isPending || rejectRequest.isPending}
+          open={Boolean(reviewAction)}
+          request={reviewRequest}
+          onOpenChange={(open) => {
+            if (!open) {
+              setReviewAction(null)
+              setReviewRequest(null)
+            }
+          }}
+          onSubmit={handleReviewSubmit}
+        />
+      ) : null}
     </div>
   )
 }

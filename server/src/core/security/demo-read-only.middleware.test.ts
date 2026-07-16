@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-describe("demo account guard", () => {
+describe("demo read-only middleware", () => {
   afterEach(() => {
     vi.resetModules();
     vi.unstubAllEnvs();
@@ -10,10 +10,10 @@ describe("demo account guard", () => {
     vi.stubEnv("DATABASE_URL", "postgresql://localhost/stafflow_test");
     vi.stubEnv("DEMO_MODE", "true");
 
-    const { assertDemoAccountMutationAllowed } =
-      await import("./demo-account.guard.js");
+    const { assertDemoMutationAllowed } =
+      await import("./demo-read-only.middleware.js");
 
-    expect(() => assertDemoAccountMutationAllowed()).toThrow(
+    expect(() => assertDemoMutationAllowed()).toThrow(
       expect.objectContaining({
         code: "DEMO_READ_ONLY",
         statusCode: 403,
@@ -21,13 +21,13 @@ describe("demo account guard", () => {
     );
   });
 
-  it("allows account mutations outside demo mode", async () => {
+  it("allows mutations outside demo mode", async () => {
     vi.stubEnv("DATABASE_URL", "postgresql://localhost/stafflow_test");
     vi.stubEnv("DEMO_MODE", "false");
 
-    const { assertDemoAccountMutationAllowed } =
-      await import("./demo-account.guard.js");
+    const { assertDemoMutationAllowed } =
+      await import("./demo-read-only.middleware.js");
 
-    expect(() => assertDemoAccountMutationAllowed()).not.toThrow();
+    expect(() => assertDemoMutationAllowed()).not.toThrow();
   });
 });

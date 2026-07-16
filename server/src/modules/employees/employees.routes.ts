@@ -3,7 +3,7 @@ import { Router } from "express";
 import { attachAuth, requireAuth } from "../../core/auth/auth.middleware";
 import { requireCsrf } from "../../core/auth/csrf.service";
 import { requirePermission } from "../../core/auth/permissions";
-import { requireDemoAccountMutationAllowed } from "../../core/security/demo-account.guard";
+import { requireDemoMutationAllowed } from "../../core/security/demo-read-only.middleware";
 import {
   createEmployeeController,
   disableEmployeeController,
@@ -33,6 +33,7 @@ export const createEmployeeRoutes = (): Router => {
     requireAuth,
     requirePermission("profile:update:self"),
     requireCsrf,
+    requireDemoMutationAllowed,
     updateSelfProfileController,
   );
   router.get(
@@ -55,7 +56,7 @@ export const createEmployeeRoutes = (): Router => {
     requireAuth,
     requirePermission("employees:update:any"),
     requireCsrf,
-    requireDemoAccountMutationAllowed,
+    requireDemoMutationAllowed,
     regenerateEmployeeInvitationController,
   );
   router.get(
@@ -71,7 +72,7 @@ export const createEmployeeRoutes = (): Router => {
     requireAuth,
     requirePermission("employees:create"),
     requireCsrf,
-    requireDemoAccountMutationAllowed,
+    requireDemoMutationAllowed,
     createEmployeeController,
   );
   router.patch(
@@ -80,6 +81,7 @@ export const createEmployeeRoutes = (): Router => {
     requireAuth,
     requirePermission("employees:update:any"),
     requireCsrf,
+    requireDemoMutationAllowed,
     updateEmployeeController,
   );
   router.patch(
@@ -88,7 +90,7 @@ export const createEmployeeRoutes = (): Router => {
     requireAuth,
     requirePermission("employees:update:any"),
     requireCsrf,
-    requireDemoAccountMutationAllowed,
+    requireDemoMutationAllowed,
     updateEmployeeStatusController,
   );
   router.delete(
@@ -97,7 +99,7 @@ export const createEmployeeRoutes = (): Router => {
     requireAuth,
     requirePermission("employees:delete"),
     requireCsrf,
-    requireDemoAccountMutationAllowed,
+    requireDemoMutationAllowed,
     disableEmployeeController,
   );
 

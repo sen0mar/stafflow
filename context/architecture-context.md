@@ -20,7 +20,7 @@
 | Frontend hosting     | Vercel                            | Client deployment                                                                                                  |
 | Backend hosting      | Render                            | Express API deployment                                                                                             |
 | Domain model         | One custom domain with subdomains | Example: `app.company.com` for frontend and `api.company.com` for backend                                          |
-| Public demo model    | Seeded demo users + guard         | Visitors can log in; demo mode blocks persistent account creation, activation, status changes, and elevation       |
+| Public demo model    | Seeded read-only workspace        | Visitors can log in and browse seeded data; demo mode rejects persistent business and identity mutations           |
 
 ## System Boundaries
 
@@ -82,6 +82,14 @@ Auth model:
 - Frontend route guards are UX-only; the backend is the security boundary.
 - Public demo mode must prevent storage abuse through disabled uploads, strict quotas, automatic cleanup, or another explicit guardrail before unrestricted R2 writes are exposed.
 - Public demo mode must reject employee/account creation, invitation generation and acceptance, account-status mutations, and account elevation with `DEMO_READ_ONLY`.
+
+### Public Demo Mutation Policy
+
+When `DEMO_MODE=true`, the deployed public workspace is read-only for persistent business and identity data. The backend rejects every non-read mutation across employees, departments, attendance, leave, payslips, settings, invitations, password reset, and password/profile changes with the stable `DEMO_READ_ONLY` error. This shared middleware is the security boundary; frontend-disabled controls and the demo banner are explanatory UX only.
+
+Login, logout, `/auth/me`, authenticated app configuration, GET routes, and the non-mutating CSRF bootstrap remain available. Login/logout are the bounded session lifecycle exception required to enter and leave the seeded demo. Demo login does not update `lastLoginAt`, and successful login prunes stored sessions to the newest 100 rows per shared demo account so repeated login/logout traffic cannot grow the session table indefinitely. Forgot-password, reset-password, invitation generation/regeneration/acceptance, and other credential or identity changes are blocked because they create tokens, sessions, audit entries, or lasting identity changes and can grow PostgreSQL. Existing authentication, CSRF, RBAC, ownership, validation, and upload protections remain in place; demo enforcement is additive and does not weaken private deployments.
+
+Interactive public mutations may be enabled only after documenting enforceable quotas and implementing an automated full-state reset for the entire seeded workspace. The existing development reset helper is not sufficient for public mutation safety.
 
 MVP roles:
 

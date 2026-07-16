@@ -1,15 +1,18 @@
 import { useState } from 'react'
 import { Outlet, useNavigate } from 'react-router-dom'
 import { useCurrentUser } from '@/features/auth/hooks/use-current-user'
+import { useDemoMode } from '@/features/auth/hooks/use-auth-config'
 import { useLogout } from '@/features/auth/hooks/use-logout'
 import { appNavItems } from '@/shared/components/layout/nav-items'
 import { Sidebar } from '@/shared/components/layout/sidebar'
 import { Topbar } from '@/shared/components/layout/topbar'
+import { DemoModeBanner } from '@/shared/components/layout/demo-mode-banner'
 
 export const AppShell = () => {
   const navigate = useNavigate()
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const currentUserQuery = useCurrentUser()
+  const demoMode = useDemoMode()
   const logoutMutation = useLogout()
   const user = currentUserQuery.data
   const visibleNavItems = appNavItems.filter(
@@ -44,6 +47,7 @@ export const AppShell = () => {
             role={user?.role}
             onOpenSidebar={() => setIsSidebarOpen(true)}
           />
+          {demoMode ? <DemoModeBanner /> : null}
           <main className="px-5 py-6 sm:px-6 lg:px-8 2xl:px-10">
             <div className="mx-auto max-w-7xl 2xl:max-w-[1760px] min-[2200px]:!max-w-none">
               <Outlet />

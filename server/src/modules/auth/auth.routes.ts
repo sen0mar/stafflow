@@ -2,9 +2,10 @@ import { Router } from "express";
 
 import { attachAuth, requireAuth } from "../../core/auth/auth.middleware";
 import { requireCsrf } from "../../core/auth/csrf.service";
-import { requireDemoAccountMutationAllowed } from "../../core/security/demo-account.guard";
+import { requireDemoMutationAllowed } from "../../core/security/demo-read-only.middleware";
 import {
   acceptInvitationController,
+  authConfigController,
   changePasswordController,
   forgotPasswordController,
   loginController,
@@ -16,12 +17,21 @@ import {
 export const createAuthRoutes = (): Router => {
   const router = Router();
 
+  router.get("/config", authConfigController);
   router.post("/login", loginController);
-  router.post("/forgot-password", forgotPasswordController);
-  router.post("/reset-password", resetPasswordController);
+  router.post(
+    "/forgot-password",
+    requireDemoMutationAllowed,
+    forgotPasswordController,
+  );
+  router.post(
+    "/reset-password",
+    requireDemoMutationAllowed,
+    resetPasswordController,
+  );
   router.post(
     "/invitations/accept",
-    requireDemoAccountMutationAllowed,
+    requireDemoMutationAllowed,
     acceptInvitationController,
   );
   router.get("/me", attachAuth, requireAuth, meController);
@@ -37,6 +47,7 @@ export const createAuthRoutes = (): Router => {
     attachAuth,
     requireAuth,
     requireCsrf,
+    requireDemoMutationAllowed,
     changePasswordController,
   );
 
