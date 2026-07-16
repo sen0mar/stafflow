@@ -23,7 +23,7 @@ const upload = multer({
   storage: multer.memoryStorage(),
 });
 
-const uploadPayslipFile: RequestHandler = (request, response, next) => {
+export const uploadPayslipFile: RequestHandler = (request, response, next) => {
   upload.single("file")(request, response, (error: unknown) => {
     if (error instanceof multer.MulterError) {
       next(

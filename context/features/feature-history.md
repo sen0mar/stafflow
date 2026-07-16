@@ -50,6 +50,7 @@ Keep entries short. This file should explain what changed, not become a detailed
 - Feature 43: README and Screenshot Refresh — rewrote the root project guide in simpler, more complete language and replaced outdated reference images with current light/dark homepage and admin dashboard screenshots captured from the running app.
 - Feature 44: 4K Layout Density — added a dedicated wide-screen scale tier, fluid authenticated layouts, a wider desktop sidebar, and expanded homepage containers while preserving existing desktop and mobile sizing.
 - Feature 45: Trustworthy npm and CI Baseline — established the root npm lock as canonical, removed the redundant client lock, added a CI workspace-lock guard, repaired lock metadata and tracked formatting drift, and restored green client and server validation.
+- Feature 46: Dependency Security Patches — patched Multer, React Router, Vite, qs, and compatible transitive advisories, added upload-limit regression coverage, and documented the remaining toolchain-only findings without a forced Prisma downgrade.
 
 ## Entry Format
 
