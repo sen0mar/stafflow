@@ -225,7 +225,6 @@ Audit-log-worthy actions include:
 - Admin approves or rejects leave requests.
 - Admin uploads, replaces, or deletes payslips.
 - User changes password.
-- Password reset is requested or completed.
 - Settings are changed.
 
 ## Performance

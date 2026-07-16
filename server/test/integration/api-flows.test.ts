@@ -180,6 +180,30 @@ describeWithTestDatabase("core API flows", () => {
       });
   });
 
+  it("does not expose deferred password-reset routes or create reset tokens", async () => {
+    const { employeeUser } = await seedUsers();
+
+    const deferredRequests = [
+      request(app)
+        .post("/auth/forgot-password")
+        .send({ email: employeeUser.email }),
+      request(app)
+        .post("/auth/reset-password")
+        .send({
+          newPassword: "ReplacementPassword",
+          token: "a".repeat(43),
+        }),
+    ];
+
+    for (const deferredRequest of deferredRequests) {
+      await deferredRequest.expect(404).expect(({ body }) => {
+        expect(body.error.code).toBe("NOT_FOUND");
+      });
+    }
+
+    await expect(prisma.passwordResetToken.count()).resolves.toBe(0);
+  });
+
   it("blocks the public demo account-takeover chain", async () => {
     const { admin, employee, employeeUser } = await seedUsers();
     const { agent, csrfToken } = await login(admin.email);
@@ -289,18 +313,6 @@ describeWithTestDatabase("core API flows", () => {
       await adminAuth.agent.get("/auth/me").expect(200);
 
       const routeMatrix = [
-        {
-          module: "auth forgot password",
-          request: request(app)
-            .post("/auth/forgot-password")
-            .send({ email: admin.email }),
-        },
-        {
-          module: "auth reset password",
-          request: request(app)
-            .post("/auth/reset-password")
-            .send({ password: "ReplacementPassword", token: "token" }),
-        },
         {
           module: "auth invitation acceptance",
           request: request(app)

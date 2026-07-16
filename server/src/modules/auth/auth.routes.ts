@@ -8,11 +8,9 @@ import {
   acceptInvitationController,
   authConfigController,
   changePasswordController,
-  forgotPasswordController,
   loginController,
   logoutController,
   meController,
-  resetPasswordController,
 } from "./auth.controller";
 
 export const createAuthRoutes = (): Router => {
@@ -20,18 +18,6 @@ export const createAuthRoutes = (): Router => {
 
   router.get("/config", authConfigController);
   router.post("/login", requireJson, loginController);
-  router.post(
-    "/forgot-password",
-    requireJson,
-    requireDemoMutationAllowed,
-    forgotPasswordController,
-  );
-  router.post(
-    "/reset-password",
-    requireJson,
-    requireDemoMutationAllowed,
-    resetPasswordController,
-  );
   router.post(
     "/invitations/accept",
     requireJson,

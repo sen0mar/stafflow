@@ -17,7 +17,7 @@ Render documents the custom-domain setup at <https://render.com/docs/configure-c
 
 Create one zone-level WAF rate-limiting rule using [`cloudflare-public-auth-rate-limit-rule.json`](./cloudflare-public-auth-rate-limit-rule.json). This single rule fits Cloudflare's documented Free-plan allowance and covers all public credential/token entry points.
 
-- Match paths: `/auth/login`, `/auth/forgot-password`, `/auth/reset-password`, and `/auth/invitations/accept`
+- Match paths: `/auth/login` and `/auth/invitations/accept`
 - Counting characteristics: source IP and Cloudflare data-center ID
 - Threshold: 5 requests per 10 seconds
 - Action: block for 10 seconds

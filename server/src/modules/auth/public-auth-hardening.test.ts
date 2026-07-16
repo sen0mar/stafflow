@@ -6,7 +6,6 @@ import { AppError } from "../../core/errors/app-error";
 vi.mock("./auth.service", () => ({
   acceptInvitation: vi.fn(),
   changePassword: vi.fn(),
-  forgotPassword: vi.fn(),
   login: vi.fn().mockResolvedValue({
     token: "test-session-token",
     user: {
@@ -18,7 +17,6 @@ vi.mock("./auth.service", () => ({
     },
   }),
   logout: vi.fn(),
-  resetPassword: vi.fn(),
 }));
 
 import { createApp } from "../../app";
@@ -37,13 +35,9 @@ describe("public auth request hardening", () => {
     expect(response.headers["set-cookie"]).toBeUndefined();
   });
 
-  it.each([
-    "/auth/forgot-password",
-    "/auth/reset-password",
-    "/auth/invitations/accept",
-  ])("rejects form bodies on the public token endpoint %s", async (path) => {
+  it("rejects form bodies on invitation acceptance", async () => {
     await request(createApp())
-      .post(path)
+      .post("/auth/invitations/accept")
       .type("form")
       .send({
         email: "employee@example.com",

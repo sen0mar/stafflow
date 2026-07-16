@@ -14,17 +14,13 @@ import type { PublicAuthUser } from "../../core/auth/auth.types";
 import {
   acceptInvitationSchema,
   changePasswordSchema,
-  forgotPasswordSchema,
   loginSchema,
-  resetPasswordSchema,
 } from "./auth.schema";
 import {
   acceptInvitation,
   changePassword,
-  forgotPassword,
   login,
   logout,
-  resetPassword,
 } from "./auth.service";
 
 interface AuthResponse {
@@ -134,42 +130,6 @@ export const changePasswordController: RequestHandler = async (
     ...body,
     auditContext: getAuditContext(request),
     userId: request.auth?.userId ?? "",
-  });
-
-  clearSessionCookie(response);
-  clearCsrfCookie(response);
-
-  const responseBody: ApiSuccess<AuthResponse> = {
-    data: {
-      user,
-    },
-  };
-
-  response.status(200).json(responseBody);
-};
-
-export const forgotPasswordController: RequestHandler = async (
-  request,
-  response,
-) => {
-  const { body } = forgotPasswordSchema.parse({ body: request.body });
-  const result = await forgotPassword(body);
-
-  const responseBody: ApiSuccess<{ success: true }> = {
-    data: result,
-  };
-
-  response.status(200).json(responseBody);
-};
-
-export const resetPasswordController: RequestHandler = async (
-  request,
-  response,
-) => {
-  const { body } = resetPasswordSchema.parse({ body: request.body });
-  const user = await resetPassword({
-    ...body,
-    auditContext: getAuditContext(request),
   });
 
   clearSessionCookie(response);

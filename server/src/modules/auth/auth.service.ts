@@ -15,22 +15,16 @@ import { createAuditLog } from "../audit-logs/audit-log.service";
 import type {
   AcceptInvitationInput,
   ChangePasswordInput,
-  ForgotPasswordInput,
   LoginInput,
-  ResetPasswordInput,
 } from "./auth.schema";
 import {
   acceptInvitationToken,
   createInvitedUserForAcceptedInvitation,
-  createPasswordResetToken,
   createSession,
-  findActiveUserByEmail,
   findUserByEmailForAuth,
   findUserByIdForAuth,
   findValidInvitationToken,
-  findValidPasswordResetToken,
   markInvitationTokenAccepted,
-  markPasswordResetTokenUsed,
   revokeSession,
   revokeUserSessions,
   updateLastLoginAt,
@@ -65,13 +59,10 @@ const invalidTokenError = () =>
     statusCode: 400,
   });
 
-const passwordResetTtlMs = 60 * 60 * 1000;
 const protectedDemoEmails = new Set([
   "admin.demo@example.com",
   "employee.demo@example.com",
 ]);
-
-const getExpiresAt = (ttlMs: number) => new Date(Date.now() + ttlMs);
 
 // Strip service-only fields such as passwordHash before returning API data.
 const toPublicAuthUser = (user: {
@@ -199,58 +190,6 @@ export const changePassword = async ({
   });
 
   return toPublicAuthUser(user);
-};
-
-// Password reset request is enumeration-safe. Email delivery can use the stored
-// token later without changing the public API shape.
-export const forgotPassword = async ({ email }: ForgotPasswordInput) => {
-  const user = await findActiveUserByEmail(email);
-
-  if (user) {
-    const token = createSessionToken();
-
-    await createPasswordResetToken({
-      expiresAt: getExpiresAt(passwordResetTtlMs),
-      tokenHash: hashSessionToken(token),
-      userId: user.id,
-    });
-  }
-
-  return { success: true as const };
-};
-
-export const resetPassword = async ({
-  newPassword,
-  token,
-  auditContext,
-}: ResetPasswordInput & {
-  auditContext: AuditContext;
-}) => {
-  validatePasswordConstraints(newPassword);
-
-  const resetToken = await findValidPasswordResetToken(hashSessionToken(token));
-
-  if (!resetToken) {
-    throw invalidTokenError();
-  }
-
-  const passwordHash = await hashPassword(newPassword);
-
-  await updatePasswordHash({ passwordHash, userId: resetToken.userId });
-  await markPasswordResetTokenUsed(resetToken.id);
-  await revokeUserSessions(resetToken.userId);
-  await createAuditLog({
-    ...auditContext,
-    action: "PASSWORD_RESET_COMPLETED",
-    actorUserId: null,
-    entityId: resetToken.userId,
-    entityType: "User",
-    metadata: {
-      sessionsRevoked: true,
-    },
-  });
-
-  return toPublicAuthUser(resetToken.user);
 };
 
 export const acceptInvitation = async ({

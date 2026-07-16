@@ -1,6 +1,6 @@
 {
   "description": "Stafflow public auth entry points",
-  "expression": "(http.request.uri.path in {\"/auth/login\" \"/auth/forgot-password\" \"/auth/reset-password\" \"/auth/invitations/accept\"})",
+  "expression": "(http.request.uri.path in {\"/auth/login\" \"/auth/invitations/accept\"})",
   "action": "block",
   "ratelimit": {
     "characteristics": ["cf.colo.id", "ip.src"],

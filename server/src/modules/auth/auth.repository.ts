@@ -29,17 +29,6 @@ export const findUserByIdForAuth = async (userId: string) =>
     select: authUserSelect,
   });
 
-export const findActiveUserByEmail = async (email: string) =>
-  prisma.user.findFirst({
-    where: {
-      email,
-      status: "ACTIVE",
-    },
-    select: {
-      id: true,
-    },
-  });
-
 // Persist only the hashed token; the raw token lives solely in the cookie.
 export const createSession = async ({
   expiresAt,
@@ -103,7 +92,7 @@ export const revokeSession = async (sessionId: string) =>
     },
   });
 
-// Security-sensitive password setup/reset flows revoke every active session.
+// Security-sensitive credential changes revoke every active session.
 export const revokeUserSessions = async (userId: string) =>
   prisma.session.updateMany({
     where: {
@@ -126,52 +115,6 @@ export const updatePasswordHash = async ({
   prisma.user.update({
     where: { id: userId },
     data: { passwordHash },
-    select: { id: true },
-  });
-
-export const createPasswordResetToken = async ({
-  expiresAt,
-  tokenHash,
-  userId,
-}: {
-  expiresAt: Date;
-  tokenHash: string;
-  userId: string;
-}) =>
-  prisma.passwordResetToken.create({
-    data: {
-      expiresAt,
-      tokenHash,
-      userId,
-    },
-    select: {
-      id: true,
-    },
-  });
-
-export const findValidPasswordResetToken = async (tokenHash: string) =>
-  prisma.passwordResetToken.findFirst({
-    where: {
-      expiresAt: { gt: new Date() },
-      tokenHash,
-      usedAt: null,
-      user: {
-        status: "ACTIVE",
-      },
-    },
-    select: {
-      id: true,
-      userId: true,
-      user: {
-        select: authUserSelect,
-      },
-    },
-  });
-
-export const markPasswordResetTokenUsed = async (tokenId: string) =>
-  prisma.passwordResetToken.update({
-    where: { id: tokenId },
-    data: { usedAt: new Date() },
     select: { id: true },
   });
 

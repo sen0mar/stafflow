@@ -53,7 +53,7 @@ Controllers must stay thin. Services own business rules. Repositories own databa
 ## Storage Model
 
 - **PostgreSQL / Neon** stores relational application data:
-  - Users, sessions, employee profiles, departments, attendance records, leave types, leave requests, leave balances, payslip metadata, company settings, audit logs, and reset/invitation tokens.
+  - Users, sessions, employee profiles, departments, attendance records, leave types, leave requests, leave balances, payslip metadata, company settings, audit logs, invitation tokens, and the retained but runtime-unused password-reset table.
 - **Cloudflare R2** stores large private files:
   - Payslip PDFs and future employee documents.
   - PostgreSQL stores only metadata and the R2 object key, not the file contents.
@@ -83,13 +83,14 @@ Auth model:
 - Public demo mode must prevent storage abuse through disabled uploads, strict quotas, automatic cleanup, or another explicit guardrail before unrestricted R2 writes are exposed.
 - Public demo mode must reject employee/account creation, invitation generation and acceptance, account-status mutations, and account elevation with `DEMO_READ_ONLY`.
 - Public auth request bodies are JSON-only and bounded at validation. Missing-user login attempts perform the same cost-12 bcrypt comparison path as bad-password attempts.
-- Login, forgot-password, reset-password, and invitation-acceptance traffic must be throttled at the provider edge across application instances. The production target is a Cloudflare-proxied API custom domain with the default Render hostname disabled; the deploy-time rule is documented under `deployment/`.
+- Login and invitation-acceptance traffic must be throttled at the provider edge across application instances. The production target is a Cloudflare-proxied API custom domain with the default Render hostname disabled; the deploy-time rule is documented under `deployment/`.
+- Password recovery is deferred. The API exposes no public forgot-password or reset-password routes until email delivery, atomic single-use token consumption, seeded-demo-account protection, throttling, expiry cleanup, and end-to-end tests are delivered as one feature. The existing `PasswordResetToken` model and migrations remain temporarily to avoid an unnecessary destructive migration, but runtime code does not read or write that table.
 
 ### Public Demo Mutation Policy
 
-When `DEMO_MODE=true`, the deployed public workspace is read-only for persistent business and identity data. The backend rejects every non-read mutation across employees, departments, attendance, leave, payslips, settings, invitations, password reset, and password/profile changes with the stable `DEMO_READ_ONLY` error. This shared middleware is the security boundary; frontend-disabled controls and the demo banner are explanatory UX only.
+When `DEMO_MODE=true`, the deployed public workspace is read-only for persistent business and identity data. The backend rejects every exposed non-read mutation across employees, departments, attendance, leave, payslips, settings, invitations, and password/profile changes with the stable `DEMO_READ_ONLY` error. This shared middleware is the security boundary; frontend-disabled controls and the demo banner are explanatory UX only.
 
-Login, logout, `/auth/me`, authenticated app configuration, GET routes, and the non-mutating CSRF bootstrap remain available. Login/logout are the bounded session lifecycle exception required to enter and leave the seeded demo. Demo login does not update `lastLoginAt`, and successful login prunes stored sessions to the newest 100 rows per shared demo account so repeated login/logout traffic cannot grow the session table indefinitely. Forgot-password, reset-password, invitation generation/regeneration/acceptance, and other credential or identity changes are blocked because they create tokens, sessions, audit entries, or lasting identity changes and can grow PostgreSQL. Existing authentication, CSRF, RBAC, ownership, validation, and upload protections remain in place; demo enforcement is additive and does not weaken private deployments.
+Login, logout, `/auth/me`, authenticated app configuration, GET routes, and the non-mutating CSRF bootstrap remain available. Login/logout are the bounded session lifecycle exception required to enter and leave the seeded demo. Demo login does not update `lastLoginAt`, and successful login prunes stored sessions to the newest 100 rows per shared demo account so repeated login/logout traffic cannot grow the session table indefinitely. Invitation generation/regeneration/acceptance and other credential or identity changes are blocked because they create tokens, sessions, audit entries, or lasting identity changes and can grow PostgreSQL. Existing authentication, CSRF, RBAC, ownership, validation, and upload protections remain in place; demo enforcement is additive and does not weaken private deployments.
 
 Interactive public mutations may be enabled only after documenting enforceable quotas and implementing an automated full-state reset for the entire seeded workspace. The existing development reset helper is not sufficient for public mutation safety.
 
@@ -259,7 +260,7 @@ Expected backend environment groups:
 - Database URLs: pooled `DATABASE_URL` and direct `DIRECT_URL` for migrations.
 - Session/cookie secrets.
 - Cloudflare R2 credentials and bucket config.
-- Email provider credentials once invitations/password reset are implemented.
+- Email provider credentials once email-backed invitations or password recovery are implemented.
 - Demo-mode flags, if used, such as `DEMO_MODE`, `DEMO_UPLOADS_ENABLED`, upload quotas, or cleanup settings.
 
 ## Complex Patterns and Failure Modes

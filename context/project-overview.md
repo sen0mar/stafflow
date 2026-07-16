@@ -58,7 +58,7 @@ Employee flow:
 - Invitation or password setup flow for new employees.
 - Public visitors cannot create clean company accounts from the login page.
 - Public demo credentials cannot create, activate, disable, or elevate reusable private accounts.
-- Password reset flow.
+- Password reset is deferred until email delivery and the complete recovery lifecycle are implemented together.
 - Logout and session invalidation.
 - Backend-enforced RBAC and resource ownership checks.
 
@@ -147,6 +147,7 @@ Employee flow:
 
 ### Out Of Scope
 
+- Public forgot-password and reset-password flows until delivery, atomic single-use token consumption, demo-account protection, throttling, expiry cleanup, and end-to-end coverage are implemented together.
 - Public self-registration or public company onboarding.
 - Letting visitors create their own clean company workspace from the portfolio demo.
 - Multi-company SaaS support.
