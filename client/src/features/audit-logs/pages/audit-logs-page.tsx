@@ -1,40 +1,25 @@
-import { Eye, Filter, ScrollText, X } from 'lucide-react'
+import { Filter, ScrollText, X } from 'lucide-react'
 import { useCallback, useState } from 'react'
 import { FilterSelect } from '@/shared/components/data-table/filter-select'
-import { Badge } from '@/shared/components/ui/badge'
+import { PaginationControls } from '@/shared/components/data-table/pagination-controls'
+import { SearchInput } from '@/shared/components/data-table/search-input'
 import { Button } from '@/shared/components/ui/button'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@/shared/components/ui/dialog'
 import { Input } from '@/shared/components/ui/input'
 import { Label } from '@/shared/components/ui/label'
-import { SearchInput } from '@/shared/components/data-table/search-input'
-import { Skeleton } from '@/shared/components/ui/skeleton'
 import {
   EmptyState,
   QueryStateError,
   TableSkeleton,
   UnauthorizedState,
 } from '@/shared/components/layout/page-state'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/shared/components/ui/table'
-import { PaginationControls } from '@/shared/components/data-table/pagination-controls'
 import { PageHeader } from '@/shared/components/layout/page-header'
 import { useCurrentUser } from '@/features/auth/hooks/use-current-user'
 import { getRolePermissions, hasPermission } from '@/shared/lib/permissions'
 import { getAllowedQueryValue } from '@/shared/lib/query-values'
 import { useTableQueryState } from '@/shared/hooks/use-table-query-state'
-import type { AuditLog } from '../api/audit-logs.api'
+import { AuditLogDetailsDialog } from '../components/audit-log-details-dialog'
+import { humanizeAuditAction } from '../lib/audit-formatters'
+import { AuditLogsTable } from '../components/audit-logs-table'
 import { useAuditLog, useAuditLogs } from '../hooks/use-audit-logs'
 
 const pageSize = 10
@@ -78,269 +63,24 @@ type EntityTypeFilter = 'all' | (typeof entityTypeOptions)[number]
 const actionFilterOptions = ['all', ...actionOptions] as const
 const entityTypeFilterOptions = ['all', ...entityTypeOptions] as const
 
-const formatDateTime = (value: string) =>
-  new Intl.DateTimeFormat(undefined, {
-    dateStyle: 'medium',
-    timeStyle: 'short',
-  }).format(new Date(value))
-
 const toDateTimeFilter = (value: string, endOfDay = false) => {
-  if (!value) {
-    return undefined
-  }
-
+  if (!value) return undefined
   return new Date(
     `${value}T${endOfDay ? '23:59:59' : '00:00:00'}`,
   ).toISOString()
 }
-
 const trimValue = (value: string) => {
   const trimmed = value.trim()
-
   return trimmed.length > 0 ? trimmed : undefined
 }
 
-const humanizeAction = (value: string) =>
-  value
-    .toLowerCase()
-    .split('_')
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(' ')
-
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null && !Array.isArray(value)
-
-const stringifyValue = (value: unknown) => {
-  if (value === null || value === undefined) {
-    return 'None'
-  }
-
-  if (typeof value === 'string') {
-    return value
-  }
-
-  return JSON.stringify(value, null, 2)
-}
-
-const getChangedFields = (metadata: unknown) =>
-  isRecord(metadata) && Array.isArray(metadata.changedFields)
-    ? metadata.changedFields.filter(
-        (field): field is string => typeof field === 'string',
-      )
-    : []
-
-const getOldNewMetadata = (metadata: unknown) => {
-  if (
-    !isRecord(metadata) ||
-    !isRecord(metadata.from) ||
-    !isRecord(metadata.to)
-  ) {
-    return null
-  }
-
-  return {
-    from: metadata.from,
-    to: metadata.to,
-  }
-}
-
 const AuditLogsLoading = () => <TableSkeleton />
-
 const AuditLogsEmpty = () => (
   <EmptyState
     icon={ScrollText}
     title="No audit logs found"
     description="Adjust the filters or perform a sensitive action that creates an audit record."
   />
-)
-
-interface AuditLogDetailsDialogProps {
-  auditLog: AuditLog | null
-  isLoading: boolean
-  open: boolean
-  onOpenChange: (open: boolean) => void
-}
-
-const MetadataPreview = ({ metadata }: { metadata: unknown }) => {
-  const oldNew = getOldNewMetadata(metadata)
-  const changedFields = getChangedFields(metadata)
-
-  if (!oldNew) {
-    return (
-      <pre className="max-h-72 overflow-auto rounded-lg bg-inset p-3 text-xs leading-5 text-primary">
-        {stringifyValue(metadata)}
-      </pre>
-    )
-  }
-
-  const fields =
-    changedFields.length > 0
-      ? changedFields
-      : Array.from(
-          new Set([...Object.keys(oldNew.from), ...Object.keys(oldNew.to)]),
-        )
-
-  return (
-    <div className="overflow-hidden rounded-lg border border-default">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Field</TableHead>
-            <TableHead>Old</TableHead>
-            <TableHead>New</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {fields.map((field) => (
-            <TableRow key={field}>
-              <TableCell className="font-medium text-primary">
-                {field}
-              </TableCell>
-              <TableCell>
-                <code className="whitespace-pre-wrap text-xs text-muted">
-                  {stringifyValue(oldNew.from[field])}
-                </code>
-              </TableCell>
-              <TableCell>
-                <code className="whitespace-pre-wrap text-xs text-muted">
-                  {stringifyValue(oldNew.to[field])}
-                </code>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </div>
-  )
-}
-
-const DetailItem = ({
-  label,
-  value,
-}: {
-  label: string
-  value: string | null
-}) => (
-  <div>
-    <dt className="text-xs font-medium uppercase text-muted">{label}</dt>
-    <dd className="mt-1 break-words text-sm text-primary">{value ?? 'None'}</dd>
-  </div>
-)
-
-const AuditLogDetailsDialog = ({
-  auditLog,
-  isLoading,
-  open,
-  onOpenChange,
-}: AuditLogDetailsDialogProps) => (
-  <Dialog open={open} onOpenChange={onOpenChange}>
-    <DialogContent className="max-h-[90vh] overflow-auto sm:max-w-4xl">
-      <DialogHeader>
-        <DialogTitle>Audit log details</DialogTitle>
-        <DialogDescription>
-          Sensitive metadata is redacted before it is stored and displayed.
-        </DialogDescription>
-      </DialogHeader>
-
-      {isLoading ? (
-        <div className="space-y-3">
-          <Skeleton className="h-10 w-full" />
-          <Skeleton className="h-40 w-full" />
-        </div>
-      ) : null}
-
-      {auditLog ? (
-        <div className="space-y-5">
-          <div className="grid gap-4 rounded-lg border border-default bg-inset p-4 sm:grid-cols-2">
-            <DetailItem
-              label="Action"
-              value={humanizeAction(auditLog.action)}
-            />
-            <DetailItem
-              label="Created"
-              value={formatDateTime(auditLog.createdAt)}
-            />
-            <DetailItem
-              label="Actor"
-              value={auditLog.actorUser?.email ?? auditLog.actorUserId}
-            />
-            <DetailItem label="Actor user ID" value={auditLog.actorUserId} />
-            <DetailItem label="Entity" value={auditLog.entityType} />
-            <DetailItem label="Entity ID" value={auditLog.entityId} />
-            <DetailItem label="IP address" value={auditLog.ipAddress} />
-            <DetailItem label="User agent" value={auditLog.userAgent} />
-          </div>
-
-          <section className="space-y-3">
-            <h3 className="text-sm font-semibold text-primary">Metadata</h3>
-            <MetadataPreview metadata={auditLog.metadata} />
-          </section>
-        </div>
-      ) : null}
-    </DialogContent>
-  </Dialog>
-)
-
-interface AuditLogsTableProps {
-  auditLogs: AuditLog[]
-  onView: (auditLog: AuditLog) => void
-}
-
-const AuditLogsTable = ({ auditLogs, onView }: AuditLogsTableProps) => (
-  <div className="overflow-hidden rounded-lg border border-default bg-surface p-2 shadow-soft">
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Action</TableHead>
-          <TableHead>Actor</TableHead>
-          <TableHead>Entity</TableHead>
-          <TableHead>Created</TableHead>
-          <TableHead className="text-right">Details</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {auditLogs.map((auditLog) => (
-          <TableRow key={auditLog.id}>
-            <TableCell>
-              <Badge variant="secondary">
-                {humanizeAction(auditLog.action)}
-              </Badge>
-            </TableCell>
-            <TableCell>
-              <div className="font-medium text-primary">
-                {auditLog.actorUser?.email ?? 'System or unauthenticated'}
-              </div>
-              <div className="text-xs text-muted">
-                {auditLog.actorUserId ?? 'No actor ID'}
-              </div>
-            </TableCell>
-            <TableCell>
-              <div className="font-medium text-primary">
-                {auditLog.entityType}
-              </div>
-              <div className="max-w-56 truncate text-xs text-muted">
-                {auditLog.entityId ?? 'No entity ID'}
-              </div>
-            </TableCell>
-            <TableCell>{formatDateTime(auditLog.createdAt)}</TableCell>
-            <TableCell>
-              <div className="flex justify-end">
-                <Button
-                  aria-label={`View ${auditLog.action} audit log`}
-                  size="icon"
-                  type="button"
-                  variant="outline"
-                  onClick={() => onView(auditLog)}
-                >
-                  <Eye className="h-4 w-4" aria-hidden="true" />
-                </Button>
-              </div>
-            </TableCell>
-          </TableRow>
-        ))}
-      </TableBody>
-    </Table>
-  </div>
 )
 
 export const AuditLogsPage = () => {
@@ -503,7 +243,7 @@ export const AuditLogsPage = () => {
               options={[
                 { label: 'All actions', value: 'all' },
                 ...actionOptions.map((option) => ({
-                  label: humanizeAction(option),
+                  label: humanizeAuditAction(option),
                   value: option,
                 })),
               ]}

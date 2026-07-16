@@ -1,13 +1,13 @@
 import { Prisma } from "@prisma/client";
 
 import type { AuthContext } from "../../core/auth/auth.types";
+import { getCompanyTimezone } from "../settings/settings.repository";
 import type { AttendanceRecord } from "./attendance.repository";
 import {
   createClockInRecord,
   findActiveAttendanceRecordForDay,
   findAttendanceRecordById,
   findAttendanceRecordForDay,
-  getCompanyTimezone,
   getAttendanceUpdateData,
   getSelfClockActionContext,
   updateAttendanceWithAuditLog,
@@ -26,12 +26,15 @@ vi.mock("./attendance.repository", () => ({
   findAttendanceRecordById: vi.fn(),
   findAttendanceRecordForDay: vi.fn(),
   getAttendanceUpdateData: vi.fn((input: object) => input),
-  getCompanyTimezone: vi.fn(),
   getSelfClockActionContext: vi.fn(),
   listAttendanceRecords: vi.fn(),
   listSelfAttendanceRecords: vi.fn(),
   updateAttendanceWithAuditLog: vi.fn(),
   updateClockOutRecord: vi.fn(),
+}));
+
+vi.mock("../settings/settings.repository", () => ({
+  getCompanyTimezone: vi.fn(),
 }));
 
 const auth: AuthContext = {

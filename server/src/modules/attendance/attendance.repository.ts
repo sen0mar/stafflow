@@ -73,15 +73,6 @@ export interface SelfClockActionContext {
   workdayStart: string;
 }
 
-export const getCompanyTimezone = async () => {
-  const settings = await prisma.companySettings.findUnique({
-    select: { timezone: true },
-    where: { id: SETTINGS_SINGLETON_IDS.company },
-  });
-
-  return settings?.timezone ?? "UTC";
-};
-
 export const getSelfClockActionContext = async (
   employeeId: string,
 ): Promise<SelfClockActionContext> => {

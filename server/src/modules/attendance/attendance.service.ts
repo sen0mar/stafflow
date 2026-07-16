@@ -12,7 +12,6 @@ import {
   findAttendanceRecordById,
   findAttendanceRecordForDay,
   getAttendanceUpdateData,
-  getCompanyTimezone,
   getSelfClockActionContext,
   listAttendanceRecords,
   listSelfAttendanceRecords,
@@ -21,6 +20,7 @@ import {
   type AttendanceRecord,
   type SelfClockActionContext,
 } from "./attendance.repository";
+import { getCompanyTimezone } from "../settings/settings.repository";
 import {
   getCompanyDate,
   getScheduledTime,

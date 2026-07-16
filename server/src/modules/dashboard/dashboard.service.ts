@@ -9,7 +9,6 @@ import {
   countPendingLeaveRequests,
   countTodayAttendanceByStatus,
   getAttendanceRecordsForRange,
-  getCompanyTimezone,
   getDepartmentDistribution,
   getDepartmentsByIds,
   getEmployeeLatestPayslips,
@@ -21,6 +20,7 @@ import {
   getPendingLeaveRequestPreview,
   getRecentEmployees,
 } from "./dashboard.repository";
+import { getCompanyTimezone } from "../settings/settings.repository";
 
 type AttendanceOverviewStatus = Lowercase<AttendanceStatus>;
 

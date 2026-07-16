@@ -23,6 +23,7 @@ import { useDemoMode } from '@/features/auth/hooks/use-auth-config'
 import { useTableQueryState } from '@/shared/hooks/use-table-query-state'
 import { getRolePermissions, hasPermission } from '@/shared/lib/permissions'
 import { getAllowedQueryValue } from '@/shared/lib/query-values'
+import { formatBinaryFileSize } from '@/shared/lib/file-size'
 import type { Payslip } from '../api/payslips.api'
 import { PayslipPreviewDialog } from '../components/payslip-preview-dialog'
 import { PayslipUploadDialog } from '../components/payslip-upload-dialog'
@@ -73,14 +74,6 @@ const yearFilterValues = ['all', ...years.map(String)]
 
 type MonthFilter = (typeof monthFilterValues)[number]
 type YearFilter = string
-
-const formatFileSize = (bytes: number) => {
-  if (bytes < 1024 * 1024) {
-    return `${Math.max(1, Math.round(bytes / 1024))} KB`
-  }
-
-  return `${(bytes / 1024 / 1024).toFixed(1)} MB`
-}
 
 const formatDate = (value: string) =>
   new Intl.DateTimeFormat(undefined, {
@@ -161,7 +154,7 @@ const PayslipsTable = ({
                 {payslip.fileName}
               </div>
               <div className="text-xs text-muted">
-                {formatFileSize(payslip.fileSize)}
+                {formatBinaryFileSize(payslip.fileSize)}
               </div>
             </TableCell>
             <TableCell>{formatDate(payslip.uploadedAt)}</TableCell>

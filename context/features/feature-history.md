@@ -70,6 +70,7 @@ Keep entries short. This file should explain what changed, not become a detailed
 - Feature 63: Frontend Auth and Filter Reliability — made protected auth failures fail closed with retry, kept authenticated UI intact on failed logout, synchronized URL-backed search drafts across navigation and resets, and restricted client page parsing to positive safe integers.
 - Feature 64: Idle Homepage Canvas Scheduling — replaced the homepage dot canvas's perpetual animation loop with a single-frame event-driven scheduler, added visibility and reduced-motion lifecycle handling, and verified idle, interaction, resize, theme, and high-DPI behavior with deterministic coverage.
 - Feature 65: Audit Section 21 Dead Code Cleanup — removed verified-unreachable client artifacts and app exports, trimmed test-only policy helpers while preserving runtime ownership defenses, removed unused direct Zustand and coverage dependencies from canonical npm metadata, and documented the deferred Section 24 database readiness export.
+- Feature 66: Audit Section 22 Feature Page Splits — split dashboard, settings, leave, and audit-log pages into feature-local role, form, table, dialog, and presentation components; centralized exact company-timezone and binary file-size duplication; and added focused composition and presentation regressions without changing behavior or API contracts.
 
 ## Entry Format
 

@@ -94,6 +94,15 @@ export const findCompanySettings = () =>
     where: { id: SETTINGS_SINGLETON_IDS.company },
   });
 
+export const getCompanyTimezone = async () => {
+  const settings = await prisma.companySettings.findUnique({
+    select: { timezone: true },
+    where: { id: SETTINGS_SINGLETON_IDS.company },
+  });
+
+  return settings?.timezone ?? "UTC";
+};
+
 export const findAttendanceSettings = () =>
   prisma.attendanceSettings.findUnique({
     select: attendanceSettingsSelect,
