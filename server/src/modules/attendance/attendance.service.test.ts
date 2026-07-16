@@ -1,3 +1,5 @@
+import { Prisma } from "@prisma/client";
+
 import type { AuthContext } from "../../core/auth/auth.types";
 import type { AttendanceRecord } from "./attendance.repository";
 import {
@@ -5,9 +7,9 @@ import {
   findActiveAttendanceRecordForDay,
   findAttendanceRecordById,
   findAttendanceRecordForDay,
-  getAttendanceSettings,
   getCompanyTimezone,
   getAttendanceUpdateData,
+  getSelfClockActionContext,
   updateAttendanceWithAuditLog,
   updateClockOutRecord,
 } from "./attendance.repository";
@@ -22,9 +24,9 @@ vi.mock("./attendance.repository", () => ({
   findActiveAttendanceRecordForDay: vi.fn(),
   findAttendanceRecordById: vi.fn(),
   findAttendanceRecordForDay: vi.fn(),
-  getAttendanceSettings: vi.fn(),
   getAttendanceUpdateData: vi.fn((input: object) => input),
   getCompanyTimezone: vi.fn(),
+  getSelfClockActionContext: vi.fn(),
   listAttendanceRecords: vi.fn(),
   listSelfAttendanceRecords: vi.fn(),
   updateAttendanceWithAuditLog: vi.fn(),
@@ -75,20 +77,124 @@ describe("attendance.service", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(getCompanyTimezone).mockResolvedValue("UTC");
-    vi.mocked(getAttendanceSettings).mockResolvedValue({ workdayMinutes: 480 });
+    vi.mocked(getSelfClockActionContext).mockResolvedValue({
+      allowEmployeeClockIn: true,
+      employeeStatus: "ACTIVE",
+      lateGracePeriodMinutes: 10,
+      timeZone: "UTC",
+      weeklyWorkingDays: [1, 2, 3, 4, 5],
+      workdayEnd: "17:00",
+      workdayMinutes: 480,
+      workdayStart: "09:00",
+    });
   });
 
-  it("blocks duplicate active clock-ins", async () => {
-    vi.mocked(findAttendanceRecordForDay).mockResolvedValue(attendanceRecord());
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("maps the unique employee/day clock-in conflict to 409", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-05-13T09:00:00.000Z"));
+    vi.mocked(createClockInRecord).mockRejectedValue(
+      new Prisma.PrismaClientKnownRequestError("Unique constraint failed", {
+        clientVersion: "7.8.0",
+        code: "P2002",
+      }),
+    );
 
     await expect(clockInSelf(auth)).rejects.toMatchObject({
-      code: "ATTENDANCE_ALREADY_CLOCKED_IN",
+      code: "ATTENDANCE_ALREADY_RECORDED",
       statusCode: 409,
     });
-    expect(createClockInRecord).not.toHaveBeenCalled();
+    expect(findAttendanceRecordForDay).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ["INACTIVE", "ATTENDANCE_EMPLOYEE_INACTIVE"],
+    ["TERMINATED", "ATTENDANCE_EMPLOYEE_INACTIVE"],
+  ] as const)(
+    "blocks %s employees from self clock-in",
+    async (status, code) => {
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date("2026-05-13T09:00:00.000Z"));
+      vi.mocked(getSelfClockActionContext).mockResolvedValue({
+        allowEmployeeClockIn: true,
+        employeeStatus: status,
+        lateGracePeriodMinutes: 10,
+        timeZone: "UTC",
+        weeklyWorkingDays: [1, 2, 3, 4, 5],
+        workdayEnd: "17:00",
+        workdayMinutes: 480,
+        workdayStart: "09:00",
+      });
+
+      await expect(clockInSelf(auth)).rejects.toMatchObject({ code });
+      expect(createClockInRecord).not.toHaveBeenCalled();
+    },
+  );
+
+  it("enforces disabled employee clock-in", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-05-13T09:00:00.000Z"));
+    vi.mocked(getSelfClockActionContext).mockResolvedValue({
+      allowEmployeeClockIn: false,
+      employeeStatus: "ACTIVE",
+      lateGracePeriodMinutes: 10,
+      timeZone: "UTC",
+      weeklyWorkingDays: [1, 2, 3, 4, 5],
+      workdayEnd: "17:00",
+      workdayMinutes: 480,
+      workdayStart: "09:00",
+    });
+
+    await expect(clockInSelf(auth)).rejects.toMatchObject({
+      code: "ATTENDANCE_CLOCK_IN_DISABLED",
+    });
+  });
+
+  it("enforces company-local working days", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-05-17T09:00:00.000Z"));
+
+    await expect(clockInSelf(auth)).rejects.toMatchObject({
+      code: "ATTENDANCE_NON_WORKING_DAY",
+    });
+  });
+
+  it("marks clock-in late only after the company-local grace boundary", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-05-13T13:10:00.000Z"));
+    vi.mocked(getSelfClockActionContext).mockResolvedValue({
+      allowEmployeeClockIn: true,
+      employeeStatus: "ACTIVE",
+      lateGracePeriodMinutes: 10,
+      timeZone: "America/New_York",
+      weeklyWorkingDays: [3],
+      workdayEnd: "17:00",
+      workdayMinutes: 480,
+      workdayStart: "09:00",
+    });
+    vi.mocked(createClockInRecord).mockResolvedValue(attendanceRecord());
+
+    await clockInSelf(auth);
+    expect(createClockInRecord).toHaveBeenLastCalledWith(
+      expect.objectContaining({ status: "PRESENT" }),
+    );
+
+    vi.setSystemTime(new Date("2026-05-13T13:11:00.000Z"));
+    vi.mocked(createClockInRecord).mockResolvedValue(
+      attendanceRecord({ status: "LATE" }),
+    );
+    await clockInSelf(auth);
+    expect(createClockInRecord).toHaveBeenLastCalledWith(
+      expect.objectContaining({ status: "LATE" }),
+    );
   });
 
   it("blocks clock-out without an active clock-in", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-05-13T13:00:00.000Z"));
     vi.mocked(findActiveAttendanceRecordForDay).mockResolvedValue(null);
 
     await expect(clockOutSelf(auth)).rejects.toMatchObject({
@@ -96,6 +202,26 @@ describe("attendance.service", () => {
       statusCode: 409,
     });
     expect(updateClockOutRecord).not.toHaveBeenCalled();
+  });
+
+  it("blocks inactive employees from self clock-out", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-05-13T17:00:00.000Z"));
+    vi.mocked(getSelfClockActionContext).mockResolvedValue({
+      allowEmployeeClockIn: true,
+      employeeStatus: "INACTIVE",
+      lateGracePeriodMinutes: 10,
+      timeZone: "UTC",
+      weeklyWorkingDays: [1, 2, 3, 4, 5],
+      workdayEnd: "17:00",
+      workdayMinutes: 480,
+      workdayStart: "09:00",
+    });
+
+    await expect(clockOutSelf(auth)).rejects.toMatchObject({
+      code: "ATTENDANCE_EMPLOYEE_INACTIVE",
+    });
+    expect(findActiveAttendanceRecordForDay).not.toHaveBeenCalled();
   });
 
   it("records clock-out totals and status from configured workday length", async () => {
@@ -123,7 +249,89 @@ describe("attendance.service", () => {
         totalMinutes: 240,
       }),
     );
-    vi.useRealTimers();
+  });
+
+  it("marks an early clock-out partial even when required minutes are met", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-05-13T16:30:00.000Z"));
+    vi.mocked(getSelfClockActionContext).mockResolvedValue({
+      allowEmployeeClockIn: false,
+      employeeStatus: "ACTIVE",
+      lateGracePeriodMinutes: 10,
+      timeZone: "UTC",
+      weeklyWorkingDays: [1, 2, 3, 4, 5],
+      workdayEnd: "17:00",
+      workdayMinutes: 450,
+      workdayStart: "09:00",
+    });
+    vi.mocked(findActiveAttendanceRecordForDay).mockResolvedValue(
+      attendanceRecord({
+        clockInAt: new Date("2026-05-13T09:00:00.000Z"),
+      }),
+    );
+    vi.mocked(updateClockOutRecord).mockResolvedValue(
+      attendanceRecord({ status: "PARTIAL" }),
+    );
+
+    await clockOutSelf(auth);
+
+    expect(updateClockOutRecord).toHaveBeenCalledWith(
+      expect.objectContaining({ status: "PARTIAL", totalMinutes: 450 }),
+    );
+  });
+
+  it("gives partial precedence over a late clock-in", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-05-13T17:00:00.000Z"));
+    vi.mocked(findActiveAttendanceRecordForDay).mockResolvedValue(
+      attendanceRecord({
+        clockInAt: new Date("2026-05-13T10:00:00.000Z"),
+        status: "LATE",
+      }),
+    );
+    vi.mocked(updateClockOutRecord).mockResolvedValue(
+      attendanceRecord({ status: "PARTIAL" }),
+    );
+
+    await clockOutSelf(auth);
+
+    expect(updateClockOutRecord).toHaveBeenCalledWith(
+      expect.objectContaining({ status: "PARTIAL", totalMinutes: 420 }),
+    );
+  });
+
+  it("preserves late when required time and scheduled end are satisfied", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-05-13T18:30:00.000Z"));
+    vi.mocked(findActiveAttendanceRecordForDay).mockResolvedValue(
+      attendanceRecord({
+        clockInAt: new Date("2026-05-13T10:30:00.000Z"),
+        status: "LATE",
+      }),
+    );
+    vi.mocked(updateClockOutRecord).mockResolvedValue(
+      attendanceRecord({ status: "LATE" }),
+    );
+
+    await clockOutSelf(auth);
+
+    expect(updateClockOutRecord).toHaveBeenCalledWith(
+      expect.objectContaining({ status: "LATE", totalMinutes: 480 }),
+    );
+  });
+
+  it("maps a stale conditional clock-out to 409", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-05-13T17:00:00.000Z"));
+    vi.mocked(findActiveAttendanceRecordForDay).mockResolvedValue(
+      attendanceRecord(),
+    );
+    vi.mocked(updateClockOutRecord).mockResolvedValue(null);
+
+    await expect(clockOutSelf(auth)).rejects.toMatchObject({
+      code: "ATTENDANCE_ALREADY_CLOCKED_OUT",
+      statusCode: 409,
+    });
   });
 
   it("rejects admin corrections where clock-out precedes clock-in", async () => {

@@ -1,4 +1,8 @@
-import type { AttendanceStatus, Prisma } from "@prisma/client";
+import type {
+  AttendanceStatus,
+  EmploymentStatus,
+  Prisma,
+} from "@prisma/client";
 
 import { prisma } from "../../prisma/prisma.client";
 import { createAuditLog } from "../audit-logs/audit-log.service";
@@ -56,6 +60,17 @@ export interface SelfAttendanceListFilters extends ListSelfAttendanceInput {
   take: number;
 }
 
+export interface SelfClockActionContext {
+  allowEmployeeClockIn: boolean;
+  employeeStatus: EmploymentStatus | null;
+  lateGracePeriodMinutes: number;
+  timeZone: string;
+  weeklyWorkingDays: number[];
+  workdayEnd: string;
+  workdayMinutes: number;
+  workdayStart: string;
+}
+
 export const getCompanyTimezone = async () => {
   const settings = await prisma.companySettings.findFirst({
     orderBy: { createdAt: "asc" },
@@ -65,14 +80,40 @@ export const getCompanyTimezone = async () => {
   return settings?.timezone ?? "UTC";
 };
 
-export const getAttendanceSettings = async () => {
-  const settings = await prisma.attendanceSettings.findFirst({
-    orderBy: { createdAt: "asc" },
-    select: { workdayMinutes: true },
-  });
+export const getSelfClockActionContext = async (
+  employeeId: string,
+): Promise<SelfClockActionContext> => {
+  const [employee, companySettings, attendanceSettings] = await Promise.all([
+    prisma.employee.findUnique({
+      select: { status: true },
+      where: { id: employeeId },
+    }),
+    prisma.companySettings.findFirst({
+      orderBy: { createdAt: "asc" },
+      select: { timezone: true },
+    }),
+    prisma.attendanceSettings.findFirst({
+      orderBy: { createdAt: "asc" },
+      select: {
+        allowEmployeeClockIn: true,
+        lateGracePeriodMinutes: true,
+        weeklyWorkingDays: true,
+        workdayEnd: true,
+        workdayMinutes: true,
+        workdayStart: true,
+      },
+    }),
+  ]);
 
   return {
-    workdayMinutes: settings?.workdayMinutes ?? 480,
+    allowEmployeeClockIn: attendanceSettings?.allowEmployeeClockIn ?? true,
+    employeeStatus: employee?.status ?? null,
+    lateGracePeriodMinutes: attendanceSettings?.lateGracePeriodMinutes ?? 0,
+    timeZone: companySettings?.timezone ?? "UTC",
+    weeklyWorkingDays: attendanceSettings?.weeklyWorkingDays ?? [1, 2, 3, 4, 5],
+    workdayEnd: attendanceSettings?.workdayEnd ?? "17:00",
+    workdayMinutes: attendanceSettings?.workdayMinutes ?? 480,
+    workdayStart: attendanceSettings?.workdayStart ?? "09:00",
   };
 };
 
@@ -193,10 +234,12 @@ export const createClockInRecord = ({
   clockInAt,
   date,
   employeeId,
+  status,
 }: {
   clockInAt: Date;
   date: Date;
   employeeId: string;
+  status: AttendanceStatus;
 }) =>
   prisma.attendanceRecord.create({
     data: {
@@ -204,7 +247,7 @@ export const createClockInRecord = ({
       date,
       employeeId,
       source: "SELF",
-      status: "PRESENT",
+      status,
     },
     select: attendanceSelect,
   });
@@ -220,14 +263,24 @@ export const updateClockOutRecord = ({
   status: AttendanceStatus;
   totalMinutes: number;
 }) =>
-  prisma.attendanceRecord.update({
-    data: {
-      clockOutAt,
-      status,
-      totalMinutes,
-    },
-    select: attendanceSelect,
-    where: { id },
+  prisma.$transaction(async (transaction) => {
+    const update = await transaction.attendanceRecord.updateMany({
+      data: {
+        clockOutAt,
+        status,
+        totalMinutes,
+      },
+      where: { clockOutAt: null, id },
+    });
+
+    if (update.count !== 1) {
+      return null;
+    }
+
+    return transaction.attendanceRecord.findUnique({
+      select: attendanceSelect,
+      where: { id },
+    });
   });
 
 export const updateAttendanceWithAuditLog = ({

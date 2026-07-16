@@ -1,4 +1,4 @@
-import type { AttendanceStatus } from "@prisma/client";
+import { Prisma, type AttendanceStatus } from "@prisma/client";
 
 import type { AuthContext } from "../../core/auth/auth.types";
 import { AppError } from "../../core/errors/app-error";
@@ -11,15 +11,21 @@ import {
   findActiveAttendanceRecordForDay,
   findAttendanceRecordById,
   findAttendanceRecordForDay,
-  getAttendanceSettings,
   getAttendanceUpdateData,
   getCompanyTimezone,
+  getSelfClockActionContext,
   listAttendanceRecords,
   listSelfAttendanceRecords,
   updateAttendanceWithAuditLog,
   updateClockOutRecord,
   type AttendanceRecord,
+  type SelfClockActionContext,
 } from "./attendance.repository";
+import {
+  getAttendanceDate,
+  getScheduledTime,
+  isWorkingDay,
+} from "./attendance-time";
 import { getSelfAttendanceEmployeeId } from "./attendance.policy";
 import type {
   ListAttendanceInput,
@@ -33,78 +39,15 @@ interface AuditContext {
   userAgent?: string;
 }
 
-interface ZonedDay {
-  day: number;
-  month: number;
-  year: number;
-}
-
 const toIso = (date: Date | null) => date?.toISOString() ?? null;
 
 const getFullName = (firstName: string, lastName: string) =>
   `${firstName} ${lastName}`;
 
-const getTimezoneOffsetMs = (date: Date, timeZone: string) => {
-  const formatter = new Intl.DateTimeFormat("en-US", {
-    day: "2-digit",
-    hour: "2-digit",
-    hour12: false,
-    minute: "2-digit",
-    month: "2-digit",
-    second: "2-digit",
-    timeZone,
-    year: "numeric",
-  });
-  const parts = formatter.formatToParts(date);
-  const values = new Map(parts.map((part) => [part.type, part.value]));
-  const asUtc = Date.UTC(
-    Number(values.get("year")),
-    Number(values.get("month")) - 1,
-    Number(values.get("day")),
-    Number(values.get("hour")),
-    Number(values.get("minute")),
-    Number(values.get("second")),
-  );
-
-  return asUtc - date.getTime();
-};
-
-const getZonedParts = (date: Date, timeZone: string): ZonedDay => {
-  const formatter = new Intl.DateTimeFormat("en-US", {
-    day: "2-digit",
-    month: "2-digit",
-    timeZone,
-    year: "numeric",
-  });
-  const parts = formatter.formatToParts(date);
-  const getPart = (type: string) => {
-    const value = parts.find((part) => part.type === type)?.value;
-
-    if (!value) {
-      throw new Error(`Missing ${type} date part.`);
-    }
-
-    return Number(value);
-  };
-
-  return {
-    day: getPart("day"),
-    month: getPart("month"),
-    year: getPart("year"),
-  };
-};
-
-const zonedDayToUtc = ({ day, month, year }: ZonedDay, timeZone: string) => {
-  const utcGuess = new Date(Date.UTC(year, month - 1, day));
-  const offsetMs = getTimezoneOffsetMs(utcGuess, timeZone);
-
-  return new Date(utcGuess.getTime() - offsetMs);
-};
-
 const getTodayDate = async () => {
   const timeZone = await getCompanyTimezone();
 
-  return zonedDayToUtc(getZonedParts(new Date(), timeZone), timeZone);
+  return getAttendanceDate(new Date(), timeZone);
 };
 
 const calculateTotalMinutes = (
@@ -122,9 +65,51 @@ const calculateTotalMinutes = (
 };
 
 const getClockOutStatus = (
+  clockInStatus: AttendanceStatus,
+  clockOutAt: Date,
+  context: SelfClockActionContext,
   totalMinutes: number,
-  workdayMinutes: number,
-): AttendanceStatus => (totalMinutes < workdayMinutes ? "PARTIAL" : "PRESENT");
+): AttendanceStatus => {
+  const scheduledEnd = getScheduledTime(
+    clockOutAt,
+    context.timeZone,
+    context.workdayEnd,
+  );
+
+  if (
+    totalMinutes < context.workdayMinutes ||
+    clockOutAt.getTime() < scheduledEnd.getTime()
+  ) {
+    return "PARTIAL";
+  }
+
+  return clockInStatus === "LATE" ? "LATE" : "PRESENT";
+};
+
+const assertSelfClockActionAllowed = (
+  context: SelfClockActionContext,
+  now: Date,
+) => {
+  if (context.employeeStatus !== "ACTIVE") {
+    throw new AppError({
+      code: "ATTENDANCE_EMPLOYEE_INACTIVE",
+      message: "Only active employees can use self attendance.",
+      statusCode: 409,
+    });
+  }
+
+  if (!isWorkingDay(now, context.timeZone, context.weeklyWorkingDays)) {
+    throw new AppError({
+      code: "ATTENDANCE_NON_WORKING_DAY",
+      message: "Self attendance is unavailable on non-working days.",
+      statusCode: 409,
+    });
+  }
+};
+
+const isUniqueAttendanceDayError = (error: unknown) =>
+  error instanceof Prisma.PrismaClientKnownRequestError &&
+  error.code === "P2002";
 
 const toAttendanceDto = (record: AttendanceRecord) => ({
   clockInAt: toIso(record.clockInAt),
@@ -213,40 +198,68 @@ export const getAttendanceDetail = async (id: string) => {
 
 export const clockInSelf = async (auth: AuthContext) => {
   const employeeId = getSelfAttendanceEmployeeId(auth);
-  const date = await getTodayDate();
-  const existingRecord = await findAttendanceRecordForDay(employeeId, date);
+  const now = new Date();
+  const context = await getSelfClockActionContext(employeeId);
+  assertSelfClockActionAllowed(context, now);
 
-  if (existingRecord?.clockInAt && !existingRecord.clockOutAt) {
+  if (!context.allowEmployeeClockIn) {
     throw new AppError({
-      code: "ATTENDANCE_ALREADY_CLOCKED_IN",
-      message: "You are already clocked in.",
+      code: "ATTENDANCE_CLOCK_IN_DISABLED",
+      message: "Employee clock-in is disabled.",
       statusCode: 409,
     });
   }
 
-  if (existingRecord) {
-    throw new AppError({
-      code: "ATTENDANCE_ALREADY_RECORDED",
-      message: "Attendance is already recorded for today.",
-      statusCode: 409,
+  const scheduledStart = getScheduledTime(
+    now,
+    context.timeZone,
+    context.workdayStart,
+  );
+  const lateAfter = new Date(
+    scheduledStart.getTime() + context.lateGracePeriodMinutes * 60_000,
+  );
+
+  try {
+    const record = await createClockInRecord({
+      clockInAt: now,
+      date: getAttendanceDate(now, context.timeZone),
+      employeeId,
+      status: now.getTime() > lateAfter.getTime() ? "LATE" : "PRESENT",
     });
+
+    return toAttendanceDto(record);
+  } catch (error) {
+    if (isUniqueAttendanceDayError(error)) {
+      throw new AppError({
+        code: "ATTENDANCE_ALREADY_RECORDED",
+        message: "Attendance is already recorded for today.",
+        statusCode: 409,
+      });
+    }
+
+    throw error;
   }
-
-  const record = await createClockInRecord({
-    clockInAt: new Date(),
-    date,
-    employeeId,
-  });
-
-  return toAttendanceDto(record);
 };
 
 export const clockOutSelf = async (auth: AuthContext) => {
   const employeeId = getSelfAttendanceEmployeeId(auth);
-  const date = await getTodayDate();
+  const now = new Date();
+  const context = await getSelfClockActionContext(employeeId);
+  assertSelfClockActionAllowed(context, now);
+  const date = getAttendanceDate(now, context.timeZone);
   const activeRecord = await findActiveAttendanceRecordForDay(employeeId, date);
 
   if (!activeRecord?.clockInAt) {
+    const completedRecord = await findAttendanceRecordForDay(employeeId, date);
+
+    if (completedRecord?.clockInAt && completedRecord.clockOutAt) {
+      throw new AppError({
+        code: "ATTENDANCE_ALREADY_CLOCKED_OUT",
+        message: "Attendance has already been clocked out.",
+        statusCode: 409,
+      });
+    }
+
     throw new AppError({
       code: "ATTENDANCE_NO_ACTIVE_CLOCK_IN",
       message: "You do not have an active clock-in for today.",
@@ -254,16 +267,28 @@ export const clockOutSelf = async (auth: AuthContext) => {
     });
   }
 
-  const clockOutAt = new Date();
+  const clockOutAt = now;
   const totalMinutes =
     calculateTotalMinutes(activeRecord.clockInAt, clockOutAt) ?? 0;
-  const settings = await getAttendanceSettings();
   const record = await updateClockOutRecord({
     clockOutAt,
     id: activeRecord.id,
-    status: getClockOutStatus(totalMinutes, settings.workdayMinutes),
+    status: getClockOutStatus(
+      activeRecord.status,
+      clockOutAt,
+      context,
+      totalMinutes,
+    ),
     totalMinutes,
   });
+
+  if (!record) {
+    throw new AppError({
+      code: "ATTENDANCE_ALREADY_CLOCKED_OUT",
+      message: "Attendance has already been clocked out.",
+      statusCode: 409,
+    });
+  }
 
   return toAttendanceDto(record);
 };

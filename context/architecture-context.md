@@ -121,6 +121,28 @@ days. This keeps each approved request attributable to one annual balance and
 prevents a duration outside the supported product and database bounds from
 reaching Prisma.
 
+### Attendance Self Clock Policy
+
+Employee self clock actions use the company IANA timezone for the attendance
+calendar date, weekday, scheduled start, and scheduled end. The linked employee
+must be active, and the local weekday must be included in
+`weeklyWorkingDays`. `allowEmployeeClockIn` controls new self clock-ins; it does
+not prevent an already clocked-in employee from closing that record.
+
+Automatic self attendance uses the precedence `PARTIAL` over `LATE` over
+`PRESENT`. Clock-in is `LATE` only when it occurs after `workdayStart` plus
+`lateGracePeriodMinutes`. At clock-out, a record is `PARTIAL` when its elapsed
+minutes are below `workdayMinutes` or clock-out occurs before `workdayEnd`;
+otherwise its prior `LATE` state is preserved, and the remaining result is
+`PRESENT`. The MVP supports same-day schedules only; overnight shifts and
+holiday calendars remain out of scope.
+
+The existing unique employee/date constraint is the clock-in concurrency
+boundary and duplicate inserts map to HTTP 409. Clock-out conditionally updates
+only a record whose `clockOutAt` is still null and requires exactly one updated
+row, so stale or concurrent repeats also map to HTTP 409 without overwriting the
+first committed time.
+
 Examples:
 
 - Employees must not be able to access another employee's payslip by guessing an ID.
