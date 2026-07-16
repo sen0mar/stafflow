@@ -53,9 +53,6 @@ jobs:
       - name: Generate Prisma client
         run: npm exec -- prisma generate
 
-      - name: Apply migrations
-        run: npm run db:migrate:deploy
-
       - name: Lint
         run: npm run lint
 
@@ -68,8 +65,14 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Test
-        run: npm run test
+      - name: Unit and non-database tests
+        run: npm run test:unit
 
-      - name: Smoke checks
+      - name: Apply migrations to the fixed CI test database
+        run: npm run db:migrate:deploy
+
+      - name: Guarded database integration tests
+        run: npm run test:integration
+
+      - name: Database smoke checks
         run: npm run smoke

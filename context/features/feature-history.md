@@ -73,6 +73,7 @@ Keep entries short. This file should explain what changed, not become a detailed
 - Feature 66: Audit Section 22 Feature Page Splits — split dashboard, settings, leave, and audit-log pages into feature-local role, form, table, dialog, and presentation components; centralized exact company-timezone and binary file-size duplication; and added focused composition and presentation regressions without changing behavior or API contracts.
 - Feature 67: Audit Section 23 Duplicate Indexes — removed exact redundant AttendanceRecord and Payslip non-unique indexes with a fail-closed Prisma migration, added read-only catalog/query-plan verification and deployment guidance, and preserved unique constraints, offset pagination, dashboard fan-out, and measurement-first search infrastructure.
 - Feature 68: Audit Section 24 Operational Readiness — separated dependency-free liveness from bounded database readiness, added bounded idempotent HTTP/Prisma shutdown, made expected 4xx logging single-source, expanded sensitive-log redaction and production env validation, and aligned Render health configuration with focused regression coverage.
+- Feature 69: Audit Section 25 Risk-Focused Tests — added an auditable P0/P1 regression matrix, restored and verified the clean npm/client test baseline, and reordered CI into fast static/build/unit checks followed by guarded database integration and non-repeating smoke checks.
 
 ## Entry Format
 
