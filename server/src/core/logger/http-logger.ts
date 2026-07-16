@@ -1,4 +1,5 @@
 import pinoHttp from "pino-http";
+import type { Logger } from "pino";
 
 import { env } from "../../config/env";
 import { isExpectedAuthFailure } from "./expected-auth-failure";
@@ -27,8 +28,8 @@ export const redactLegacyInvitationToken = (url: string): string => {
   }
 
   const searchParams = new URLSearchParams(query);
-  const tokenKeys = [...searchParams.keys()].filter(
-    (key) => key.toLowerCase() === "token",
+  const tokenKeys = [...searchParams.keys()].filter((key) =>
+    /(auth|cookie|credential|key|password|secret|signature|token)/i.test(key),
   );
 
   if (tokenKeys.length === 0) {
@@ -57,19 +58,35 @@ export const sanitizeAccessLogRequest = (
   };
 };
 
-export const httpLogger = pinoHttp({
-  autoLogging:
-    env.NODE_ENV === "production"
+export const createHttpLogger = (
+  baseLogger: Logger = logger,
+  enableAutoLogging = env.NODE_ENV === "production",
+) =>
+  pinoHttp({
+    autoLogging: enableAutoLogging
       ? {
           ignore: (request) => isExpectedAuthFailure(request),
         }
       : false,
-  customProps: (_request, response) => ({
-    requestId: getResponseRequestId(response),
-  }),
-  genReqId: (_request, response) => getResponseRequestId(response) ?? "",
-  logger,
-  serializers: {
-    req: sanitizeAccessLogRequest,
-  },
-});
+    customProps: (_request, response) => ({
+      requestId: getResponseRequestId(response),
+    }),
+    customLogLevel: (_request, response, error) => {
+      if (isExpectedAuthFailure(_request) || isExpectedAuthFailure(response)) {
+        return "silent";
+      }
+
+      if (error || response.statusCode >= 500) {
+        return "error";
+      }
+
+      return "info";
+    },
+    genReqId: (_request, response) => getResponseRequestId(response) ?? "",
+    logger: baseLogger,
+    serializers: {
+      req: sanitizeAccessLogRequest,
+    },
+  });
+
+export const httpLogger = createHttpLogger();

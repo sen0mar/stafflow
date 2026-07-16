@@ -3,7 +3,6 @@ import { ZodError } from "zod";
 
 import { env } from "../../config/env";
 import type { ApiError } from "../types/api-response";
-import { isExpectedAuthFailure } from "../logger/expected-auth-failure";
 import { logger } from "../logger/logger";
 import { AppError } from "./app-error";
 
@@ -14,9 +13,6 @@ const formatZodIssues = (error: ZodError) =>
     message: issue.message,
     path: issue.path,
   }));
-
-const shouldLogError = (statusCode: number) =>
-  statusCode >= 500 || env.NODE_ENV === "production";
 
 export const globalErrorHandler: ErrorRequestHandler = (
   error,
@@ -43,10 +39,10 @@ export const globalErrorHandler: ErrorRequestHandler = (
       ? error.details
       : undefined;
 
-  if (shouldLogError(statusCode) && !isExpectedAuthFailure(response)) {
-    logger[statusCode >= 500 ? "error" : "warn"](
+  if (statusCode >= 500) {
+    logger.error(
       {
-        ...(statusCode >= 500 ? { err: error } : { code }),
+        err: error,
         requestId: response.locals.requestId,
         statusCode,
       },

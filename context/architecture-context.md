@@ -317,8 +317,20 @@ Recommended domain setup:
 - Activate and verify the daily Render auth-table maintenance cron declared in `render.yaml` by following `deployment/auth-table-maintenance.md`; repository configuration does not prove that the external cron service or its database secret is active.
 - Activate and verify the daily Render payslip-storage maintenance cron declared in `render.yaml` by following `deployment/payslip-storage-maintenance.md`; it requires private R2 credentials and retries only soft-deleted payslip objects.
 - Keep the baseline Vercel browser headers aligned in both Vercel configurations. CSP remains deployment-specific until the concrete frontend, API, and R2 preview origins are known; follow `deployment/browser-security-headers.md` rather than shipping guessed or wildcard directives.
+- Keep Render's platform health check on dependency-free `/health`. Use the
+  bounded database-backed `/ready` contract for dependency-aware monitoring or
+  traffic readiness without turning database incidents into application restart
+  loops. Vercel serves only the frontend and does not own API health routes.
+- On `SIGTERM` or `SIGINT`, stop accepting HTTP connections, drain or force-close
+  them, and attempt exactly one Prisma disconnect inside the documented
+  10-second total shutdown budget. Bootstrap imports do not install signal
+  listeners, and registered listeners are removed when the server closes.
 
 Environment variables must be validated at server startup. Missing required variables should fail fast.
+
+Production `CLIENT_URL` must use HTTPS and `PORT` must be an integer from 1
+through 65535. Because upload quotas and automated cleanup are not implemented,
+startup fails closed whenever the demo-upload enablement flag is true.
 
 Expected backend environment groups:
 
@@ -380,6 +392,13 @@ Operational risks:
 - Untrusted request IDs reach logs or response headers; incoming IDs must be 1-64 ASCII characters matching `[A-Za-z0-9][A-Za-z0-9._:-]*`, otherwise the API generates a UUID.
 - Technical logs and audit logs are treated as the same thing.
 - Environment variables are missing or inconsistent across Vercel, Render, Neon, and R2.
+- Liveness checks depend on the database and create restart loops during a
+  recoverable dependency incident, or readiness checks expose connection errors.
+- Shutdown accepts new work, waits without a bound, skips Prisma disconnect, or
+  installs duplicate signal listeners in imports and tests.
+- Expected validation, authentication, authorization, or not-found responses
+  produce warning duplicates in addition to access logs, or technical logs
+  serialize sensitive headers, request fields, files, object keys, or signed URLs.
 
 ## Invariants
 
@@ -405,3 +424,10 @@ Operational risks:
 20. Payslip multipart parsing and display filenames are bounded; private R2 object keys and signed URLs never enter technical logs, and soft-deleted object removal has an idempotent retry path.
 21. Invitation tokens are fragment-based for new links, captured only in component memory, and synchronously removed from browser-visible URLs; legacy query tokens are scrubbed and redacted from access logs, and sensitive auth/CSRF and signed-download URL responses are never cacheable.
 22. Generic scalar inputs are bounded at API schemas before service or repository work; pagination pages are safe integers no greater than 10,000, and only short allowlisted ASCII request IDs may be reflected.
+23. `/health` is dependency-free liveness; `/ready` is a bounded, non-sensitive
+    database readiness contract. Graceful HTTP and Prisma shutdown is
+    idempotent and bounded across `SIGTERM` and `SIGINT`.
+24. Expected 4xx responses emit one info-level access log unless replaced by one
+    explicit security warning; 5xx responses log at error level, request IDs are
+    retained, and sensitive headers, query/body fields, files, object keys, and
+    private URLs are redacted.

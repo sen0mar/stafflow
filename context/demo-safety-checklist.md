@@ -60,7 +60,10 @@ Frontend route guards are only UX. Backend RBAC and ownership checks are the sec
 
 ## Provider Monitoring
 
-- Render logs: check backend deploy health, request failures, 5xx spikes, upload failures, and redaction behavior.
+- Render health: keep the platform check on dependency-free `/health`; monitor
+  `/ready` separately for bounded database readiness without restart loops.
+- Render logs: check backend deploy health, request failures, 5xx spikes, upload
+  failures, graceful shutdown completion/timeouts, and redaction behavior.
 - Vercel deployment logs: check frontend build/deploy status, runtime errors, and API origin configuration.
 - Neon usage monitoring: check connection, storage, compute, and query usage for abnormal public-demo activity.
 - Cloudflare R2 usage checks: check object count, storage growth, and request volume; unexpected growth means disable uploads and rotate credentials if needed.

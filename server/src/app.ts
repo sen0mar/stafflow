@@ -10,7 +10,12 @@ import { httpLogger } from "./core/logger/http-logger";
 import { requestIdMiddleware } from "./core/middleware/request-id.middleware";
 import { createRoutes } from "./routes";
 
-export const createApp = (): Express => {
+interface AppDependencies {
+  checkDatabase?: () => Promise<void>;
+  readinessTimeoutMs?: number;
+}
+
+export const createApp = (dependencies: AppDependencies = {}): Express => {
   const app = express();
 
   if (env.NODE_ENV === "production") {
@@ -24,7 +29,7 @@ export const createApp = (): Express => {
   app.use(cookieParser());
   app.use(express.json());
 
-  app.use(createRoutes());
+  app.use(createRoutes(dependencies));
   app.use(notFoundHandler);
   app.use(globalErrorHandler);
 

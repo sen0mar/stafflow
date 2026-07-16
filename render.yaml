@@ -1,4 +1,31 @@
 services:
+  - type: web
+    name: stafflow-api
+    runtime: node
+    plan: starter
+    buildCommand: npm ci && npm exec -- prisma generate && npm run build:server
+    startCommand: npm --prefix server start
+    healthCheckPath: /health
+    maxShutdownDelaySeconds: 10
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: CLIENT_URL
+        sync: false
+      - key: DATABASE_URL
+        sync: false
+      - key: DEMO_MODE
+        value: "true"
+      - key: DEMO_UPLOADS_ENABLED
+        value: "false"
+      - key: R2_ACCESS_KEY_ID
+        sync: false
+      - key: R2_ACCOUNT_ID
+        sync: false
+      - key: R2_BUCKET_NAME
+        sync: false
+      - key: R2_SECRET_ACCESS_KEY
+        sync: false
   - type: cron
     name: stafflow-auth-table-maintenance
     runtime: node
