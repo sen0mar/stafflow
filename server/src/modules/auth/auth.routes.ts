@@ -4,6 +4,7 @@ import { attachAuth, requireAuth } from "../../core/auth/auth.middleware";
 import { requireCsrf } from "../../core/auth/csrf.service";
 import { requireDemoMutationAllowed } from "../../core/security/demo-read-only.middleware";
 import { requireJson } from "../../core/security/require-json.middleware";
+import { preventSensitiveResponseCaching } from "../../core/security/sensitive-response-cache.middleware";
 import {
   acceptInvitationController,
   authConfigController,
@@ -15,6 +16,8 @@ import {
 
 export const createAuthRoutes = (): Router => {
   const router = Router();
+
+  router.use(preventSensitiveResponseCaching);
 
   router.get("/config", authConfigController);
   router.post("/login", requireJson, loginController);

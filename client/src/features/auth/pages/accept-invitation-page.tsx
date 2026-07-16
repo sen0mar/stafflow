@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { ArrowLeft, CheckCircle2, KeyRound, Loader2, LogIn } from 'lucide-react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
@@ -10,6 +10,7 @@ import { ThemeToggle } from '@/shared/components/ui/theme-toggle'
 import { getSafeErrorMessage } from '@/shared/lib/api-errors'
 import { useAcceptInvitation } from '../hooks/use-accept-invitation'
 import { useDemoMode } from '../hooks/use-auth-config'
+import { captureAndScrubInvitationToken } from '../lib/invitation-token'
 
 const minPasswordLength = 12
 const maxBcryptPasswordBytes = 72
@@ -18,13 +19,10 @@ const getUtf8ByteLength = (value: string) => new Blob([value]).size
 
 export const AcceptInvitationPage = () => {
   const location = useLocation()
+  const [token] = useState(() => captureAndScrubInvitationToken(location))
   const navigate = useNavigate()
   const acceptInvitation = useAcceptInvitation()
   const demoMode = useDemoMode()
-  const token = useMemo(
-    () => new URLSearchParams(location.search).get('token')?.trim() ?? '',
-    [location.search],
-  )
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [isComplete, setIsComplete] = useState(false)

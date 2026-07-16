@@ -63,6 +63,7 @@ Keep entries short. This file should explain what changed, not become a detailed
 - Feature 56: Date-Only Contracts — migrated hire, termination, attendance, and leave calendar fields to defensive PostgreSQL `date` columns; standardized `YYYY-MM-DD` API/client handling; centralized company-day logic; and added timezone, DST, and contract regressions while preserving attendance clock behavior.
 - Feature 57: Transactional Audits — made department, employee update/status/self-profile, and leave-type mutations atomic with their audit rows; kept account-status session revocation in the same employee transaction; and added injected audit-failure rollback coverage for every converted path.
 - Feature 58: Payslip Storage Hardening — bounded multipart parsing and sanitized display filenames, reused one lazy private R2 client, replaced key-bearing failure logs with safe request-scoped classifications, and added idempotent scheduled recovery for soft-deleted objects with focused mock coverage.
+- Feature 59: Secret Cache and Referrer Hardening — moved invitation tokens to fragment links with synchronous fragment/legacy-query scrubbing, made auth and signed-download responses non-cacheable, redacted access-log URL/referrer secrets, and added baseline Vercel browser headers while deferring CSP to verified deployment origins.
 
 ## Entry Format
 

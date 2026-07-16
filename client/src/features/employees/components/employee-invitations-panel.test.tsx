@@ -59,14 +59,14 @@ describe('EmployeeInvitationsPanel', () => {
         copiedEmployeeId="employee-1"
         setupUrlsByEmployeeId={{
           'employee-1':
-            'http://localhost:5173/accept-invitation?token=invite-token',
+            'http://localhost:5173/accept-invitation#token=invite-token',
         }}
       />,
     )
 
     expect(
       screen.getByText(
-        'http://localhost:5173/accept-invitation?token=invite-token',
+        'http://localhost:5173/accept-invitation#token=invite-token',
       ),
     ).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Copied' })).toBeInTheDocument()

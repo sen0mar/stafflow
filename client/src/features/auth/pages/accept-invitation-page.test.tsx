@@ -26,7 +26,7 @@ vi.mock('../hooks/use-auth-config', () => ({
 const asAcceptInvitationResult = (value: unknown) =>
   value as ReturnType<typeof useAcceptInvitation>
 
-const renderPage = (path = '/accept-invitation?token=invite-token') =>
+const renderPage = (path = '/accept-invitation#token=invite-token') =>
   render(
     <MemoryRouter initialEntries={[path]}>
       <AcceptInvitationPage />
@@ -34,8 +34,13 @@ const renderPage = (path = '/accept-invitation?token=invite-token') =>
   )
 
 describe('AcceptInvitationPage', () => {
+  let replaceStateSpy: ReturnType<typeof vi.spyOn>
+
   beforeEach(() => {
     vi.clearAllMocks()
+    replaceStateSpy = vi
+      .spyOn(window.history, 'replaceState')
+      .mockImplementation(() => undefined)
     vi.mocked(useDemoMode).mockReturnValue(false)
     vi.mocked(useAcceptInvitation).mockReturnValue(
       asAcceptInvitationResult({
@@ -43,6 +48,10 @@ describe('AcceptInvitationPage', () => {
         mutate,
       }),
     )
+  })
+
+  afterEach(() => {
+    replaceStateSpy.mockRestore()
   })
 
   it('shows an invalid invitation state when the token is missing', () => {
@@ -82,8 +91,14 @@ describe('AcceptInvitationPage', () => {
     expect(toast.error).toHaveBeenCalledWith('Passwords do not match.')
   })
 
-  it('accepts the invitation with the token and password', () => {
-    renderPage('/accept-invitation?token=invite-token%2Bencoded')
+  it('captures and scrubs a fragment token before accepting the invitation', () => {
+    renderPage('/accept-invitation?source=admin#token=invite-token%2Bencoded')
+
+    expect(replaceStateSpy).toHaveBeenCalledWith(
+      window.history.state,
+      '',
+      '/accept-invitation?source=admin',
+    )
 
     fireEvent.change(screen.getByLabelText('New password'), {
       target: { value: 'long-enough-password' },
@@ -102,6 +117,35 @@ describe('AcceptInvitationPage', () => {
         onError: expect.any(Function),
         onSuccess: expect.any(Function),
       }),
+    )
+    expect(replaceStateSpy.mock.invocationCallOrder[0]).toBeLessThan(
+      mutate.mock.invocationCallOrder[0],
+    )
+  })
+
+  it('captures and scrubs a legacy query token before accepting it', () => {
+    renderPage('/accept-invitation?token=legacy%2Btoken&source=email')
+
+    expect(replaceStateSpy).toHaveBeenCalledWith(
+      window.history.state,
+      '',
+      '/accept-invitation?source=email',
+    )
+
+    fireEvent.change(screen.getByLabelText('New password'), {
+      target: { value: 'long-enough-password' },
+    })
+    fireEvent.change(screen.getByLabelText('Confirm password'), {
+      target: { value: 'long-enough-password' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'Set password' }))
+
+    expect(mutate).toHaveBeenCalledWith(
+      expect.objectContaining({ token: 'legacy+token' }),
+      expect.any(Object),
+    )
+    expect(replaceStateSpy.mock.invocationCallOrder[0]).toBeLessThan(
+      mutate.mock.invocationCallOrder[0],
     )
   })
 })

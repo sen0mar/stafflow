@@ -89,6 +89,7 @@ Auth model:
 - Retained credential transitions are atomic database operations. Password changes compare-and-set the verified current hash before updating it, revoking every active session, and writing the audit record in one Prisma transaction. Invitation acceptance conditionally consumes one unexpired, unused token; requires any matching account to remain `INVITED` with the invitation's expected identity and role; and activates the account, revokes every session, and writes the audit record in the same transaction.
 - Successful login persists the hashed session and the non-demo `lastLoginAt` update in one Prisma transaction. Demo login keeps `lastLoginAt` unchanged and serializes per-user session creation/pruning so concurrent shared-account logins cannot exceed the 100-row cap.
 - Terminal auth rows have seven-day retention with strict cutoff semantics: maintenance deletes sessions whose `expiresAt` or `revokedAt` is older than the cutoff, invitation tokens whose `expiresAt` or `acceptedAt` is older, and retained legacy password-reset tokens whose `expiresAt` or `usedAt` is older. One atomic daily run uses one cutoff, preserves live/current/boundary rows, and is safe to retry.
+- Newly generated invitation links carry the raw token only in the URL fragment. The acceptance page synchronously captures the fragment token into component memory and replaces browser history with the token-free path before any token-bearing API request; legacy query-token links remain transition-compatible but receive the same immediate scrub. Auth/session/CSRF responses and signed-payslip-URL responses use `Cache-Control: no-store`, and technical access logs redact legacy query tokens and exclude referrer headers.
 
 ### Public Demo Mutation Policy
 
@@ -305,6 +306,7 @@ Recommended domain setup:
 - Activate and verify the provider-level public-auth rate-limit rule in `deployment/public-auth-edge-throttling.md`; repository code does not imply that external Cloudflare state is active.
 - Activate and verify the daily Render auth-table maintenance cron declared in `render.yaml` by following `deployment/auth-table-maintenance.md`; repository configuration does not prove that the external cron service or its database secret is active.
 - Activate and verify the daily Render payslip-storage maintenance cron declared in `render.yaml` by following `deployment/payslip-storage-maintenance.md`; it requires private R2 credentials and retries only soft-deleted payslip objects.
+- Keep the baseline Vercel browser headers aligned in both Vercel configurations. CSP remains deployment-specific until the concrete frontend, API, and R2 preview origins are known; follow `deployment/browser-security-headers.md` rather than shipping guessed or wildcard directives.
 
 Environment variables must be validated at server startup. Missing required variables should fail fast.
 
@@ -329,6 +331,7 @@ Auth/session risks:
 - Session tokens are stored raw instead of hashed.
 - Password hashes, cookies, or reset tokens are accidentally logged.
 - Password reset and invitation tokens are stored unsafely.
+- Invitation tokens remain in query-string history or leak through referrer/request access logs, or sensitive auth and signed-download responses are cached.
 
 RBAC/resource-access risks:
 
@@ -389,3 +392,4 @@ Operational risks:
 18. Calendar-only fields use PostgreSQL `date` and `YYYY-MM-DD` API contracts; timestamp instants remain ISO strings, and browsers never timezone-convert date-only values.
 19. Every audit-worthy database mutation and its audit row use the same Prisma transaction client; related session revocation is part of that transaction.
 20. Payslip multipart parsing and display filenames are bounded; private R2 object keys and signed URLs never enter technical logs, and soft-deleted object removal has an idempotent retry path.
+21. Invitation tokens are fragment-based for new links, captured only in component memory, and synchronously removed from browser-visible URLs; legacy query tokens are scrubbed and redacted from access logs, and sensitive auth/CSRF and signed-download URL responses are never cacheable.

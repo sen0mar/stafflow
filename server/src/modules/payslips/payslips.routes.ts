@@ -7,6 +7,7 @@ import { requireCsrf } from "../../core/auth/csrf.service";
 import { requirePermission } from "../../core/auth/permissions";
 import { AppError } from "../../core/errors/app-error";
 import { requireDemoMutationAllowed } from "../../core/security/demo-read-only.middleware";
+import { preventSensitiveResponseCaching } from "../../core/security/sensitive-response-cache.middleware";
 import {
   createPayslipController,
   deletePayslipController,
@@ -85,6 +86,7 @@ export const createPayslipRoutes = (): Router => {
   );
   router.get(
     "/:id/download",
+    preventSensitiveResponseCaching,
     attachAuth,
     requireAuth,
     downloadPayslipController,
