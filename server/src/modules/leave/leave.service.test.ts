@@ -121,7 +121,7 @@ describe("leave.service", () => {
       }),
     );
 
-    await createSelfLeaveRequest(auth, {
+    const result = await createSelfLeaveRequest(auth, {
       endDate: "2026-12-31",
       leaveTypeId: "leave-type-1",
       reason: null,
@@ -135,6 +135,10 @@ describe("leave.service", () => {
         totalDays: 1,
       }),
     );
+    expect(result).toMatchObject({
+      endDate: "2026-12-31",
+      startDate: "2026-12-31",
+    });
   });
 
   it("rejects cross-year requests before repository access", async () => {

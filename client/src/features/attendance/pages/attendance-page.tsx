@@ -38,16 +38,6 @@ type StatusFilter = 'all' | AttendanceStatus
 const getStatusFilter = (status: StatusFilter) =>
   status === 'all' ? undefined : status
 
-const toDateFilter = (value: string, endOfDay = false) => {
-  if (!value) {
-    return undefined
-  }
-
-  const date = new Date(`${value}T${endOfDay ? '23:59:59' : '00:00:00'}`)
-
-  return date.toISOString()
-}
-
 const EmptyAttendance = ({ isAdmin }: { isAdmin?: boolean }) => (
   <EmptyState
     icon={CalendarCheck}
@@ -194,11 +184,11 @@ const AdminAttendancePage = () => {
   const attendanceQuery = useAttendanceRecords({
     departmentId: departmentId === 'all' ? undefined : departmentId,
     employeeId: employeeId === 'all' ? undefined : employeeId,
-    from: toDateFilter(from),
+    from: from || undefined,
     limit: pageSize,
     page,
     status: getStatusFilter(status),
-    to: toDateFilter(to, true),
+    to: to || undefined,
   })
   const employeesQuery = useEmployees({
     limit: 100,

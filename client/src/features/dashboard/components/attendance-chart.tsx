@@ -1,5 +1,5 @@
 import type { AdminAttendanceOverviewPoint } from '../api/dashboard.api'
-import { formatDate } from '@/shared/lib/dates'
+import { formatDateOnly } from '@/shared/lib/dates'
 
 interface ChartPoint {
   x: number
@@ -136,9 +136,7 @@ export const AttendanceChart = ({ data }: AttendanceChartProps) => {
           }}
         >
           {chartData.map((point) => (
-            <span key={point.date}>
-              {formatDate(`${point.date}T00:00:00`, 'MMM d')}
-            </span>
+            <span key={point.date}>{formatDateOnly(point.date, 'MMM d')}</span>
           ))}
         </div>
       </div>

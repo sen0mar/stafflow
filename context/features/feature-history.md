@@ -60,6 +60,7 @@ Keep entries short. This file should explain what changed, not become a detailed
 - Feature 53: Leave Concurrency and Balance Integrity — moved leave overlap and status checks into conditional serializable transactions with bounded retries, made competing transitions commit exclusively, preserved shared balance updates and atomic audit writes, and added guarded PostgreSQL race coverage.
 - Feature 54: Leave Validation and Inactive Filtering — fixed literal active/inactive leave-type filtering, limited leave requests to 365 inclusive calendar days within one year before persistence, documented calendar-day balance behavior, mirrored the policy in the employee form, and added boundary regressions without changing transactional review semantics.
 - Feature 55: Attendance Clock Integrity — enforced active employment and attendance settings in company-local self clock actions, added documented partial/late precedence with DST-safe schedule handling, and made duplicate clock-ins and stale clock-outs deterministic under concurrency.
+- Feature 56: Date-Only Contracts — migrated hire, termination, attendance, and leave calendar fields to defensive PostgreSQL `date` columns; standardized `YYYY-MM-DD` API/client handling; centralized company-day logic; and added timezone, DST, and contract regressions while preserving attendance clock behavior.
 
 ## Entry Format
 

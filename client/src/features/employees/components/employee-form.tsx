@@ -46,9 +46,6 @@ interface EmployeeFormProps {
 
 const unassignedDepartmentValue = 'unassigned'
 
-const getDateInputValue = (value?: string | null) =>
-  value ? value.slice(0, 10) : ''
-
 const getDefaultValues = (
   employee?: Employee | null,
 ): EmployeeFormValues | CreateEmployeeFormValues => ({
@@ -56,7 +53,7 @@ const getDefaultValues = (
   email: employee?.account?.email ?? '',
   employeeCode: employee?.employeeCode ?? '',
   firstName: employee?.firstName ?? '',
-  hireDate: getDateInputValue(employee?.hireDate),
+  hireDate: employee?.hireDate ?? '',
   jobTitle: employee?.jobTitle ?? '',
   lastName: employee?.lastName ?? '',
   phone: employee?.phone ?? '',

@@ -4,7 +4,7 @@ import {
   type DataTableColumn,
 } from '@/shared/components/data-table/data-table'
 import { Button } from '@/shared/components/ui/button'
-import { formatDate } from '@/shared/lib/dates'
+import { formatDate, formatDateOnly } from '@/shared/lib/dates'
 import type { AttendanceRecord } from '../api/attendance.api'
 import { AttendanceStatusBadge } from './attendance-status-badge'
 import { formatMinutes } from './attendance-formatters'
@@ -44,7 +44,7 @@ export const AttendanceHistoryTable = ({
       className: 'font-medium text-primary',
       header: 'Date',
       id: 'date',
-      render: (record) => formatDate(record.date, 'MMM d, yyyy'),
+      render: (record) => formatDateOnly(record.date, 'MMM d, yyyy'),
     },
     {
       header: 'Clock In',

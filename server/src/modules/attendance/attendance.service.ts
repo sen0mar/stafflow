@@ -22,10 +22,11 @@ import {
   type SelfClockActionContext,
 } from "./attendance.repository";
 import {
-  getAttendanceDate,
+  getCompanyDate,
   getScheduledTime,
   isWorkingDay,
-} from "./attendance-time";
+} from "../../core/utils/company-day";
+import { formatDateOnly } from "../../core/utils/date-only";
 import { getSelfAttendanceEmployeeId } from "./attendance.policy";
 import type {
   ListAttendanceInput,
@@ -47,7 +48,7 @@ const getFullName = (firstName: string, lastName: string) =>
 const getTodayDate = async () => {
   const timeZone = await getCompanyTimezone();
 
-  return getAttendanceDate(new Date(), timeZone);
+  return getCompanyDate(new Date(), timeZone);
 };
 
 const calculateTotalMinutes = (
@@ -115,7 +116,7 @@ const toAttendanceDto = (record: AttendanceRecord) => ({
   clockInAt: toIso(record.clockInAt),
   clockOutAt: toIso(record.clockOutAt),
   createdAt: record.createdAt.toISOString(),
-  date: record.date.toISOString(),
+  date: formatDateOnly(record.date),
   employee: {
     department: record.employee.department,
     employeeCode: record.employee.employeeCode,
@@ -222,7 +223,7 @@ export const clockInSelf = async (auth: AuthContext) => {
   try {
     const record = await createClockInRecord({
       clockInAt: now,
-      date: getAttendanceDate(now, context.timeZone),
+      date: getCompanyDate(now, context.timeZone),
       employeeId,
       status: now.getTime() > lateAfter.getTime() ? "LATE" : "PRESENT",
     });
@@ -246,7 +247,7 @@ export const clockOutSelf = async (auth: AuthContext) => {
   const now = new Date();
   const context = await getSelfClockActionContext(employeeId);
   assertSelfClockActionAllowed(context, now);
-  const date = getAttendanceDate(now, context.timeZone);
+  const date = getCompanyDate(now, context.timeZone);
   const activeRecord = await findActiveAttendanceRecordForDay(employeeId, date);
 
   if (!activeRecord?.clockInAt) {

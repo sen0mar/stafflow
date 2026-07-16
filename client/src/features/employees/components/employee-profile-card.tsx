@@ -5,7 +5,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/shared/components/ui/card'
-import { formatDate } from '@/shared/lib/dates'
+import { formatDate, formatDateOnly } from '@/shared/lib/dates'
 import type { Employee } from '../api/employees.api'
 import { EmployeeStatusBadge } from './employee-status-badge'
 
@@ -67,7 +67,7 @@ export const EmployeeProfileCard = ({ employee }: EmployeeProfileCardProps) => (
           </p>
           <p className="mt-1 font-medium text-primary">
             {employee.hireDate
-              ? formatDate(employee.hireDate, 'MMM d, yyyy')
+              ? formatDateOnly(employee.hireDate, 'MMM d, yyyy')
               : 'Not provided'}
           </p>
         </div>

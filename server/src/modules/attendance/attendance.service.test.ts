@@ -17,6 +17,7 @@ import {
   clockInSelf,
   clockOutSelf,
   correctAttendance,
+  getSelfTodayAttendance,
 } from "./attendance.service";
 
 vi.mock("./attendance.repository", () => ({
@@ -91,6 +92,14 @@ describe("attendance.service", () => {
 
   afterEach(() => {
     vi.useRealTimers();
+  });
+
+  it("returns the attendance calendar date as YYYY-MM-DD", async () => {
+    vi.mocked(findAttendanceRecordForDay).mockResolvedValue(attendanceRecord());
+
+    await expect(getSelfTodayAttendance(auth)).resolves.toMatchObject({
+      date: "2026-05-13",
+    });
   });
 
   it("maps the unique employee/day clock-in conflict to 409", async () => {

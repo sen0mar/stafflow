@@ -21,7 +21,11 @@ import {
 } from '@/shared/components/ui/dropdown-menu'
 import { PageHeader } from '@/shared/components/layout/page-header'
 import { QueryStateError } from '@/shared/components/layout/page-state'
-import { formatDate } from '@/shared/lib/dates'
+import {
+  differenceFromTodayInCalendarDays,
+  formatDate,
+  formatDateOnly,
+} from '@/shared/lib/dates'
 import { useCurrentUser } from '@/features/auth/hooks/use-current-user'
 import { AttendanceChart } from '../components/attendance-chart'
 import { EmptyState } from '../components/empty-state'
@@ -78,8 +82,8 @@ const formatStatus = (status: string) =>
     .join(' ')
 
 const formatDateRange = (startDate: string, endDate: string) => {
-  const start = formatDate(startDate, 'MMM d')
-  const end = formatDate(endDate, 'MMM d')
+  const start = formatDateOnly(startDate, 'MMM d')
+  const end = formatDateOnly(endDate, 'MMM d')
 
   return start === end ? start : `${start} - ${end}`
 }
@@ -103,22 +107,7 @@ const formatFileSize = (bytes: number) => {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
 }
 
-const getDaysUntil = (date: string) => {
-  const start = new Date(date)
-  const today = new Date()
-  const startOfLeaveDate = new Date(
-    start.getFullYear(),
-    start.getMonth(),
-    start.getDate(),
-  ).getTime()
-  const startOfToday = new Date(
-    today.getFullYear(),
-    today.getMonth(),
-    today.getDate(),
-  ).getTime()
-
-  return Math.ceil((startOfLeaveDate - startOfToday) / 86_400_000)
-}
+const getDaysUntil = (date: string) => differenceFromTodayInCalendarDays(date)
 
 const getLeavePriority = (startDate: string) => {
   const daysUntil = getDaysUntil(startDate)
@@ -176,7 +165,7 @@ const AttendanceRecordPreview = ({
   <div className="flex items-center justify-between gap-3 rounded-xl border border-subtle bg-inset p-3">
     <div>
       <p className="text-sm font-semibold text-primary">
-        {formatDate(record.date, 'MMM d, yyyy')}
+        {formatDateOnly(record.date, 'MMM d, yyyy')}
       </p>
       <p className="mt-1 text-xs text-muted">
         {formatMinutes(record.totalMinutes)}
@@ -196,8 +185,7 @@ const AdminDashboard = () => {
         (first, second) =>
           new Date(first.createdAt).getTime() -
             new Date(second.createdAt).getTime() ||
-          new Date(first.startDate).getTime() -
-            new Date(second.startDate).getTime(),
+          first.startDate.localeCompare(second.startDate),
       )
     : []
   const attendanceRate =
@@ -714,7 +702,7 @@ const EmployeeDashboard = () => {
                   <span className="text-muted">Hire date</span>
                   <span className="font-medium text-primary">
                     {summary.profileSummary.hireDate
-                      ? formatDate(
+                      ? formatDateOnly(
                           summary.profileSummary.hireDate,
                           'MMM d, yyyy',
                         )

@@ -7,6 +7,7 @@ import {
   getPaginationParams,
   toPaginatedResult,
 } from "../../core/pagination/pagination";
+import { formatDateOnly, parseDateOnly } from "../../core/utils/date-only";
 import { MAX_LEAVE_REQUEST_CALENDAR_DAYS } from "./leave.constants";
 import { getSelfLeaveEmployeeId } from "./leave.policy";
 import {
@@ -49,12 +50,6 @@ interface AuditContext {
 
 const millisecondsPerDay = 86_400_000;
 
-const atUtcMidnight = (value: string) => {
-  const [year, month, day] = value.split("-").map(Number);
-
-  return new Date(Date.UTC(year, month - 1, day));
-};
-
 const calculateTotalDays = (startDate: Date, endDate: Date) =>
   Math.floor((endDate.getTime() - startDate.getTime()) / millisecondsPerDay) +
   1;
@@ -90,7 +85,7 @@ const toLeaveRequestDto = (leaveRequest: LeaveRequestRecord) => ({
     id: leaveRequest.employee.id,
   },
   employeeId: leaveRequest.employeeId,
-  endDate: leaveRequest.endDate.toISOString(),
+  endDate: formatDateOnly(leaveRequest.endDate),
   id: leaveRequest.id,
   leaveType: leaveRequest.leaveType,
   leaveTypeId: leaveRequest.leaveTypeId,
@@ -99,7 +94,7 @@ const toLeaveRequestDto = (leaveRequest: LeaveRequestRecord) => ({
   reviewedBy: leaveRequest.reviewedBy,
   reviewedById: leaveRequest.reviewedById,
   reviewNote: leaveRequest.reviewNote,
-  startDate: leaveRequest.startDate.toISOString(),
+  startDate: formatDateOnly(leaveRequest.startDate),
   status: leaveRequest.status,
   totalDays: Number(leaveRequest.totalDays),
   updatedAt: leaveRequest.updatedAt.toISOString(),
@@ -157,8 +152,8 @@ const assertUniqueLeaveTypeName = async (name: string, currentId?: string) => {
 };
 
 const assertDateRange = (input: CreateLeaveRequestInput) => {
-  const startDate = atUtcMidnight(input.startDate);
-  const endDate = atUtcMidnight(input.endDate);
+  const startDate = parseDateOnly(input.startDate);
+  const endDate = parseDateOnly(input.endDate);
 
   if (endDate < startDate) {
     throw new AppError({

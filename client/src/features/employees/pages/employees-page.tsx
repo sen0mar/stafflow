@@ -43,8 +43,6 @@ const allValue = 'all'
 
 type StatusFilter = EmployeeStatus | typeof allValue
 
-const toIsoDate = (value?: string) =>
-  value ? new Date(`${value}T00:00:00.000Z`).toISOString() : null
 const getNullableValue = (value?: string | null) =>
   value && value.trim() ? value.trim() : null
 const getDepartmentValue = (value?: string | null) =>
@@ -120,7 +118,7 @@ export const EmployeesPage = () => {
       departmentId: getDepartmentValue(values.departmentId),
       employeeCode: values.employeeCode.trim(),
       firstName: values.firstName.trim(),
-      hireDate: toIsoDate(values.hireDate),
+      hireDate: values.hireDate || null,
       jobTitle: getNullableValue(values.jobTitle),
       lastName: values.lastName.trim(),
       phone: getNullableValue(values.phone),

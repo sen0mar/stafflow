@@ -36,7 +36,7 @@ export const createEmployeeSchema = z.object({
     email: z.string().trim().email().toLowerCase(),
     employeeCode: z.string().trim().min(1).max(40),
     firstName: z.string().trim().min(1).max(80),
-    hireDate: z.string().datetime().optional().nullable(),
+    hireDate: z.string().date().optional().nullable(),
     jobTitle: optionalTrimmedString,
     lastName: z.string().trim().min(1).max(80),
     phone: optionalTrimmedString,
@@ -49,11 +49,11 @@ export const updateEmployeeSchema = z.object({
       departmentId: optionalTrimmedString,
       employeeCode: z.string().trim().min(1).max(40).optional(),
       firstName: z.string().trim().min(1).max(80).optional(),
-      hireDate: z.string().datetime().optional().nullable(),
+      hireDate: z.string().date().optional().nullable(),
       jobTitle: optionalTrimmedString,
       lastName: z.string().trim().min(1).max(80).optional(),
       phone: optionalTrimmedString,
-      terminationDate: z.string().datetime().optional().nullable(),
+      terminationDate: z.string().date().optional().nullable(),
     })
     .refine((value) => Object.keys(value).length > 0, {
       message: "At least one employee field is required.",

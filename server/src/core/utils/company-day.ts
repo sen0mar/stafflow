@@ -1,3 +1,5 @@
+import { addDateOnlyDays, formatDateOnly, parseDateOnly } from "./date-only";
+
 interface ZonedDateTime {
   day: number;
   hour: number;
@@ -75,24 +77,40 @@ const zonedDateTimeToUtc = (zonedDateTime: ZonedDateTime, timeZone: string) => {
   return candidate;
 };
 
+export const getCompanyDateKey = (date: Date, timeZone: string) => {
+  const zoned = getZonedDateTime(date, timeZone);
+
+  return formatDateOnly(
+    new Date(Date.UTC(zoned.year, zoned.month - 1, zoned.day)),
+  );
+};
+
+export const getCompanyDate = (date: Date, timeZone: string) =>
+  parseDateOnly(getCompanyDateKey(date, timeZone));
+
+export const getCompanyDateRange = (
+  date: Date,
+  timeZone: string,
+  dayCount: number,
+) => {
+  const endDate = getCompanyDateKey(date, timeZone);
+  const dateKeys = Array.from({ length: dayCount }, (_item, index) =>
+    addDateOnlyDays(endDate, index - dayCount + 1),
+  );
+
+  return {
+    dateKeys,
+    endExclusive: parseDateOnly(addDateOnlyDays(endDate, 1)),
+    start: parseDateOnly(dateKeys[0]),
+    today: parseDateOnly(endDate),
+    todayKey: endDate,
+  };
+};
+
 const getTimeParts = (time: string) => {
   const [hour, minute] = time.split(":").map(Number);
 
   return { hour, minute };
-};
-
-export const getAttendanceDate = (date: Date, timeZone: string) => {
-  const zoned = getZonedDateTime(date, timeZone);
-
-  return zonedDateTimeToUtc(
-    {
-      ...zoned,
-      hour: 0,
-      minute: 0,
-      second: 0,
-    },
-    timeZone,
-  );
 };
 
 export const getScheduledTime = (

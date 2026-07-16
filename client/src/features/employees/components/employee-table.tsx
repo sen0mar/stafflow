@@ -11,7 +11,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/shared/components/ui/dropdown-menu'
-import { formatDate } from '@/shared/lib/dates'
+import { formatDateOnly } from '@/shared/lib/dates'
 import type { Employee } from '../api/employees.api'
 import { EmployeeStatusBadge } from './employee-status-badge'
 
@@ -71,7 +71,7 @@ export const EmployeeTable = ({
       id: 'hireDate',
       render: (employee) =>
         employee.hireDate
-          ? formatDate(employee.hireDate, 'MMM d, yyyy')
+          ? formatDateOnly(employee.hireDate, 'MMM d, yyyy')
           : 'Not provided',
     },
     {

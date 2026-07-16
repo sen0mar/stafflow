@@ -1,14 +1,9 @@
 import { z } from 'zod'
+import { parseDateOnly } from '@/shared/lib/dates'
 
 export const MAX_LEAVE_REQUEST_CALENDAR_DAYS = 365
 
 const millisecondsPerDay = 86_400_000
-
-const toUtcDate = (value: string) => {
-  const [year, month, day] = value.split('-').map(Number)
-
-  return new Date(Date.UTC(year, month - 1, day))
-}
 
 export const leaveRequestFormSchema = z
   .object({
@@ -25,8 +20,8 @@ export const leaveRequestFormSchema = z
       return
     }
 
-    const startDate = toUtcDate(value.startDate)
-    const endDate = toUtcDate(value.endDate)
+    const startDate = parseDateOnly(value.startDate)
+    const endDate = parseDateOnly(value.endDate)
 
     if (endDate < startDate) {
       context.addIssue({

@@ -4,6 +4,7 @@ import type {
   Prisma,
 } from "@prisma/client";
 
+import { parseDateOnly } from "../../core/utils/date-only";
 import { prisma } from "../../prisma/prisma.client";
 import { createAuditLog } from "../audit-logs/audit-log.service";
 import type {
@@ -128,8 +129,8 @@ const getDateFilter = ({
   }
 
   return {
-    ...(from ? { gte: new Date(from) } : {}),
-    ...(to ? { lte: new Date(to) } : {}),
+    ...(from ? { gte: parseDateOnly(from) } : {}),
+    ...(to ? { lte: parseDateOnly(to) } : {}),
   };
 };
 

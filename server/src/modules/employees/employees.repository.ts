@@ -1,5 +1,7 @@
 import type { EmploymentStatus, Prisma, UserStatus } from "@prisma/client";
 
+import { getCompanyDate } from "../../core/utils/company-day";
+import { parseDateOnly } from "../../core/utils/date-only";
 import { createAuditLog } from "../audit-logs/audit-log.service";
 import { prisma } from "../../prisma/prisma.client";
 import type {
@@ -300,7 +302,7 @@ export const createInvitedEmployeeAccount = async ({
         departmentId: input.departmentId ?? null,
         employeeCode: input.employeeCode,
         firstName: input.firstName,
-        hireDate: input.hireDate ? new Date(input.hireDate) : null,
+        hireDate: input.hireDate ? parseDateOnly(input.hireDate) : null,
         jobTitle: input.jobTitle ?? null,
         lastName: input.lastName,
         phone: input.phone ?? null,
@@ -423,7 +425,7 @@ export const updateEmployee = (id: string, input: UpdateEmployeeInput) =>
         : {}),
       ...(input.firstName !== undefined ? { firstName: input.firstName } : {}),
       ...(input.hireDate !== undefined
-        ? { hireDate: input.hireDate ? new Date(input.hireDate) : null }
+        ? { hireDate: input.hireDate ? parseDateOnly(input.hireDate) : null }
         : {}),
       ...(input.jobTitle !== undefined ? { jobTitle: input.jobTitle } : {}),
       ...(input.lastName !== undefined ? { lastName: input.lastName } : {}),
@@ -431,7 +433,7 @@ export const updateEmployee = (id: string, input: UpdateEmployeeInput) =>
       ...(input.terminationDate !== undefined
         ? {
             terminationDate: input.terminationDate
-              ? new Date(input.terminationDate)
+              ? parseDateOnly(input.terminationDate)
               : null,
           }
         : {}),
@@ -468,11 +470,23 @@ export const updateEmployeeAndAccountStatus = async ({
   employeeStatus?: EmploymentStatus;
 }) =>
   prisma.$transaction(async (tx) => {
+    const companySettings =
+      employeeStatus === "TERMINATED"
+        ? await tx.companySettings.findFirst({
+            orderBy: { createdAt: "asc" },
+            select: { timezone: true },
+          })
+        : null;
     const employee = await tx.employee.update({
       data: {
         ...(employeeStatus !== undefined ? { status: employeeStatus } : {}),
         ...(employeeStatus === "TERMINATED"
-          ? { terminationDate: new Date() }
+          ? {
+              terminationDate: getCompanyDate(
+                new Date(),
+                companySettings?.timezone ?? "UTC",
+              ),
+            }
           : {}),
         ...(employeeStatus === "ACTIVE" ? { terminationDate: null } : {}),
         ...(accountStatus !== undefined

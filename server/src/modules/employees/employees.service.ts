@@ -11,6 +11,7 @@ import {
   getPaginationParams,
   toPaginatedResult,
 } from "../../core/pagination/pagination";
+import { formatDateOnly } from "../../core/utils/date-only";
 import {
   createEmployeeAuditLog,
   createInvitedEmployeeAccount,
@@ -64,13 +65,15 @@ const toEmployeeDto = (employee: EmployeeRecord) => ({
   employeeCode: employee.employeeCode,
   firstName: employee.firstName,
   fullName: `${employee.firstName} ${employee.lastName}`,
-  hireDate: employee.hireDate?.toISOString() ?? null,
+  hireDate: employee.hireDate ? formatDateOnly(employee.hireDate) : null,
   id: employee.id,
   jobTitle: employee.jobTitle,
   lastName: employee.lastName,
   phone: employee.phone,
   status: employee.status,
-  terminationDate: employee.terminationDate?.toISOString() ?? null,
+  terminationDate: employee.terminationDate
+    ? formatDateOnly(employee.terminationDate)
+    : null,
   updatedAt: employee.updatedAt.toISOString(),
 });
 

@@ -1,6 +1,6 @@
 import type { AuthContext } from "../../src/core/auth/auth.types";
 import { AppError } from "../../src/core/errors/app-error";
-import { getAttendanceDate } from "../../src/modules/attendance/attendance-time";
+import { getCompanyDate } from "../../src/core/utils/company-day";
 import {
   clockInSelf,
   clockOutSelf,
@@ -148,7 +148,7 @@ describeWithTestDatabase("attendance clock concurrency", () => {
     const attendance = await prisma.attendanceRecord.create({
       data: {
         clockInAt: new Date(now.getTime() - 10 * 60_000),
-        date: getAttendanceDate(now, "UTC"),
+        date: getCompanyDate(now, "UTC"),
         employeeId: employee.id,
         source: "SELF",
         status: "LATE",

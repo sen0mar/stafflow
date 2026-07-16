@@ -3,6 +3,14 @@ import { prisma } from "./prisma-script-client";
 
 const normalizeEmail = (email: string) => email.trim().toLowerCase();
 
+const currentUtcDate = () => {
+  const now = new Date();
+
+  return new Date(
+    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()),
+  );
+};
+
 const requireEnv = (name: string) => {
   const value = process.env[name];
 
@@ -89,7 +97,7 @@ const main = async () => {
       create: {
         employeeCode,
         firstName: "Demo",
-        hireDate: new Date(),
+        hireDate: currentUtcDate(),
         jobTitle: "Employee",
         lastName: "Employee",
         status: "ACTIVE",

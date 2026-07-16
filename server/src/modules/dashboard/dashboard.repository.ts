@@ -7,8 +7,9 @@ import type {
 import { prisma } from "../../prisma/prisma.client";
 
 export interface DateRange {
-  end: Date;
+  endExclusive: Date;
   start: Date;
+  today: Date;
 }
 
 const activeEmployeeWhere = {
@@ -29,25 +30,22 @@ export const countActiveEmployees = () =>
     where: activeEmployeeWhere,
   });
 
-export const countTodayAttendanceByStatus = async ({ end, start }: DateRange) =>
+export const countTodayAttendanceByStatus = async ({ today }: DateRange) =>
   prisma.attendanceRecord.groupBy({
     by: ["status"],
     _count: { _all: true },
     where: {
-      date: {
-        gte: start,
-        lt: end,
-      },
+      date: today,
       employee: activeEmployeeWhere,
     },
   });
 
-export const countApprovedLeaveInRange = ({ end, start }: DateRange) =>
+export const countApprovedLeaveInRange = ({ today }: DateRange) =>
   prisma.leaveRequest.count({
     where: {
       status: "APPROVED",
-      startDate: { lt: end },
-      endDate: { gte: start },
+      startDate: { lte: today },
+      endDate: { gte: today },
       employee: activeEmployeeWhere,
     },
   });
@@ -60,7 +58,10 @@ export const countPendingLeaveRequests = () =>
     },
   });
 
-export const getAttendanceRecordsForRange = ({ end, start }: DateRange) =>
+export const getAttendanceRecordsForRange = ({
+  endExclusive,
+  start,
+}: DateRange) =>
   prisma.attendanceRecord.findMany({
     orderBy: { date: "asc" },
     select: {
@@ -70,7 +71,7 @@ export const getAttendanceRecordsForRange = ({ end, start }: DateRange) =>
     where: {
       date: {
         gte: start,
-        lt: end,
+        lt: endExclusive,
       },
       employee: activeEmployeeWhere,
     },
@@ -162,7 +163,7 @@ export const getEmployeeProfileSummary = (employeeId: string) =>
 
 export const getEmployeeTodayAttendance = (
   employeeId: string,
-  { end, start }: DateRange,
+  { today }: DateRange,
 ) =>
   prisma.attendanceRecord.findFirst({
     orderBy: { date: "desc" },
@@ -173,10 +174,7 @@ export const getEmployeeTodayAttendance = (
       totalMinutes: true,
     },
     where: {
-      date: {
-        gte: start,
-        lt: end,
-      },
+      date: today,
       employeeId,
     },
   });

@@ -121,6 +121,22 @@ days. This keeps each approved request attributable to one annual balance and
 prevents a duration outside the supported product and database bounds from
 reaching Prisma.
 
+### Calendar Date and Timestamp Contracts
+
+Calendar values use PostgreSQL `date` columns and `YYYY-MM-DD` API strings:
+`Employee.hireDate`, `Employee.terminationDate`, `AttendanceRecord.date`,
+`LeaveRequest.startDate`, and `LeaveRequest.endDate`. Server and client code
+must parse and format these through explicit date-only helpers; a bare
+`YYYY-MM-DD` must never be passed through browser-local `Date` conversion.
+
+All other Prisma `DateTime` fields are instants and use ISO timestamps,
+including authentication/session lifecycle times, clock-in/out times,
+created/updated/reviewed/uploaded/deleted times, and audit-log timestamps.
+Attendance date filters accept inclusive date-only bounds. The current
+attendance date is derived from the company IANA timezone and then persisted as
+the resulting calendar date; Section 11 schedule, status, and concurrency
+behavior remains instant-based and unchanged.
+
 ### Attendance Self Clock Policy
 
 Employee self clock actions use the company IANA timezone for the attendance
@@ -365,3 +381,4 @@ Operational risks:
 15. Public demo deployments must protect Cloudflare R2 from unrestricted uploads and storage abuse.
 16. Public demo deployments must enforce `DEMO_READ_ONLY` on identity-persistence mutations; frontend hiding is not a security control.
 17. Leave request overlap checks, expected-status transitions, balance adjustments, and review audit logs commit atomically; balance-changing operations use serializable transactions with bounded serialization retries.
+18. Calendar-only fields use PostgreSQL `date` and `YYYY-MM-DD` API contracts; timestamp instants remain ISO strings, and browsers never timezone-convert date-only values.

@@ -1,6 +1,8 @@
 import type { AttendanceStatus } from "@prisma/client";
 
 import { AppError } from "../../core/errors/app-error";
+import { getCompanyDateRange } from "../../core/utils/company-day";
+import { formatDateOnly } from "../../core/utils/date-only";
 import {
   countActiveEmployees,
   countApprovedLeaveInRange,
@@ -18,16 +20,9 @@ import {
   getEmployeeTodayAttendance,
   getPendingLeaveRequestPreview,
   getRecentEmployees,
-  type DateRange,
 } from "./dashboard.repository";
 
 type AttendanceOverviewStatus = Lowercase<AttendanceStatus>;
-
-interface ZonedDay {
-  day: number;
-  month: number;
-  year: number;
-}
 
 const emptyAttendanceStatusCounts = {
   absent: 0,
@@ -47,101 +42,6 @@ const toIso = (date: Date | null) => date?.toISOString() ?? null;
 const toNumber = (value: { toString: () => string }) =>
   Number(value.toString());
 
-const getZonedParts = (date: Date, timeZone: string): ZonedDay => {
-  const formatter = new Intl.DateTimeFormat("en-US", {
-    day: "2-digit",
-    month: "2-digit",
-    timeZone,
-    year: "numeric",
-  });
-  const parts = formatter.formatToParts(date);
-  const getPart = (type: string) => {
-    const value = parts.find((part) => part.type === type)?.value;
-
-    if (!value) {
-      throw new Error(`Missing ${type} date part.`);
-    }
-
-    return Number(value);
-  };
-
-  return {
-    day: getPart("day"),
-    month: getPart("month"),
-    year: getPart("year"),
-  };
-};
-
-const getTimezoneOffsetMs = (date: Date, timeZone: string) => {
-  const formatter = new Intl.DateTimeFormat("en-US", {
-    day: "2-digit",
-    hour: "2-digit",
-    hour12: false,
-    minute: "2-digit",
-    month: "2-digit",
-    second: "2-digit",
-    timeZone,
-    year: "numeric",
-  });
-  const parts = formatter.formatToParts(date);
-  const values = new Map(parts.map((part) => [part.type, part.value]));
-  const asUtc = Date.UTC(
-    Number(values.get("year")),
-    Number(values.get("month")) - 1,
-    Number(values.get("day")),
-    Number(values.get("hour")),
-    Number(values.get("minute")),
-    Number(values.get("second")),
-  );
-
-  return asUtc - date.getTime();
-};
-
-const zonedDayToUtc = ({ day, month, year }: ZonedDay, timeZone: string) => {
-  const utcGuess = new Date(Date.UTC(year, month - 1, day));
-  const offsetMs = getTimezoneOffsetMs(utcGuess, timeZone);
-
-  return new Date(utcGuess.getTime() - offsetMs);
-};
-
-const addDays = ({ day, month, year }: ZonedDay, amount: number): ZonedDay => {
-  const nextDate = new Date(Date.UTC(year, month - 1, day + amount));
-
-  return {
-    day: nextDate.getUTCDate(),
-    month: nextDate.getUTCMonth() + 1,
-    year: nextDate.getUTCFullYear(),
-  };
-};
-
-const dayKey = ({ day, month, year }: ZonedDay) =>
-  `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-
-const getTodayRange = (timeZone: string) => {
-  const today = getZonedParts(new Date(), timeZone);
-  const tomorrow = addDays(today, 1);
-
-  return {
-    end: zonedDayToUtc(tomorrow, timeZone),
-    start: zonedDayToUtc(today, timeZone),
-    today,
-  };
-};
-
-const getSevenDayRange = (today: ZonedDay, timeZone: string) => {
-  const days = Array.from({ length: 7 }, (_item, index) =>
-    addDays(today, index - 6),
-  );
-  const start = zonedDayToUtc(days[0], timeZone);
-  const end = zonedDayToUtc(addDays(today, 1), timeZone);
-
-  return {
-    days,
-    end,
-    start,
-  };
-};
-
 const statusToKey = (status: AttendanceStatus): AttendanceOverviewStatus =>
   status.toLowerCase() as AttendanceOverviewStatus;
 
@@ -158,8 +58,7 @@ const summarizeTodayPresentCount = (
 
 export const getAdminDashboardSummary = async () => {
   const timeZone = await getCompanyTimezone();
-  const todayRange = getTodayRange(timeZone);
-  const sevenDayRange = getSevenDayRange(todayRange.today, timeZone);
+  const sevenDayRange = getCompanyDateRange(new Date(), timeZone, 7);
 
   const [
     totalEmployees,
@@ -172,8 +71,8 @@ export const getAdminDashboardSummary = async () => {
     pendingPreview,
   ] = await Promise.all([
     countActiveEmployees(),
-    countTodayAttendanceByStatus(todayRange),
-    countApprovedLeaveInRange(todayRange),
+    countTodayAttendanceByStatus(sevenDayRange),
+    countApprovedLeaveInRange(sevenDayRange),
     countPendingLeaveRequests(),
     getAttendanceRecordsForRange(sevenDayRange),
     getRecentEmployees(),
@@ -189,17 +88,17 @@ export const getAdminDashboardSummary = async () => {
     departments.map((department) => [department.id, department]),
   );
   const overviewByDate = new Map(
-    sevenDayRange.days.map((day) => [
-      dayKey(day),
+    sevenDayRange.dateKeys.map((date) => [
+      date,
       {
         ...emptyAttendanceStatusCounts,
-        date: dayKey(day),
+        date,
       },
     ]),
   );
 
   for (const record of attendanceRecords) {
-    const key = dayKey(getZonedParts(record.date, timeZone));
+    const key = formatDateOnly(record.date);
     const overview = overviewByDate.get(key);
 
     if (overview) {
@@ -231,10 +130,10 @@ export const getAdminDashboardSummary = async () => {
         request.employee.firstName,
         request.employee.lastName,
       ),
-      endDate: request.endDate.toISOString(),
+      endDate: formatDateOnly(request.endDate),
       id: request.id,
       leaveTypeName: request.leaveType.name,
-      startDate: request.startDate.toISOString(),
+      startDate: formatDateOnly(request.startDate),
       totalDays: toNumber(request.totalDays),
     })),
     pendingLeaveRequests,
@@ -264,8 +163,8 @@ export const getEmployeeDashboardSummary = async (
   }
 
   const timeZone = await getCompanyTimezone();
-  const todayRange = getTodayRange(timeZone);
-  const currentYear = todayRange.today.year;
+  const todayRange = getCompanyDateRange(new Date(), timeZone, 1);
+  const currentYear = todayRange.today.getUTCFullYear();
   const [
     profile,
     todayAttendance,
@@ -275,7 +174,7 @@ export const getEmployeeDashboardSummary = async (
     latestPayslips,
   ] = await Promise.all([
     getEmployeeProfileSummary(employeeId),
-    getEmployeeTodayAttendance(employeeId, todayRange as DateRange),
+    getEmployeeTodayAttendance(employeeId, todayRange),
     getEmployeeRecentAttendance(employeeId),
     getEmployeeLeaveBalances(employeeId, currentYear),
     getEmployeeRecentLeaveRequests(employeeId),
@@ -310,7 +209,7 @@ export const getEmployeeDashboardSummary = async (
       departmentName: profile.department?.name ?? "Unassigned",
       employeeCode: profile.employeeCode,
       employeeId: profile.id,
-      hireDate: toIso(profile.hireDate),
+      hireDate: profile.hireDate ? formatDateOnly(profile.hireDate) : null,
       initials: getInitials(profile.firstName, profile.lastName),
       jobTitle: profile.jobTitle,
       name: getFullName(profile.firstName, profile.lastName),
@@ -318,17 +217,17 @@ export const getEmployeeDashboardSummary = async (
     recentAttendance: recentAttendance.map((record) => ({
       clockInAt: toIso(record.clockInAt),
       clockOutAt: toIso(record.clockOutAt),
-      date: record.date.toISOString(),
+      date: formatDateOnly(record.date),
       id: record.id,
       status: record.status,
       totalMinutes: record.totalMinutes,
     })),
     recentLeaveRequests: recentLeaveRequests.map((request) => ({
       createdAt: request.createdAt.toISOString(),
-      endDate: request.endDate.toISOString(),
+      endDate: formatDateOnly(request.endDate),
       id: request.id,
       leaveTypeName: request.leaveType.name,
-      startDate: request.startDate.toISOString(),
+      startDate: formatDateOnly(request.startDate),
       status: request.status,
       totalDays: toNumber(request.totalDays),
     })),

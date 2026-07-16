@@ -14,11 +14,11 @@ export const attendanceIdSchema = z.object({
 
 export const listSelfAttendanceSchema = z.object({
   query: z.object({
-    from: z.string().datetime().optional(),
+    from: z.string().date().optional(),
     limit: limitQuerySchema,
     page: pageQuerySchema,
     status: z.enum(["PRESENT", "ABSENT", "LATE", "PARTIAL"]).optional(),
-    to: z.string().datetime().optional(),
+    to: z.string().date().optional(),
   }),
 });
 
@@ -26,11 +26,11 @@ export const listAttendanceSchema = z.object({
   query: z.object({
     departmentId: z.string().trim().optional(),
     employeeId: z.string().trim().optional(),
-    from: z.string().datetime().optional(),
+    from: z.string().date().optional(),
     limit: limitQuerySchema,
     page: pageQuerySchema,
     status: z.enum(["PRESENT", "ABSENT", "LATE", "PARTIAL"]).optional(),
-    to: z.string().datetime().optional(),
+    to: z.string().date().optional(),
   }),
 });
 

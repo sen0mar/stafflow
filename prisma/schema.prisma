@@ -70,35 +70,35 @@ model User {
 }
 
 model Session {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   userId    String
-  tokenHash String   @unique
+  tokenHash String    @unique
   expiresAt DateTime
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
   revokedAt DateTime?
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([expiresAt])
 }
 
 model Employee {
-  id                String              @id @default(cuid())
-  userId            String?             @unique
+  id                String             @id @default(cuid())
+  userId            String?            @unique
   departmentId      String?
-  employeeCode      String              @unique
+  employeeCode      String             @unique
   firstName         String
   lastName          String
   jobTitle          String?
   phone             String?
-  hireDate          DateTime?
-  terminationDate   DateTime?
-  status            EmploymentStatus    @default(ACTIVE)
-  createdAt         DateTime            @default(now())
-  updatedAt         DateTime            @updatedAt
-  user              User?               @relation(fields: [userId], references: [id], onDelete: SetNull)
-  department        Department?         @relation(fields: [departmentId], references: [id], onDelete: SetNull)
+  hireDate          DateTime?          @db.Date
+  terminationDate   DateTime?          @db.Date
+  status            EmploymentStatus   @default(ACTIVE)
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  user              User?              @relation(fields: [userId], references: [id], onDelete: SetNull)
+  department        Department?        @relation(fields: [departmentId], references: [id], onDelete: SetNull)
   attendanceRecords AttendanceRecord[]
   leaveRequests     LeaveRequest[]
   leaveBalances     LeaveBalance[]
@@ -124,7 +124,7 @@ model Department {
 model AttendanceRecord {
   id           String           @id @default(cuid())
   employeeId   String
-  date         DateTime
+  date         DateTime         @db.Date
   clockInAt    DateTime?
   clockOutAt   DateTime?
   totalMinutes Int?
@@ -143,16 +143,16 @@ model AttendanceRecord {
 }
 
 model LeaveType {
-  id             String         @id @default(cuid())
-  name           String         @unique
-  description    String?
-  annualAllowance Decimal?      @db.Decimal(5, 2)
-  isPaid         Boolean        @default(true)
-  isActive       Boolean        @default(true)
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt
-  leaveRequests  LeaveRequest[]
-  leaveBalances  LeaveBalance[]
+  id              String         @id @default(cuid())
+  name            String         @unique
+  description     String?
+  annualAllowance Decimal?       @db.Decimal(5, 2)
+  isPaid          Boolean        @default(true)
+  isActive        Boolean        @default(true)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  leaveRequests   LeaveRequest[]
+  leaveBalances   LeaveBalance[]
 
   @@index([isActive])
 }
@@ -161,8 +161,8 @@ model LeaveRequest {
   id           String             @id @default(cuid())
   employeeId   String
   leaveTypeId  String
-  startDate    DateTime
-  endDate      DateTime
+  startDate    DateTime           @db.Date
+  endDate      DateTime           @db.Date
   totalDays    Decimal            @db.Decimal(5, 2)
   status       LeaveRequestStatus @default(PENDING)
   reason       String?
@@ -292,7 +292,7 @@ model InvitationToken {
   userId      String?
   email       String
   tokenHash   String    @unique
-  role        UserRole   @default(EMPLOYEE)
+  role        UserRole  @default(EMPLOYEE)
   expiresAt   DateTime
   acceptedAt  DateTime?
   createdById String?

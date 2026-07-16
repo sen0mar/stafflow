@@ -182,16 +182,16 @@ describeWithTestDatabase("leave mutation concurrency", () => {
     const requests = await Promise.all([
       createPendingRequest({
         employeeId: employee.id,
-        endDate: "2026-09-03T00:00:00.000Z",
+        endDate: "2026-09-03",
         leaveTypeId: leaveType.id,
-        startDate: "2026-09-01T00:00:00.000Z",
+        startDate: "2026-09-01",
         totalDays: 3,
       }),
       createPendingRequest({
         employeeId: employee.id,
-        endDate: "2026-09-14T00:00:00.000Z",
+        endDate: "2026-09-14",
         leaveTypeId: leaveType.id,
-        startDate: "2026-09-11T00:00:00.000Z",
+        startDate: "2026-09-11",
         totalDays: 4,
       }),
     ]);
@@ -244,9 +244,9 @@ describeWithTestDatabase("leave mutation concurrency", () => {
     const { admin, employee, leaveType } = await createLeaveFixture();
     const request = await createPendingRequest({
       employeeId: employee.id,
-      endDate: "2026-10-02T00:00:00.000Z",
+      endDate: "2026-10-02",
       leaveTypeId: leaveType.id,
-      startDate: "2026-10-01T00:00:00.000Z",
+      startDate: "2026-10-01",
       totalDays: 2,
     });
 
@@ -291,9 +291,9 @@ describeWithTestDatabase("leave mutation concurrency", () => {
     const { admin, employee, leaveType } = await createLeaveFixture();
     const request = await createPendingRequest({
       employeeId: employee.id,
-      endDate: "2026-11-03T00:00:00.000Z",
+      endDate: "2026-11-03",
       leaveTypeId: leaveType.id,
-      startDate: "2026-11-01T00:00:00.000Z",
+      startDate: "2026-11-01",
       totalDays: 3,
     });
     const results = await Promise.allSettled([
@@ -337,9 +337,9 @@ describeWithTestDatabase("leave mutation concurrency", () => {
     const { admin, employee, leaveType } = await createLeaveFixture();
     const request = await createPendingRequest({
       employeeId: employee.id,
-      endDate: "2026-12-02T00:00:00.000Z",
+      endDate: "2026-12-02",
       leaveTypeId: leaveType.id,
-      startDate: "2026-12-01T00:00:00.000Z",
+      startDate: "2026-12-01",
       totalDays: 2,
     });
     const results = await Promise.allSettled([

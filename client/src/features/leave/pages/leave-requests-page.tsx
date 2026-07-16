@@ -27,6 +27,7 @@ import { useCurrentUser } from '@/features/auth/hooks/use-current-user'
 import { useDemoMode } from '@/features/auth/hooks/use-auth-config'
 import { useEmployees } from '@/features/employees/hooks/use-employees'
 import { useTableQueryState } from '@/shared/hooks/use-table-query-state'
+import { formatDateOnly } from '@/shared/lib/dates'
 import type {
   LeaveRequest,
   LeaveRequestStatus,
@@ -63,14 +64,6 @@ const getStatusFilter = (status: StatusFilter) =>
   status === 'all' ? undefined : status
 const getVisibleRequests = (requests: LeaveRequest[]) =>
   requests.filter((request) => request.status !== 'CANCELLED')
-
-const formatDate = (value: string) =>
-  new Intl.DateTimeFormat(undefined, {
-    day: 'numeric',
-    month: 'short',
-    timeZone: 'UTC',
-    year: 'numeric',
-  }).format(new Date(value))
 
 const getRequestPayload = (values: LeaveRequestFormValues) => ({
   endDate: values.endDate,
@@ -182,7 +175,8 @@ const LeaveRequestsTable = ({
             </TableCell>
             <TableCell>{request.leaveType.name}</TableCell>
             <TableCell>
-              {formatDate(request.startDate)} - {formatDate(request.endDate)}
+              {formatDateOnly(request.startDate, 'MMM d, yyyy')} -{' '}
+              {formatDateOnly(request.endDate, 'MMM d, yyyy')}
             </TableCell>
             <TableCell className="max-w-[18rem] whitespace-normal">
               <LeaveNotePreview
