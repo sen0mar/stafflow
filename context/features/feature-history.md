@@ -55,6 +55,7 @@ Keep entries short. This file should explain what changed, not become a detailed
 - Feature 48: Public Demo Read-Only Enforcement — consolidated demo protection into shared backend middleware across all business and identity mutations, exposed sanitized demo configuration with read-only UI controls and a global banner, bounded demo-session growth, and added route-matrix and frontend regression coverage.
 - Feature 49: Public Auth Entry-Point Hardening — made public auth JSON-only with bounded inputs, equalized missing-user bcrypt work, deduplicated expected failed-login logs, and added a Cloudflare edge-throttling deployment artifact and runbook.
 - Feature 50: Password Reset Deferral — removed the nonfunctional public forgot/reset routes and unreachable runtime scaffold, retained the existing database table and migrations, documented password recovery as deferred, and added 404 regression coverage.
+- Feature 51: Atomic Authentication Transitions — made password changes and invitation acceptance transactional with conditional single-use/invariant checks, all-session revocation, atomic audit writes, and focused concurrency and rollback integration coverage while preserving password-reset deferral.
 
 ## Entry Format
 

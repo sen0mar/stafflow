@@ -1,4 +1,24 @@
+import type { UserRole } from "@prisma/client";
+
 import { prisma } from "../../prisma/prisma.client";
+import {
+  createAuditLog,
+  type AuditLogInput,
+} from "../audit-logs/audit-log.service";
+
+type AuthAuditContext = Pick<AuditLogInput, "ipAddress" | "userAgent">;
+
+type AuthTransitionFailureReason = "INVITATION_INVALID" | "PASSWORD_CHANGED";
+
+export class AuthTransitionError extends Error {
+  public readonly reason: AuthTransitionFailureReason;
+
+  public constructor(reason: AuthTransitionFailureReason) {
+    super(reason);
+    this.name = "AuthTransitionError";
+    this.reason = reason;
+  }
+}
 
 // Centralize the auth select so password hashes never leak past the service layer.
 export const authUserSelect = {
@@ -93,96 +113,179 @@ export const revokeSession = async (sessionId: string) =>
   });
 
 // Security-sensitive credential changes revoke every active session.
-export const revokeUserSessions = async (userId: string) =>
-  prisma.session.updateMany({
-    where: {
-      revokedAt: null,
-      userId,
-    },
-    data: {
-      revokedAt: new Date(),
-    },
-  });
-
-// Password hash updates are deliberately narrow and never return the hash.
-export const updatePasswordHash = async ({
+export const changePasswordAtomically = async ({
+  auditContext,
+  currentPasswordHash,
   passwordHash,
   userId,
 }: {
+  auditContext: AuthAuditContext;
+  currentPasswordHash: string;
   passwordHash: string;
   userId: string;
 }) =>
-  prisma.user.update({
-    where: { id: userId },
-    data: { passwordHash },
-    select: { id: true },
-  });
-
-export const findValidInvitationToken = async (tokenHash: string) =>
-  prisma.invitationToken.findFirst({
-    where: {
-      acceptedAt: null,
-      expiresAt: { gt: new Date() },
-      tokenHash,
-    },
-    select: {
-      email: true,
-      id: true,
-      role: true,
-      userId: true,
-      user: {
-        select: authUserSelect,
-      },
-    },
-  });
-
-export const acceptInvitationToken = async ({
-  passwordHash,
-  tokenId,
-  userId,
-}: {
-  passwordHash: string;
-  tokenId: string;
-  userId: string;
-}) =>
-  prisma.$transaction([
-    prisma.user.update({
-      where: { id: userId },
-      data: {
-        passwordHash,
+  prisma.$transaction(async (tx) => {
+    const now = new Date();
+    const passwordUpdate = await tx.user.updateMany({
+      data: { passwordHash },
+      where: {
+        id: userId,
+        passwordHash: currentPasswordHash,
         status: "ACTIVE",
       },
-      select: { id: true },
-    }),
-    prisma.invitationToken.update({
-      where: { id: tokenId },
-      data: { acceptedAt: new Date() },
-      select: { id: true },
-    }),
-  ]);
+    });
 
-export const markInvitationTokenAccepted = async (tokenId: string) =>
-  prisma.invitationToken.update({
-    where: { id: tokenId },
-    data: { acceptedAt: new Date() },
-    select: { id: true },
+    if (passwordUpdate.count !== 1) {
+      throw new AuthTransitionError("PASSWORD_CHANGED");
+    }
+
+    await tx.session.updateMany({
+      data: { revokedAt: now },
+      where: {
+        revokedAt: null,
+        userId,
+      },
+    });
+    await createAuditLog({
+      ...auditContext,
+      action: "PASSWORD_CHANGED",
+      actorUserId: userId,
+      entityId: userId,
+      entityType: "User",
+      metadata: {
+        sessionsRevoked: true,
+      },
+      tx,
+    });
   });
 
-export const createInvitedUserForAcceptedInvitation = async ({
-  email,
+const invitationUserMatches = (
+  user: {
+    email: string;
+    role: UserRole;
+    status: "ACTIVE" | "DISABLED" | "INVITED";
+  },
+  invitation: { email: string; role: UserRole },
+) =>
+  user.email === invitation.email &&
+  user.role === invitation.role &&
+  user.status === "INVITED";
+
+export const acceptInvitationAtomically = async ({
   passwordHash,
-  role,
+  tokenHash,
 }: {
-  email: string;
   passwordHash: string;
-  role: "ADMIN" | "EMPLOYEE";
+  tokenHash: string;
 }) =>
-  prisma.user.create({
-    data: {
-      email,
-      passwordHash,
-      role,
-      status: "ACTIVE",
-    },
-    select: authUserSelect,
+  prisma.$transaction(async (tx) => {
+    const now = new Date();
+    const invitation = await tx.invitationToken.findUnique({
+      select: {
+        acceptedAt: true,
+        email: true,
+        expiresAt: true,
+        id: true,
+        role: true,
+        userId: true,
+      },
+      where: { tokenHash },
+    });
+
+    if (!invitation || invitation.acceptedAt || invitation.expiresAt <= now) {
+      throw new AuthTransitionError("INVITATION_INVALID");
+    }
+
+    const tokenConsumption = await tx.invitationToken.updateMany({
+      data: { acceptedAt: now },
+      where: {
+        acceptedAt: null,
+        expiresAt: { gt: now },
+        id: invitation.id,
+        tokenHash,
+      },
+    });
+
+    if (tokenConsumption.count !== 1) {
+      throw new AuthTransitionError("INVITATION_INVALID");
+    }
+
+    const existingUser = invitation.userId
+      ? await tx.user.findUnique({
+          select: authUserSelect,
+          where: { id: invitation.userId },
+        })
+      : await tx.user.findUnique({
+          select: authUserSelect,
+          where: { email: invitation.email },
+        });
+
+    let userId: string;
+
+    if (existingUser) {
+      if (!invitationUserMatches(existingUser, invitation)) {
+        throw new AuthTransitionError("INVITATION_INVALID");
+      }
+
+      const userUpdate = await tx.user.updateMany({
+        data: {
+          passwordHash,
+          status: "ACTIVE",
+        },
+        where: {
+          email: invitation.email,
+          id: existingUser.id,
+          role: invitation.role,
+          status: "INVITED",
+        },
+      });
+
+      if (userUpdate.count !== 1) {
+        throw new AuthTransitionError("INVITATION_INVALID");
+      }
+
+      userId = existingUser.id;
+    } else {
+      const createdUser = await tx.user.create({
+        data: {
+          email: invitation.email,
+          passwordHash,
+          role: invitation.role,
+          status: "ACTIVE",
+        },
+        select: { id: true },
+      });
+
+      userId = createdUser.id;
+    }
+
+    await tx.session.updateMany({
+      data: { revokedAt: now },
+      where: {
+        revokedAt: null,
+        userId,
+      },
+    });
+    await createAuditLog({
+      action: "INVITATION_ACCEPTED",
+      actorUserId: userId,
+      entityId: userId,
+      entityType: "User",
+      metadata: {
+        invitationId: invitation.id,
+        sessionsRevoked: true,
+      },
+      tx,
+    });
+
+    const user = await tx.user.findUnique({
+      select: authUserSelect,
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new AuthTransitionError("INVITATION_INVALID");
+    }
+
+    return user;
   });

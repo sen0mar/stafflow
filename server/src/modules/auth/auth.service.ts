@@ -11,25 +11,21 @@ import {
 } from "../../core/auth/password.service";
 import { env } from "../../config/env";
 import type { PublicAuthUser } from "../../core/auth/auth.types";
-import { createAuditLog } from "../audit-logs/audit-log.service";
 import type {
   AcceptInvitationInput,
   ChangePasswordInput,
   LoginInput,
 } from "./auth.schema";
 import {
-  acceptInvitationToken,
-  createInvitedUserForAcceptedInvitation,
+  acceptInvitationAtomically,
+  AuthTransitionError,
+  changePasswordAtomically,
   createSession,
   findUserByEmailForAuth,
   findUserByIdForAuth,
-  findValidInvitationToken,
-  markInvitationTokenAccepted,
   revokeSession,
-  revokeUserSessions,
   updateLastLoginAt,
   pruneUserSessions,
-  updatePasswordHash,
 } from "./auth.repository";
 
 const demoSessionLimitPerUser = 100;
@@ -176,18 +172,27 @@ export const changePassword = async ({
 
   const passwordHash = await hashPassword(newPassword);
 
-  await updatePasswordHash({ passwordHash, userId });
-  await revokeUserSessions(userId);
-  await createAuditLog({
-    ...auditContext,
-    action: "PASSWORD_CHANGED",
-    actorUserId: userId,
-    entityId: userId,
-    entityType: "User",
-    metadata: {
-      sessionsRevoked: true,
-    },
-  });
+  try {
+    await changePasswordAtomically({
+      auditContext,
+      currentPasswordHash: user.passwordHash,
+      passwordHash,
+      userId,
+    });
+  } catch (error) {
+    if (
+      error instanceof AuthTransitionError &&
+      error.reason === "PASSWORD_CHANGED"
+    ) {
+      throw new AppError({
+        code: "PASSWORD_CHANGE_CONFLICT",
+        message: "The password changed before this request completed.",
+        statusCode: 409,
+      });
+    }
+
+    throw error;
+  }
 
   return toPublicAuthUser(user);
 };
@@ -198,37 +203,23 @@ export const acceptInvitation = async ({
 }: AcceptInvitationInput) => {
   validatePasswordConstraints(password);
 
-  const invitation = await findValidInvitationToken(hashSessionToken(token));
-
-  if (!invitation) {
-    throw invalidTokenError();
-  }
-
   const passwordHash = await hashPassword(password);
-  const existingUser =
-    invitation.user ?? (await findUserByEmailForAuth(invitation.email));
-  const user =
-    existingUser ??
-    (await createInvitedUserForAcceptedInvitation({
-      email: invitation.email,
-      passwordHash,
-      role: invitation.role,
-    }));
 
-  if (existingUser) {
-    await acceptInvitationToken({
+  try {
+    const user = await acceptInvitationAtomically({
       passwordHash,
-      tokenId: invitation.id,
-      userId: existingUser.id,
+      tokenHash: hashSessionToken(token),
     });
-  } else {
-    await markInvitationTokenAccepted(invitation.id);
+
+    return toPublicAuthUser(user);
+  } catch (error) {
+    if (
+      error instanceof AuthTransitionError &&
+      error.reason === "INVITATION_INVALID"
+    ) {
+      throw invalidTokenError();
+    }
+
+    throw error;
   }
-
-  await revokeUserSessions(user.id);
-
-  return toPublicAuthUser({
-    ...user,
-    status: "ACTIVE",
-  });
 };

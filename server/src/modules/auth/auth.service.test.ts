@@ -16,18 +16,15 @@ vi.mock("../audit-logs/audit-log.service", () => ({
 }));
 
 vi.mock("./auth.repository", () => ({
-  acceptInvitationToken: vi.fn(),
-  createInvitedUserForAcceptedInvitation: vi.fn(),
+  acceptInvitationAtomically: vi.fn(),
+  AuthTransitionError: class AuthTransitionError extends Error {},
+  changePasswordAtomically: vi.fn(),
   createSession: vi.fn(),
   findUserByEmailForAuth,
   findUserByIdForAuth: vi.fn(),
-  findValidInvitationToken: vi.fn(),
-  markInvitationTokenAccepted: vi.fn(),
   pruneUserSessions: vi.fn(),
   revokeSession: vi.fn(),
-  revokeUserSessions: vi.fn(),
   updateLastLoginAt: vi.fn(),
-  updatePasswordHash: vi.fn(),
 }));
 
 import { login } from "./auth.service";

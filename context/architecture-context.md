@@ -85,6 +85,7 @@ Auth model:
 - Public auth request bodies are JSON-only and bounded at validation. Missing-user login attempts perform the same cost-12 bcrypt comparison path as bad-password attempts.
 - Login and invitation-acceptance traffic must be throttled at the provider edge across application instances. The production target is a Cloudflare-proxied API custom domain with the default Render hostname disabled; the deploy-time rule is documented under `deployment/`.
 - Password recovery is deferred. The API exposes no public forgot-password or reset-password routes until email delivery, atomic single-use token consumption, seeded-demo-account protection, throttling, expiry cleanup, and end-to-end tests are delivered as one feature. The existing `PasswordResetToken` model and migrations remain temporarily to avoid an unnecessary destructive migration, but runtime code does not read or write that table.
+- Retained credential transitions are atomic database operations. Password changes compare-and-set the verified current hash before updating it, revoking every active session, and writing the audit record in one Prisma transaction. Invitation acceptance conditionally consumes one unexpired, unused token; requires any matching account to remain `INVITED` with the invitation's expected identity and role; and activates the account, revokes every session, and writes the audit record in the same transaction.
 
 ### Public Demo Mutation Policy
 
