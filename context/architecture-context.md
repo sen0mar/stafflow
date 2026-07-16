@@ -274,6 +274,9 @@ Backend/database performance rules:
 - Log slow requests and slow database paths.
 - Keep heavy calculations out of page-load endpoints where possible.
 - Do not upload files to R2 before authentication, authorization, and file validation.
+- Treat unique B-tree indexes as sufficient for exact lookups on the same ordered columns; do not retain identical non-unique duplicates.
+- Capture deployment slow-query evidence and inspect representative plans before adding trigram, full-text, or other search-specific infrastructure. Ordinary B-tree indexes do not solve `contains`/case-insensitive search.
+- Keep bounded offset pagination and the current dashboard query fan-out until measurements show a real problem.
 
 Important indexes to consider early:
 

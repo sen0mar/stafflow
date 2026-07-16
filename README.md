@@ -155,21 +155,22 @@ Open `http://localhost:5173`. The API runs on `http://localhost:4000` by default
 
 ## Useful commands
 
-| Command                          | Purpose                                         |
-| -------------------------------- | ----------------------------------------------- |
-| `npm run dev:client`             | Start the Vite client                           |
-| `npm run dev:server`             | Start the Express API                           |
-| `npm run build`                  | Build all workspaces                            |
-| `npm run typecheck`              | Type-check the client and server                |
-| `npm run lint`                   | Run workspace lint checks                       |
-| `npm run test`                   | Run the test suites                             |
-| `npm run format:check`           | Check formatting                                |
-| `npm run db:migrate:status`      | Inspect Prisma migration status                 |
-| `npm run db:migrate:deploy`      | Apply existing Prisma migrations                |
-| `npm run db:maintain-auth`       | Prune terminal auth rows past retention         |
-| `npm run db:seed`                | Seed the demo company and users                 |
-| `npm run db:seed:check`          | Verify the seeded baseline                      |
-| `npm run db:bootstrap-demo-auth` | Create or repair production demo login accounts |
+| Command                               | Purpose                                         |
+| ------------------------------------- | ----------------------------------------------- |
+| `npm run dev:client`                  | Start the Vite client                           |
+| `npm run dev:server`                  | Start the Express API                           |
+| `npm run build`                       | Build all workspaces                            |
+| `npm run typecheck`                   | Type-check the client and server                |
+| `npm run lint`                        | Run workspace lint checks                       |
+| `npm run test`                        | Run the test suites                             |
+| `npm run format:check`                | Check formatting                                |
+| `npm run db:migrate:status`           | Inspect Prisma migration status                 |
+| `npm run db:migrate:deploy`           | Apply existing Prisma migrations                |
+| `npm run db:verify-duplicate-indexes` | Inspect duplicate-index catalogs and plans      |
+| `npm run db:maintain-auth`            | Prune terminal auth rows past retention         |
+| `npm run db:seed`                     | Seed the demo company and users                 |
+| `npm run db:seed:check`               | Verify the seeded baseline                      |
+| `npm run db:bootstrap-demo-auth`      | Create or repair production demo login accounts |
 
 ## Project structure
 
