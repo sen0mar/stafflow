@@ -2,7 +2,7 @@
 
 Stafflow is a full-stack employee management app for a single company. It gives administrators one place to manage day-to-day people operations and gives employees a private self-service workspace.
 
-The project is designed as a safe public portfolio demo. Visitors can use seeded accounts, but they cannot register a new company or turn the demo into their own workspace.
+The project is designed as a safe public portfolio demo. Visitors can use seeded accounts, but the backend rejects persistent business and identity mutations, so they cannot register a company or turn the shared demo into their own workspace. Login/logout are the bounded session-lifecycle exception. Exact route and non-persistence coverage is recorded under audit Sections 03–04 in the [Section 25 regression matrix](context/audit-25-regression-matrix.md).
 
 ## Current interface
 
@@ -42,7 +42,7 @@ The login page is prefilled for the admin demo. You can switch roles from the de
 | Admin    | `admin.demo@example.com`    | `StafflowDemo` |
 | Employee | `employee.demo@example.com` | `StafflowDemo` |
 
-There is no public sign-up page. Outside the public demo, new accounts are created by an administrator and completed through a controlled invitation link. With `DEMO_MODE=true`, the API blocks employee/account creation, invitation generation and acceptance, account-status changes, and account elevation with the stable `DEMO_READ_ONLY` error.
+There is no public sign-up page. Outside the public demo, new accounts are created by an administrator and completed through a controlled invitation link. With `DEMO_MODE=true`, shared backend middleware returns the stable `DEMO_READ_ONLY` error for every exposed persistent business or identity mutation; frontend-disabled controls are explanatory UX only. Password recovery is deferred, and `/auth/forgot-password` and `/auth/reset-password` return `404 NOT_FOUND` ([deferred-route regression](server/test/integration/deferred-password-reset.test.ts); guarded non-persistence coverage is mapped under audit Section 06 in the [Section 25 matrix](context/audit-25-regression-matrix.md)).
 
 ## Technology
 
@@ -72,15 +72,17 @@ The backend follows the same domain structure in `server/src/modules`. Controlle
 
 ## Security and demo safety
 
-- Sessions use secure HTTP-only cookies; auth tokens are never stored in `localStorage`.
+Regression-backed controls below map to exact tests in the [Section 25 regression matrix](context/audit-25-regression-matrix.md). Production cookie attributes, provider privacy, external rules, and provider activation still require the [deployment verification checklist](deployment/verification-checklist.md).
+
+- Production sessions are code-configured with secure HTTP-only cookies; verify the deployed attributes manually. Auth tokens are never stored in `localStorage`.
 - Session tokens are hashed before they are saved to the database.
 - State-changing requests are protected against CSRF.
 - Authentication, role permissions, and record ownership are enforced by the API.
 - Employee endpoints derive identity from the signed-in session instead of trusting an employee ID from the browser.
-- Payslip PDFs remain private. The database stores file metadata and object keys, not PDF contents.
+- Backend policy permits payslip access only after authentication, role, and ownership checks. Cloudflare bucket/object privacy is an external deployment control that must be verified. The database stores file metadata and object keys, not PDF contents.
 - Passwords, cookies, tokens, hashes, files, and private signed URLs are excluded from logs.
 - Employee changes, attendance corrections, leave decisions, payslip changes, password events, and settings updates create audit records.
-- Demo mode protects seeded passwords, blocks identity-persistence mutations with `DEMO_READ_ONLY`, and blocks file uploads unless uploads are explicitly enabled.
+- Demo mode protects the entire shared workspace: it blocks persistent business and identity mutations with `DEMO_READ_ONLY`, skips `lastLoginAt` persistence, bounds shared-account sessions, and prohibits uploads. `DEMO_UPLOADS_ENABLED=true` fails startup until enforceable quotas and automated cleanup exist.
 
 ## Run locally
 
@@ -95,13 +97,14 @@ The backend follows the same domain structure in `server/src/modules`. Controlle
 Run this from the repository root:
 
 ```bash
-npm install
+npm ci
 ```
 
 ### 2. Configure the environment
 
 ```bash
 cp .env.local.example .env.local
+cp client/.env.local.example client/.env.local
 ```
 
 At minimum, set:
@@ -112,21 +115,23 @@ PORT=4000
 CLIENT_URL=http://localhost:5173
 DATABASE_URL=your_pooled_postgresql_url
 DIRECT_URL=your_direct_postgresql_url
-DEMO_MODE=true
+DEMO_MODE=false
 DEMO_UPLOADS_ENABLED=false
+PAYSLIP_MAX_UPLOAD_BYTES=2097152
 ```
 
 `DIRECT_URL` is recommended for migrations but is optional; Prisma falls back to `DATABASE_URL` when it is not provided.
 
-To enable payslip storage outside the protected public demo, also configure:
+The Vite client defaults to `http://localhost:4000`; set `VITE_API_URL` in `client/.env.local` only when the API uses another origin. To enable private payslip reads in any deployment—or writes/retry in a mutable private deployment—configure all four R2 values:
 
 ```dotenv
-PAYSLIP_MAX_UPLOAD_BYTES=2097152
 R2_ACCOUNT_ID=your_account_id
 R2_ACCESS_KEY_ID=your_access_key_id
 R2_SECRET_ACCESS_KEY=your_secret_access_key
 R2_BUCKET_NAME=your_private_bucket
 ```
+
+See [environment configuration](deployment/environment-configuration.md) for the complete local/Vercel/Render/cron ownership map, guarded bootstrap and verification variables, provider-managed `PORT`, and safe script requirements.
 
 ### 3. Apply migrations and seed demo data
 
@@ -171,6 +176,7 @@ Open `http://localhost:5173`. The API runs on `http://localhost:4000` by default
 | `npm run db:seed`                     | Seed the demo company and users                 |
 | `npm run db:seed:check`               | Verify the seeded baseline                      |
 | `npm run db:bootstrap-demo-auth`      | Create or repair production demo login accounts |
+| `npm run db:retry-payslip-deletes`    | Retry private objects for soft-deleted payslips |
 
 ## Project structure
 
@@ -198,7 +204,7 @@ The intended production setup is:
 - Neon hosts PostgreSQL.
 - Cloudflare R2 stores private payslip PDFs.
 
-Set `CLIENT_URL` to the exact deployed frontend origin. Configure `VITE_API_URL` in the Vercel project when the API uses a separate Render origin. Production cookies require HTTPS, and the frontend and API must use matching credentialed CORS settings.
+Set Render `CLIENT_URL` to the exact HTTPS deployed frontend origin and Vercel `VITE_API_URL` to the exact HTTPS API origin (unless using the supported `app.`/`api.` inference). Render owns `PORT`. The API uses exact-origin credentialed CORS, and production session cookies are secure, HTTP-only, and `SameSite=None`. See the [environment ownership map](deployment/environment-configuration.md).
 
 Render uses the dependency-free `/health` liveness endpoint. The bounded
 database-backed `/ready` endpoint is for dependency-aware monitoring and
@@ -206,8 +212,12 @@ post-deploy checks, not restart health. Follow the
 [operational readiness runbook](deployment/operational-readiness.md) for the
 stable contracts, graceful-shutdown budget, and production environment rules.
 
-For a public portfolio deployment, keep `DEMO_MODE=true` so public credentials cannot create, activate, disable, or elevate reusable private accounts. Keep `DEMO_UPLOADS_ENABLED=false`; startup rejects demo uploads until enforceable quotas and automated cleanup are implemented.
+For a public portfolio deployment, keep `DEMO_MODE=true` so public credentials cannot persist business changes or create, activate, disable, or elevate reusable private accounts. Keep `DEMO_UPLOADS_ENABLED=false`; startup rejects demo uploads until enforceable quotas and automated cleanup are implemented.
 
 Public auth throttling is a provider control, not process-local middleware. Follow [the Cloudflare edge-throttling runbook](deployment/public-auth-edge-throttling.md), including disabling the direct Render hostname, before considering login and token traffic externally bounded.
 
 Auth lifecycle cleanup is declared as a daily Render cron job in `render.yaml`. Follow [the auth-table maintenance runbook](deployment/auth-table-maintenance.md) to activate the Blueprint cron, provide its database secret, trigger an initial run, and verify retention behavior. Repository configuration alone does not prove that the external cron is active.
+
+Soft-deleted payslip object cleanup is a separate daily Render cron. Follow the [payslip storage maintenance runbook](deployment/payslip-storage-maintenance.md) and provide its pooled database URL plus complete private R2 configuration; repository declaration does not prove activation.
+
+Before sharing a deployment, complete the [deployment verification checklist](deployment/verification-checklist.md), including exact CORS/cookie checks, demo non-persistence, private R2, `/health` versus `/ready`, both Render cron jobs, Cloudflare throttling, and safe request-ID logging.

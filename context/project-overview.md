@@ -17,7 +17,7 @@ The MVP should stay simple, but the architecture must be clean enough to grow in
 7. Enforce secure authentication and role-based access control.
 8. Keep the app performant through pagination, narrow API responses, caching, and clean query patterns.
 9. Preserve auditability for sensitive admin and employee actions.
-10. Protect the public demo from becoming a reusable company workspace or an unbounded Cloudflare R2 storage surface.
+10. Protect the public demo from becoming a mutable/reusable company workspace or a Cloudflare R2 storage surface by enforcing backend read-only behavior and fail-closed uploads.
 
 ## Core User Flow
 
@@ -102,7 +102,7 @@ Employee flow:
 - Admin can view and manage payslips for all employees.
 - Payslip access is protected by backend policy checks.
 - The database must not store PDF contents.
-- Public demo deployments must not expose unrestricted R2 writes; uploads should be disabled, tightly quota-limited, or cleaned up automatically in demo mode.
+- Public demo deployments are read-only and must run with uploads disabled. The current server rejects `DEMO_UPLOADS_ENABLED=true` at startup until enforceable quotas and automated cleanup are implemented together.
 
 ### Settings, Audit Logs, and Admin Operations
 
@@ -137,7 +137,7 @@ Employee flow:
 - Leave request creation and approval/rejection.
 - Payslip PDF upload to Cloudflare R2.
 - Employee payslip viewing/downloading.
-- Demo-mode protection for storage-consuming actions when the app is publicly deployed.
+- Backend-enforced demo read-only protection across persistent business/identity mutations, with login/logout as the bounded session exception and uploads disabled fail-closed.
 - Basic settings.
 - Audit logs for sensitive actions.
 - Pino technical logging.
@@ -184,4 +184,4 @@ Employee flow:
 14. The app can be deployed with Vercel, Render, Neon, and Cloudflare R2.
 15. The login page has no public registration path.
 16. New users are created only by admins or controlled seed/invitation flows.
-17. The public demo cannot be used to consume unbounded R2 storage, create a fresh company workspace, or create/elevate a reusable private identity.
+17. The public demo cannot persist business mutations, consume R2 storage, create a fresh company workspace, or create/elevate a reusable private identity; this is covered by the Section 25 route matrix and upload regressions.

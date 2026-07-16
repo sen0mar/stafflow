@@ -36,3 +36,7 @@ Production startup validation requires:
   `DEMO_UPLOADS_ENABLED=true` value fails startup until enforceable upload
   quotas and automated cleanup are implemented as real configuration and
   behavior. Private non-demo uploads do not depend on this demo-only flag.
+
+See [environment configuration](environment-configuration.md) for exact
+provider ownership and complete the
+[deployment verification checklist](verification-checklist.md) after activation.

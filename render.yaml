@@ -18,6 +18,8 @@ services:
         value: "true"
       - key: DEMO_UPLOADS_ENABLED
         value: "false"
+      - key: PAYSLIP_MAX_UPLOAD_BYTES
+        value: "2097152"
       - key: R2_ACCESS_KEY_ID
         sync: false
       - key: R2_ACCOUNT_ID

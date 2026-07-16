@@ -17,7 +17,10 @@ prints counts plus a generated request ID without printing object keys or
 signed URLs. A nonzero failed count sets a nonzero exit status so scheduled
 operations can alert and retry later.
 
-`render.yaml` declares a daily cron using this command. Configure its database
-and R2 environment variables in Render, then verify the cron is active after
-deployment. Re-running the command is safe because R2 deletion and missing
-objects are treated idempotently.
+`render.yaml` declares a daily cron using this command. Configure its pooled
+`DATABASE_URL` plus `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`,
+`R2_SECRET_ACCESS_KEY`, and `R2_BUCKET_NAME` in Render, then verify the cron is
+active after deployment. Re-running the command is safe because R2 deletion and
+missing objects are treated idempotently. The API also needs the complete R2
+group for private payslip reads in any deployment; public-demo writes remain
+blocked independently.

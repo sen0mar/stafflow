@@ -2,6 +2,11 @@
 
 Use this checklist before sharing the public portfolio demo and after any auth, storage, or deployment change.
 
+Code-enforced items are mapped to exact regressions in the
+[Section 25 matrix](audit-25-regression-matrix.md). Provider configuration and
+activation are separate manual controls covered by the
+[deployment verification checklist](../deployment/verification-checklist.md).
+
 ## Access Model
 
 - Public sign-up and password-recovery routes are not available. In demo mode the backend exposes login, logout, `/auth/me`, authenticated app configuration, read routes, and the non-mutating CSRF bootstrap; password change and invitation mutations are blocked.
@@ -31,7 +36,7 @@ DEMO_MODE=true
 DEMO_UPLOADS_ENABLED=false
 ```
 
-- If demo uploads are ever enabled, add strict per-demo quotas and automatic cleanup before enabling public traffic.
+- Demo upload enablement currently fails server startup. Add strict per-demo quotas and automatic cleanup as tested behavior before changing that invariant or enabling public traffic.
 - Payslip uploads must stay authenticated, admin-only, CSRF-protected, PDF-only, size-limited, and validated before R2 writes.
 
 ## Private File Access
@@ -67,6 +72,10 @@ Frontend route guards are only UX. Backend RBAC and ownership checks are the sec
 - Vercel deployment logs: check frontend build/deploy status, runtime errors, and API origin configuration.
 - Neon usage monitoring: check connection, storage, compute, and query usage for abnormal public-demo activity.
 - Cloudflare R2 usage checks: check object count, storage growth, and request volume; unexpected growth means disable uploads and rotate credentials if needed.
+
+These provider checks are not activated or proven by repository tests or
+configuration files. Record their verification externally without credentials,
+private object keys, or signed URLs.
 
 ## Deferred
 

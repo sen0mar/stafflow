@@ -78,16 +78,16 @@ Auth model:
 - New users are created by admins inside the app, seeded by scripts, or activated through controlled invitation/password setup flows.
 - Passwords are hashed with bcrypt.
 - Sessions are stored in PostgreSQL.
-- Session cookies are HTTP-only, secure in production, and use `SameSite=Lax` when frontend and API are under the same parent domain.
+- Session cookies are HTTP-only and use `SameSite=None; Secure` in production; local/test cookies use `SameSite=Lax` without `Secure`.
 - The database stores a hash of the session token, not the raw session token.
 - Session invalidation must be possible after logout, password change, account disable, and suspicious activity.
 - Frontend route guards are UX-only; the backend is the security boundary.
 - Protected frontend routes mount only after `/auth/me` confirms a user. HTTP 401 is treated as unauthenticated, while network and non-401 failures show a full-page retry state without mounting the app shell. Logout clears cached auth state and navigates away only after the server confirms session revocation.
-- Public demo mode must prevent storage abuse through disabled uploads, strict quotas, automatic cleanup, or another explicit guardrail before unrestricted R2 writes are exposed.
+- Public demo mode is backend-enforced read-only and uploads are disabled. Startup rejects upload enablement until enforceable quotas and automated cleanup exist.
 - Public demo mode must reject employee/account creation, invitation generation and acceptance, account-status mutations, and account elevation with `DEMO_READ_ONLY`.
 - Public auth request bodies are JSON-only and bounded at validation. Missing-user login attempts perform the same cost-12 bcrypt comparison path as bad-password attempts.
 - Login and invitation-acceptance traffic must be throttled at the provider edge across application instances. The production target is a Cloudflare-proxied API custom domain with the default Render hostname disabled; the deploy-time rule is documented under `deployment/`.
-- Password recovery is deferred. The API exposes no public forgot-password or reset-password routes until email delivery, atomic single-use token consumption, seeded-demo-account protection, throttling, expiry cleanup, and end-to-end tests are delivered as one feature. The existing `PasswordResetToken` model and migrations remain temporarily to avoid an unnecessary destructive migration, but runtime code does not read or write that table.
+- Password recovery is deferred. The API exposes no public forgot-password or reset-password routes until email delivery, atomic single-use token consumption, seeded-demo-account protection, throttling, expiry cleanup, and end-to-end tests are delivered as one feature. The existing `PasswordResetToken` model and migrations remain temporarily to avoid an unnecessary destructive migration, but runtime code does not read or write that table. The 404 behavior and guarded non-persistence coverage are mapped under audit Section 06 in `context/audit-25-regression-matrix.md`.
 - Retained credential transitions are atomic database operations. Password changes compare-and-set the verified current hash before updating it, revoking every active session, and writing the audit record in one Prisma transaction. Invitation acceptance conditionally consumes one unexpired, unused token; requires any matching account to remain `INVITED` with the invitation's expected identity and role; and activates the account, revokes every session, and writes the audit record in the same transaction.
 - Successful login persists the hashed session and the non-demo `lastLoginAt` update in one Prisma transaction. Demo login keeps `lastLoginAt` unchanged and serializes per-user session creation/pruning so concurrent shared-account logins cannot exceed the 100-row cap.
 - Terminal auth rows have seven-day retention with strict cutoff semantics: maintenance deletes sessions whose `expiresAt` or `revokedAt` is older than the cutoff, invitation tokens whose `expiresAt` or `acceptedAt` is older, and retained legacy password-reset tokens whose `expiresAt` or `usedAt` is older. One atomic daily run uses one cutoff, preserves live/current/boundary rows, and is safe to retry.
@@ -96,6 +96,9 @@ Auth model:
 ### Public Demo Mutation Policy
 
 When `DEMO_MODE=true`, the deployed public workspace is read-only for persistent business and identity data. The backend rejects every exposed non-read mutation across employees, departments, attendance, leave, payslips, settings, invitations, and password/profile changes with the stable `DEMO_READ_ONLY` error. This shared middleware is the security boundary; frontend-disabled controls and the demo banner are explanatory UX only.
+
+Exact middleware, UI, attack-chain, and guarded route-matrix regressions are
+mapped under audit Sections 03–04 in `context/audit-25-regression-matrix.md`.
 
 Login, logout, `/auth/me`, authenticated app configuration, GET routes, and the non-mutating CSRF bootstrap remain available. Login/logout are the bounded session lifecycle exception required to enter and leave the seeded demo. Demo login does not update `lastLoginAt`, and successful login atomically prunes stored sessions to the newest 100 rows per shared demo account while serializing concurrent logins for that account. The cap remains deliberately generous for shared portfolio access; it should not be lowered without observed concurrency evidence. Invitation generation/regeneration/acceptance and other credential or identity changes are blocked because they create tokens, sessions, audit entries, or lasting identity changes and can grow PostgreSQL. Existing authentication, CSRF, RBAC, ownership, validation, and upload protections remain in place; demo enforcement is additive and does not weaken private deployments.
 
@@ -332,14 +335,19 @@ Production `CLIENT_URL` must use HTTPS and `PORT` must be an integer from 1
 through 65535. Because upload quotas and automated cleanup are not implemented,
 startup fails closed whenever the demo-upload enablement flag is true.
 
-Expected backend environment groups:
-
-- App URLs and environment mode.
-- Database URLs: pooled `DATABASE_URL` and direct `DIRECT_URL` for migrations.
-- Session/cookie secrets.
-- Cloudflare R2 credentials and bucket config.
-- Email provider credentials once email-backed invitations or password recovery are implemented.
-- Demo-mode flags, if used, such as `DEMO_MODE`, `DEMO_UPLOADS_ENABLED`, upload quotas, or cleanup settings.
+The authoritative variable/owner map is
+`deployment/environment-configuration.md`. The implemented server schema contains
+only `NODE_ENV`, provider-owned/defaulted `PORT`, exact `CLIENT_URL`, pooled
+`DATABASE_URL`, optional migration-only `DIRECT_URL`, `DEMO_MODE`, fail-closed
+`DEMO_UPLOADS_ENABLED`, `PAYSLIP_MAX_UPLOAD_BYTES`, and four independently
+optional R2 credential/bucket fields. Startup permits missing or partial R2
+configuration because the client is lazy; every storage read/write/delete
+operation requires the complete four-value group and otherwise fails safely as
+unconfigured. `VITE_API_URL` is a Vercel/client build variable,
+not a server variable. Stafflow has no session-secret or email-provider variable:
+session tokens are randomly generated and hashed, and password recovery/email
+delivery remain deferred. Script-only bootstrap and read-only acknowledgement
+variables are documented separately from runtime settings.
 
 ## Complex Patterns and Failure Modes
 
