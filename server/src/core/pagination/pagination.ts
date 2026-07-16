@@ -1,6 +1,14 @@
 import { z } from "zod";
 
-export const pageQuerySchema = z.coerce.number().int().min(1).default(1);
+// This keeps Prisma offsets finite and well below JavaScript's safe-integer bound.
+export const MAX_PAGINATION_PAGE = 10_000;
+
+export const pageQuerySchema = z.coerce
+  .number()
+  .refine(Number.isSafeInteger, { message: "Page must be a safe integer." })
+  .min(1)
+  .max(MAX_PAGINATION_PAGE)
+  .default(1);
 export const limitQuerySchema = z.coerce
   .number()
   .int()

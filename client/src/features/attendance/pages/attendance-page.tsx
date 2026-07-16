@@ -11,6 +11,7 @@ import {
   TableSkeleton,
 } from '@/shared/components/layout/page-state'
 import { useTableQueryState } from '@/shared/hooks/use-table-query-state'
+import { getAllowedQueryValue } from '@/shared/lib/query-values'
 import { useCurrentUser } from '@/features/auth/hooks/use-current-user'
 import { useDemoMode } from '@/features/auth/hooks/use-auth-config'
 import { useDepartments } from '@/features/departments/hooks/use-departments'
@@ -34,6 +35,13 @@ import type { AttendanceCorrectionValues } from '../schemas/attendance-correctio
 const pageSize = 10
 
 type StatusFilter = 'all' | AttendanceStatus
+const statusFilterValues = [
+  'all',
+  'PRESENT',
+  'ABSENT',
+  'LATE',
+  'PARTIAL',
+] as const satisfies readonly StatusFilter[]
 
 const getStatusFilter = (status: StatusFilter) =>
   status === 'all' ? undefined : status
@@ -54,7 +62,11 @@ const EmployeeAttendancePage = () => {
   const demoMode = useDemoMode()
   const tableState = useTableQueryState()
   const page = tableState.getNumber('page', 1)
-  const status = tableState.getString('status', 'all') as StatusFilter
+  const status = getAllowedQueryValue(
+    tableState.getString('status', 'all'),
+    statusFilterValues,
+    'all',
+  )
   const [confirmAction, setConfirmAction] = useState<
     'clock-in' | 'clock-out' | null
   >(null)
@@ -175,7 +187,11 @@ const AdminAttendancePage = () => {
   const page = tableState.getNumber('page', 1)
   const employeeId = tableState.getString('employeeId', 'all')
   const departmentId = tableState.getString('departmentId', 'all')
-  const status = tableState.getString('status', 'all') as StatusFilter
+  const status = getAllowedQueryValue(
+    tableState.getString('status', 'all'),
+    statusFilterValues,
+    'all',
+  )
   const from = tableState.getDate('from')
   const to = tableState.getDate('to')
   const [correctionOpen, setCorrectionOpen] = useState(false)

@@ -12,6 +12,7 @@ import {
   TableSkeleton,
 } from '@/shared/components/layout/page-state'
 import { useTableQueryState } from '@/shared/hooks/use-table-query-state'
+import { getAllowedQueryValue } from '@/shared/lib/query-values'
 import { useDepartments } from '@/features/departments/hooks/use-departments'
 import { useDemoMode } from '@/features/auth/hooks/use-auth-config'
 import type {
@@ -42,6 +43,19 @@ const pageSize = 10
 const allValue = 'all'
 
 type StatusFilter = EmployeeStatus | typeof allValue
+const statusFilterValues = [
+  allValue,
+  'ACTIVE',
+  'INACTIVE',
+  'TERMINATED',
+] as const satisfies readonly StatusFilter[]
+const employeeSortValues = [
+  'name',
+  'newest',
+  'oldest',
+  'department',
+  'status',
+] as const satisfies readonly EmployeeSort[]
 
 const getNullableValue = (value?: string | null) =>
   value && value.trim() ? value.trim() : null
@@ -54,8 +68,16 @@ export const EmployeesPage = () => {
   const page = tableState.getNumber('page', 1)
   const search = tableState.getString('search')
   const departmentId = tableState.getString('departmentId', allValue)
-  const status = tableState.getString('status', allValue) as StatusFilter
-  const sort = tableState.getString('sort', 'name') as EmployeeSort
+  const status = getAllowedQueryValue(
+    tableState.getString('status', allValue),
+    statusFilterValues,
+    allValue,
+  )
+  const sort = getAllowedQueryValue(
+    tableState.getString('sort', 'name'),
+    employeeSortValues,
+    'name',
+  )
   const [formOpen, setFormOpen] = useState(false)
   const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null)
   const [setupUrlsByEmployeeId, setSetupUrlsByEmployeeId] = useState<

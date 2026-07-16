@@ -4,6 +4,12 @@ import {
   limitQuerySchema,
   pageQuerySchema,
 } from "../../core/pagination/pagination";
+import {
+  emailInputSchema,
+  idInputSchema,
+  optionalIdInputSchema,
+  searchInputSchema,
+} from "../../core/validation/request-input";
 const optionalTrimmedString = z
   .string()
   .trim()
@@ -13,16 +19,16 @@ const optionalTrimmedString = z
 
 export const employeeIdSchema = z.object({
   params: z.object({
-    id: z.string().min(1),
+    id: idInputSchema,
   }),
 });
 
 export const listEmployeesSchema = z.object({
   query: z.object({
-    departmentId: z.string().trim().optional(),
+    departmentId: idInputSchema.optional(),
     limit: limitQuerySchema,
     page: pageQuerySchema,
-    search: z.string().trim().optional(),
+    search: searchInputSchema.optional(),
     sort: z
       .enum(["name", "newest", "oldest", "department", "status"])
       .default("name"),
@@ -32,8 +38,8 @@ export const listEmployeesSchema = z.object({
 
 export const createEmployeeSchema = z.object({
   body: z.object({
-    departmentId: optionalTrimmedString,
-    email: z.string().trim().email().toLowerCase(),
+    departmentId: optionalIdInputSchema,
+    email: emailInputSchema,
     employeeCode: z.string().trim().min(1).max(40),
     firstName: z.string().trim().min(1).max(80),
     hireDate: z.string().date().optional().nullable(),
@@ -46,7 +52,7 @@ export const createEmployeeSchema = z.object({
 export const updateEmployeeSchema = z.object({
   body: z
     .object({
-      departmentId: optionalTrimmedString,
+      departmentId: optionalIdInputSchema,
       employeeCode: z.string().trim().min(1).max(40).optional(),
       firstName: z.string().trim().min(1).max(80).optional(),
       hireDate: z.string().date().optional().nullable(),

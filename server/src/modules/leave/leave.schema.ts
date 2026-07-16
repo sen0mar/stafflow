@@ -4,6 +4,10 @@ import {
   limitQuerySchema,
   pageQuerySchema,
 } from "../../core/pagination/pagination";
+import {
+  idInputSchema,
+  searchInputSchema,
+} from "../../core/validation/request-input";
 const optionalNoteSchema = z
   .string()
   .trim()
@@ -14,7 +18,7 @@ const optionalNoteSchema = z
 
 export const leaveIdSchema = z.object({
   params: z.object({
-    id: z.string().min(1),
+    id: idInputSchema,
   }),
 });
 
@@ -32,7 +36,7 @@ export const listLeaveTypesSchema = z.object({
       }),
     limit: limitQuerySchema.default(100),
     page: pageQuerySchema,
-    search: z.string().trim().optional(),
+    search: searchInputSchema.optional(),
   }),
 });
 
@@ -71,8 +75,8 @@ export const listSelfLeaveRequestsSchema = z.object({
 
 export const listLeaveRequestsSchema = z.object({
   query: z.object({
-    employeeId: z.string().trim().optional(),
-    leaveTypeId: z.string().trim().optional(),
+    employeeId: idInputSchema.optional(),
+    leaveTypeId: idInputSchema.optional(),
     limit: limitQuerySchema,
     page: pageQuerySchema,
     status: z.enum(["PENDING", "APPROVED", "REJECTED"]).optional(),
@@ -82,7 +86,7 @@ export const listLeaveRequestsSchema = z.object({
 export const createLeaveRequestSchema = z.object({
   body: z.object({
     endDate: z.string().date(),
-    leaveTypeId: z.string().trim().min(1),
+    leaveTypeId: idInputSchema,
     reason: optionalNoteSchema,
     startDate: z.string().date(),
   }),

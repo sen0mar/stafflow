@@ -223,7 +223,9 @@ API rules:
 - Use JSON request/response bodies except file uploads.
 - Use `multipart/form-data` for payslip uploads.
 - Use pagination on all list endpoints.
+- Accept pagination pages only as safe integers from 1 through 10,000; with the shared 100-row limit ceiling, Prisma offsets therefore remain finite and safely bounded.
 - Use search and filters through query parameters.
+- Bound API IDs to 128 characters, search terms to 200 characters, emails to 254 characters, and public invitation tokens to 128 characters through shared boundary schemas.
 - Use consistent error responses.
 - Use `fetch` on the frontend through a small typed API wrapper. Do not use Axios.
 - Include credentials in frontend requests because auth uses cookies.
@@ -367,6 +369,7 @@ Operational risks:
 - An audit-worthy database mutation commits separately from its audit row, leaving a sensitive change without its required business record when auditing fails.
 - Logs are unstructured or inconsistent.
 - Request IDs are missing, making production debugging difficult.
+- Untrusted request IDs reach logs or response headers; incoming IDs must be 1-64 ASCII characters matching `[A-Za-z0-9][A-Za-z0-9._:-]*`, otherwise the API generates a UUID.
 - Technical logs and audit logs are treated as the same thing.
 - Environment variables are missing or inconsistent across Vercel, Render, Neon, and R2.
 
@@ -393,3 +396,4 @@ Operational risks:
 19. Every audit-worthy database mutation and its audit row use the same Prisma transaction client; related session revocation is part of that transaction.
 20. Payslip multipart parsing and display filenames are bounded; private R2 object keys and signed URLs never enter technical logs, and soft-deleted object removal has an idempotent retry path.
 21. Invitation tokens are fragment-based for new links, captured only in component memory, and synchronously removed from browser-visible URLs; legacy query tokens are scrubbed and redacted from access logs, and sensitive auth/CSRF and signed-download URL responses are never cacheable.
+22. Generic scalar inputs are bounded at API schemas before service or repository work; pagination pages are safe integers no greater than 10,000, and only short allowlisted ASCII request IDs may be reflected.

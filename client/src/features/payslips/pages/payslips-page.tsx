@@ -23,6 +23,7 @@ import { useDemoMode } from '@/features/auth/hooks/use-auth-config'
 import { useEmployees } from '@/features/employees/hooks/use-employees'
 import { useTableQueryState } from '@/shared/hooks/use-table-query-state'
 import { getRolePermissions, hasPermission } from '@/shared/lib/permissions'
+import { getAllowedQueryValue } from '@/shared/lib/query-values'
 import type { Payslip } from '../api/payslips.api'
 import { PayslipPreviewDialog } from '../components/payslip-preview-dialog'
 import { PayslipUploadDialog } from '../components/payslip-upload-dialog'
@@ -54,8 +55,25 @@ const months = [
   'Dec',
 ]
 
-type MonthFilter = 'all' | `${number}`
-type YearFilter = 'all' | `${number}`
+const monthFilterValues = [
+  'all',
+  '1',
+  '2',
+  '3',
+  '4',
+  '5',
+  '6',
+  '7',
+  '8',
+  '9',
+  '10',
+  '11',
+  '12',
+] as const
+const yearFilterValues = ['all', ...years.map(String)]
+
+type MonthFilter = (typeof monthFilterValues)[number]
+type YearFilter = string
 
 const formatFileSize = (bytes: number) => {
   if (bytes < 1024 * 1024) {
@@ -196,8 +214,16 @@ export const PayslipsPage = () => {
   const tableState = useTableQueryState()
   const page = tableState.getNumber('page', 1)
   const search = tableState.getString('search')
-  const month = tableState.getString('month', 'all') as MonthFilter
-  const year = tableState.getString('year', 'all') as YearFilter
+  const month = getAllowedQueryValue(
+    tableState.getString('month', 'all'),
+    monthFilterValues,
+    'all',
+  )
+  const year = getAllowedQueryValue(
+    tableState.getString('year', 'all'),
+    yearFilterValues,
+    'all',
+  )
   const [uploadOpen, setUploadOpen] = useState(false)
   const [previewPayslip, setPreviewPayslip] = useState<Payslip | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)

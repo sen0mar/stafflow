@@ -4,10 +4,14 @@ import {
   limitQuerySchema,
   pageQuerySchema,
 } from "../../core/pagination/pagination";
+import {
+  idInputSchema,
+  searchInputSchema,
+} from "../../core/validation/request-input";
 
 export const departmentIdSchema = z.object({
   params: z.object({
-    id: z.string().min(1),
+    id: idInputSchema,
   }),
 });
 
@@ -25,7 +29,7 @@ export const listDepartmentsSchema = z.object({
       }),
     page: pageQuerySchema,
     pageSize: limitQuerySchema,
-    search: z.string().trim().optional(),
+    search: searchInputSchema.optional(),
   }),
 });
 

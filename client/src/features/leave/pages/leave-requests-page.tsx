@@ -28,6 +28,7 @@ import { useDemoMode } from '@/features/auth/hooks/use-auth-config'
 import { useEmployees } from '@/features/employees/hooks/use-employees'
 import { useTableQueryState } from '@/shared/hooks/use-table-query-state'
 import { formatDateOnly } from '@/shared/lib/dates'
+import { getAllowedQueryValue } from '@/shared/lib/query-values'
 import type {
   LeaveRequest,
   LeaveRequestStatus,
@@ -57,7 +58,13 @@ import type {
 
 const pageSize = 10
 
-type StatusFilter = 'all' | LeaveRequestStatus
+type StatusFilter = 'all' | Exclude<LeaveRequestStatus, 'CANCELLED'>
+const statusFilterValues = [
+  'all',
+  'PENDING',
+  'APPROVED',
+  'REJECTED',
+] as const satisfies readonly StatusFilter[]
 type NoteMode = 'reason' | 'review'
 
 const getStatusFilter = (status: StatusFilter) =>
@@ -241,7 +248,11 @@ const EmployeeLeavePage = () => {
   const demoMode = useDemoMode()
   const tableState = useTableQueryState()
   const page = tableState.getNumber('page', 1)
-  const status = tableState.getString('status', 'all') as StatusFilter
+  const status = getAllowedQueryValue(
+    tableState.getString('status', 'all'),
+    statusFilterValues,
+    'all',
+  )
   const selfRequestsQuery = useSelfLeaveRequests({
     limit: pageSize,
     page,
@@ -504,7 +515,11 @@ const AdminLeavePage = () => {
   const page = tableState.getNumber('page', 1)
   const employeeId = tableState.getString('employeeId', 'all')
   const leaveTypeId = tableState.getString('leaveTypeId', 'all')
-  const status = tableState.getString('status', 'all') as StatusFilter
+  const status = getAllowedQueryValue(
+    tableState.getString('status', 'all'),
+    statusFilterValues,
+    'all',
+  )
   const [reviewAction, setReviewAction] = useState<'approve' | 'reject' | null>(
     null,
   )

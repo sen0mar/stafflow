@@ -32,6 +32,7 @@ import { PaginationControls } from '@/shared/components/data-table/pagination-co
 import { PageHeader } from '@/shared/components/layout/page-header'
 import { useCurrentUser } from '@/features/auth/hooks/use-current-user'
 import { getRolePermissions, hasPermission } from '@/shared/lib/permissions'
+import { getAllowedQueryValue } from '@/shared/lib/query-values'
 import { useTableQueryState } from '@/shared/hooks/use-table-query-state'
 import type { AuditLog } from '../api/audit-logs.api'
 import { useAuditLog, useAuditLogs } from '../hooks/use-audit-logs'
@@ -74,6 +75,8 @@ const entityTypeOptions = [
 
 type ActionFilter = 'all' | (typeof actionOptions)[number]
 type EntityTypeFilter = 'all' | (typeof entityTypeOptions)[number]
+const actionFilterOptions = ['all', ...actionOptions] as const
+const entityTypeFilterOptions = ['all', ...entityTypeOptions] as const
 
 const formatDateTime = (value: string) =>
   new Intl.DateTimeFormat(undefined, {
@@ -344,12 +347,17 @@ export const AuditLogsPage = () => {
   const tableState = useTableQueryState()
   const page = tableState.getNumber('page', 1)
   const actorUserId = tableState.getString('actorUserId')
-  const entityType = tableState.getString(
-    'entityType',
+  const entityType: EntityTypeFilter = getAllowedQueryValue(
+    tableState.getString('entityType', 'all'),
+    entityTypeFilterOptions,
     'all',
-  ) as EntityTypeFilter
+  )
   const entityId = tableState.getString('entityId')
-  const action = tableState.getString('action', 'all') as ActionFilter
+  const action: ActionFilter = getAllowedQueryValue(
+    tableState.getString('action', 'all'),
+    actionFilterOptions,
+    'all',
+  )
   const createdAtFrom = tableState.getDate('from')
   const createdAtTo = tableState.getDate('to')
   const [selectedAuditLogId, setSelectedAuditLogId] = useState<string | null>(

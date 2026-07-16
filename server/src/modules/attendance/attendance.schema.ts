@@ -4,11 +4,12 @@ import {
   limitQuerySchema,
   pageQuerySchema,
 } from "../../core/pagination/pagination";
+import { idInputSchema } from "../../core/validation/request-input";
 const optionalDateTimeSchema = z.string().datetime().optional().nullable();
 
 export const attendanceIdSchema = z.object({
   params: z.object({
-    id: z.string().min(1),
+    id: idInputSchema,
   }),
 });
 
@@ -24,8 +25,8 @@ export const listSelfAttendanceSchema = z.object({
 
 export const listAttendanceSchema = z.object({
   query: z.object({
-    departmentId: z.string().trim().optional(),
-    employeeId: z.string().trim().optional(),
+    departmentId: idInputSchema.optional(),
+    employeeId: idInputSchema.optional(),
     from: z.string().date().optional(),
     limit: limitQuerySchema,
     page: pageQuerySchema,

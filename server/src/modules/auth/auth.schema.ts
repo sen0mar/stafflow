@@ -1,18 +1,17 @@
 import { z } from "zod";
 
+import {
+  emailInputSchema,
+  publicTokenInputSchema,
+  requestInputLimits,
+} from "../../core/validation/request-input";
+
 export const authInputLimits = {
-  emailCharacters: 254,
+  emailCharacters: requestInputLimits.emailCharacters,
   passwordBytes: 72,
   passwordCharacters: 72,
-  tokenCharacters: 128,
+  tokenCharacters: requestInputLimits.publicTokenCharacters,
 } as const;
-
-const emailSchema = z
-  .string()
-  .trim()
-  .max(authInputLimits.emailCharacters)
-  .email()
-  .toLowerCase();
 
 const passwordSchema = z
   .string()
@@ -26,11 +25,9 @@ const passwordSchema = z
     },
   );
 
-const tokenSchema = z.string().min(32).max(authInputLimits.tokenCharacters);
-
 export const loginSchema = z.object({
   body: z.object({
-    email: emailSchema,
+    email: emailInputSchema,
     password: passwordSchema,
   }),
 });
@@ -45,7 +42,7 @@ export const changePasswordSchema = z.object({
 export const acceptInvitationSchema = z.object({
   body: z.object({
     password: passwordSchema,
-    token: tokenSchema,
+    token: publicTokenInputSchema,
   }),
 });
 

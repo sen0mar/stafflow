@@ -64,6 +64,7 @@ Keep entries short. This file should explain what changed, not become a detailed
 - Feature 57: Transactional Audits — made department, employee update/status/self-profile, and leave-type mutations atomic with their audit rows; kept account-status session revocation in the same employee transaction; and added injected audit-failure rollback coverage for every converted path.
 - Feature 58: Payslip Storage Hardening — bounded multipart parsing and sanitized display filenames, reused one lazy private R2 client, replaced key-bearing failure logs with safe request-scoped classifications, and added idempotent scheduled recovery for soft-deleted objects with focused mock coverage.
 - Feature 59: Secret Cache and Referrer Hardening — moved invitation tokens to fragment links with synchronous fragment/legacy-query scrubbing, made auth and signed-download responses non-cacheable, redacted access-log URL/referrer secrets, and added baseline Vercel browser headers while deferring CSP to verified deployment origins.
+- Feature 60: Generic Request Validation — bounded safe pagination and shared scalar inputs at API schemas, restricted reflected request IDs, validated client URL filter unions, and added boundary-focused regression coverage.
 
 ## Entry Format
 

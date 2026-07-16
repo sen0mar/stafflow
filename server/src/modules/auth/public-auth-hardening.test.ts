@@ -24,6 +24,20 @@ import { login } from "./auth.service";
 import { logger } from "../../core/logger/logger";
 
 describe("public auth request hardening", () => {
+  it("returns a controlled 422 before oversized input reaches auth work", async () => {
+    vi.mocked(login).mockClear();
+
+    await request(createApp())
+      .post("/auth/login")
+      .send({ email: `${"a".repeat(254)}@example.com`, password: "password" })
+      .expect(422)
+      .expect(({ body }) => {
+        expect(body.error.code).toBe("VALIDATION_ERROR");
+      });
+
+    expect(login).not.toHaveBeenCalled();
+  });
+
   it("does not let a cross-site-style form login establish a session", async () => {
     const response = await request(createApp())
       .post("/auth/login")

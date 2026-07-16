@@ -4,10 +4,11 @@ import {
   limitQuerySchema,
   pageQuerySchema,
 } from "../../core/pagination/pagination";
+import { idInputSchema } from "../../core/validation/request-input";
 
 export const auditLogIdSchema = z.object({
   params: z.object({
-    id: z.string().min(1),
+    id: idInputSchema,
   }),
 });
 
@@ -15,10 +16,10 @@ export const listAuditLogsSchema = z.object({
   query: z
     .object({
       action: z.string().trim().min(1).max(120).optional(),
-      actorUserId: z.string().trim().min(1).optional(),
+      actorUserId: idInputSchema.optional(),
       createdAtFrom: z.string().datetime().optional(),
       createdAtTo: z.string().datetime().optional(),
-      entityId: z.string().trim().min(1).optional(),
+      entityId: idInputSchema.optional(),
       entityType: z.string().trim().min(1).max(120).optional(),
       limit: limitQuerySchema,
       page: pageQuerySchema,
