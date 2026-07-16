@@ -1,5 +1,3 @@
-import path from "node:path";
-
 import type { Express } from "express";
 
 import type { AuthContext } from "../../core/auth/auth.types";
@@ -9,19 +7,27 @@ import {
   getPaginationParams,
   toPaginatedResult,
 } from "../../core/pagination/pagination";
-import { assertValidPayslipPdf } from "../../core/storage/file-validation";
+import {
+  assertValidPayslipPdf,
+  sanitizePayslipDisplayFilename,
+} from "../../core/storage/file-validation";
 import {
   createPayslipObjectKey,
   createPrivateDownloadUrl,
   deletePrivateObject,
   uploadPrivatePayslipPdf,
 } from "../../core/storage/r2.service";
+import {
+  classifyStorageError,
+  isMissingStorageObjectError,
+} from "../../core/storage/storage-error";
 import { assertDemoUploadsAllowed } from "./demo-upload.guard";
 import {
   createOrReplacePayslipWithAuditLog,
   deletePayslipWithAuditLog,
   findEmployeeForPayslip,
   findPayslipById,
+  findSoftDeletedPayslipObjects,
   listPayslips,
   listSelfPayslips,
   type PayslipRecord,
@@ -40,8 +46,16 @@ import {
 interface AuditContext {
   actorUserId: string | null;
   ipAddress?: string;
+  requestId?: string;
   userAgent?: string;
 }
+
+type PayslipStorageOperation =
+  | "cleanup_failed_upload"
+  | "create_download_url"
+  | "delete_payslip"
+  | "delete_replaced_object"
+  | "retry_soft_deleted_object";
 
 const getFullName = (firstName: string, lastName: string) =>
   `${firstName} ${lastName}`;
@@ -126,23 +140,46 @@ const assertEmployeeCanReceivePayslip = async (employeeId: string) => {
   }
 };
 
-const cleanupUploadedObject = async (objectKey: string) => {
+const logStorageFailure = ({
+  error,
+  operation,
+  payslipId,
+  requestId,
+}: {
+  error: unknown;
+  operation: PayslipStorageOperation;
+  payslipId: string | null;
+  requestId?: string;
+}) => {
+  logger.error(
+    {
+      errorClassification: classifyStorageError(error),
+      operation,
+      payslipId,
+      requestId,
+    },
+    "Payslip storage operation failed",
+  );
+};
+
+const cleanupUploadedObject = async (objectKey: string, requestId?: string) => {
   try {
     await deletePrivateObject(objectKey);
   } catch (error) {
-    logger.error(
-      {
-        err: error,
-        objectKey,
-      },
-      "Failed to clean up uploaded payslip object after database error",
-    );
+    logStorageFailure({
+      error,
+      operation: "cleanup_failed_upload",
+      payslipId: null,
+      requestId,
+    });
   }
 };
 
 const deleteReplacedObject = async (
   objectKey: string | null,
   newObjectKey: string,
+  payslipId: string,
+  requestId?: string,
 ) => {
   if (!objectKey || objectKey === newObjectKey) {
     return;
@@ -151,13 +188,12 @@ const deleteReplacedObject = async (
   try {
     await deletePrivateObject(objectKey);
   } catch (error) {
-    logger.error(
-      {
-        err: error,
-        objectKey,
-      },
-      "Failed to delete replaced payslip object",
-    );
+    logStorageFailure({
+      error,
+      operation: "delete_replaced_object",
+      payslipId,
+      requestId,
+    });
   }
 };
 
@@ -228,17 +264,22 @@ export const uploadPayslip = async ({
     const { oldObjectKey, payslip } = await createOrReplacePayslipWithAuditLog({
       ...auditContext,
       contentType: validFile.mimetype,
-      fileName: path.basename(validFile.originalname),
+      fileName: sanitizePayslipDisplayFilename(validFile.originalname),
       fileSize: validFile.size,
       input,
       r2ObjectKey: objectKey,
     });
 
-    await deleteReplacedObject(oldObjectKey, objectKey);
+    await deleteReplacedObject(
+      oldObjectKey,
+      objectKey,
+      payslip.id,
+      auditContext.requestId,
+    );
 
     return toPayslipDto(payslip);
   } catch (error) {
-    await cleanupUploadedObject(objectKey);
+    await cleanupUploadedObject(objectKey, auditContext.requestId);
     throw error;
   }
 };
@@ -258,20 +299,22 @@ export const deletePayslip = async (
   try {
     await deletePrivateObject(current.r2ObjectKey);
   } catch (error) {
-    logger.error(
-      {
-        err: error,
-        objectKey: current.r2ObjectKey,
-        payslipId: id,
-      },
-      "Failed to delete payslip object after metadata deletion",
-    );
+    logStorageFailure({
+      error,
+      operation: "delete_payslip",
+      payslipId: id,
+      requestId: auditContext.requestId,
+    });
   }
 
   return toPayslipDto(payslip);
 };
 
-export const getPayslipDownload = async (auth: AuthContext, id: string) => {
+export const getPayslipDownload = async (
+  auth: AuthContext,
+  id: string,
+  requestId?: string,
+) => {
   const payslip = await assertPayslipExists(id);
   assertCanReadPayslip(auth, payslip);
 
@@ -283,14 +326,12 @@ export const getPayslipDownload = async (auth: AuthContext, id: string) => {
       url: download.url,
     };
   } catch (error) {
-    logger.error(
-      {
-        err: error,
-        objectKey: payslip.r2ObjectKey,
-        payslipId: id,
-      },
-      "Failed to create payslip download URL",
-    );
+    logStorageFailure({
+      error,
+      operation: "create_download_url",
+      payslipId: id,
+      requestId,
+    });
 
     throw new AppError({
       code: "PAYSLIP_DOWNLOAD_UNAVAILABLE",
@@ -298,4 +339,54 @@ export const getPayslipDownload = async (auth: AuthContext, id: string) => {
       statusCode: 502,
     });
   }
+};
+
+export const retrySoftDeletedPayslipObjectDeletes = async (
+  requestId: string,
+) => {
+  const batchSize = 100;
+  const result = {
+    attempted: 0,
+    deleted: 0,
+    failed: 0,
+    missing: 0,
+  };
+  let skip = 0;
+
+  while (true) {
+    const payslips = await findSoftDeletedPayslipObjects({
+      skip,
+      take: batchSize,
+    });
+
+    if (payslips.length === 0) {
+      break;
+    }
+
+    result.attempted += payslips.length;
+
+    for (const payslip of payslips) {
+      try {
+        await deletePrivateObject(payslip.r2ObjectKey);
+        result.deleted += 1;
+      } catch (error) {
+        if (isMissingStorageObjectError(error)) {
+          result.missing += 1;
+          continue;
+        }
+
+        result.failed += 1;
+        logStorageFailure({
+          error,
+          operation: "retry_soft_deleted_object",
+          payslipId: payslip.id,
+          requestId,
+        });
+      }
+    }
+
+    skip += payslips.length;
+  }
+
+  return result;
 };

@@ -9,3 +9,21 @@ services:
     envVars:
       - key: DATABASE_URL
         sync: false
+  - type: cron
+    name: stafflow-payslip-storage-maintenance
+    runtime: node
+    plan: starter
+    schedule: "47 3 * * *"
+    buildCommand: npm ci && npm exec -- prisma generate
+    startCommand: npm run db:retry-payslip-deletes
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: R2_ACCESS_KEY_ID
+        sync: false
+      - key: R2_ACCOUNT_ID
+        sync: false
+      - key: R2_BUCKET_NAME
+        sync: false
+      - key: R2_SECRET_ACCESS_KEY
+        sync: false

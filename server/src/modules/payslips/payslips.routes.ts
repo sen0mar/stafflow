@@ -18,8 +18,12 @@ import {
 
 const upload = multer({
   limits: {
+    fieldNameSize: 32,
+    fieldSize: 128,
+    fields: 3,
     fileSize: env.PAYSLIP_MAX_UPLOAD_BYTES,
     files: 1,
+    parts: 4,
   },
   storage: multer.memoryStorage(),
 });

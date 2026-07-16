@@ -17,6 +17,7 @@
     "format:check": "prettier --check .",
     "db:bootstrap-demo-auth": "tsx prisma/bootstrap-demo-auth.ts",
     "db:maintain-auth": "tsx scripts/maintain-auth-tables.ts",
+    "db:retry-payslip-deletes": "tsx scripts/retry-payslip-object-deletes.ts",
     "db:migrate:deploy": "prisma migrate deploy",
     "db:migrate:status": "prisma migrate status",
     "db:seed": "tsx prisma/seed.ts",

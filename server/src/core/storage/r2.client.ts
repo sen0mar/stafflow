@@ -32,10 +32,16 @@ const getRequiredR2Config = () => {
 
 export const getR2Config = () => getRequiredR2Config();
 
-export const createR2Client = () => {
+let r2Client: S3Client | undefined;
+
+export const getR2Client = () => {
+  if (r2Client) {
+    return r2Client;
+  }
+
   const config = getRequiredR2Config();
 
-  return new S3Client({
+  r2Client = new S3Client({
     credentials: {
       accessKeyId: config.accessKeyId,
       secretAccessKey: config.secretAccessKey,
@@ -44,4 +50,6 @@ export const createR2Client = () => {
     forcePathStyle: true,
     region: "auto",
   });
+
+  return r2Client;
 };

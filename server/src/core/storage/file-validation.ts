@@ -6,6 +6,27 @@ import { env } from "../../config/env";
 import { AppError } from "../errors/app-error";
 
 export const payslipPdfMimeType = "application/pdf";
+export const payslipDisplayFilenameMaxLength = 120;
+
+const getCrossPlatformBasename = (fileName: string) =>
+  fileName.replaceAll("\\", "/").split("/").at(-1) ?? "";
+
+const truncateCodePoints = (value: string, maxLength: number) =>
+  Array.from(value).slice(0, maxLength).join("");
+
+export const sanitizePayslipDisplayFilename = (originalName: string) => {
+  const basename = getCrossPlatformBasename(originalName)
+    .normalize("NFKC")
+    .replace(/[\p{Cc}\p{Cf}]/gu, "")
+    .replace(/[<>:"|?*]/g, "_")
+    .replace(/\s+/g, " ")
+    .trim();
+  const stem = basename.replace(/\.pdf$/i, "").replace(/^[. ]+|[. ]+$/g, "");
+  const maxStemLength = payslipDisplayFilenameMaxLength - ".pdf".length;
+  const boundedStem = truncateCodePoints(stem, maxStemLength).trimEnd();
+
+  return `${boundedStem || "payslip"}.pdf`;
+};
 
 export const assertValidPayslipPdf = (
   file: Express.Multer.File | undefined,

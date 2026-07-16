@@ -16,9 +16,13 @@ import {
   uploadPayslip,
 } from "./payslips.service";
 
-const getAuditContext = (request: Parameters<RequestHandler>[0]) => ({
+const getAuditContext = (
+  request: Parameters<RequestHandler>[0],
+  response: Parameters<RequestHandler>[1],
+) => ({
   actorUserId: request.auth?.userId ?? null,
   ipAddress: request.ip,
+  requestId: response.locals.requestId as string | undefined,
   userAgent: request.get("user-agent"),
 });
 
@@ -59,7 +63,7 @@ export const createPayslipController: RequestHandler = async (
 ) => {
   const { body } = createPayslipSchema.parse({ body: request.body });
   const payslip = await uploadPayslip({
-    auditContext: getAuditContext(request),
+    auditContext: getAuditContext(request, response),
     file: request.file,
     input: body,
   });
@@ -76,7 +80,7 @@ export const deletePayslipController: RequestHandler = async (
   const payslip = await deletePayslip(
     request.auth!,
     params.id,
-    getAuditContext(request),
+    getAuditContext(request, response),
   );
   const responseBody: ApiSuccess<typeof payslip> = { data: payslip };
 
@@ -88,7 +92,11 @@ export const downloadPayslipController: RequestHandler = async (
   response,
 ) => {
   const { params } = payslipIdSchema.parse({ params: request.params });
-  const download = await getPayslipDownload(request.auth!, params.id);
+  const download = await getPayslipDownload(
+    request.auth!,
+    params.id,
+    response.locals.requestId as string | undefined,
+  );
   const responseBody: ApiSuccess<typeof download> = { data: download };
 
   response.status(200).json(responseBody);

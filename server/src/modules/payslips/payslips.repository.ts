@@ -154,6 +154,27 @@ export const findEmployeeForPayslip = (employeeId: string) =>
     where: { id: employeeId },
   });
 
+export const findSoftDeletedPayslipObjects = ({
+  skip,
+  take,
+}: {
+  skip: number;
+  take: number;
+}) =>
+  prisma.payslip.findMany({
+    orderBy: [{ deletedAt: "asc" }, { id: "asc" }],
+    select: {
+      id: true,
+      r2ObjectKey: true,
+    },
+    where: {
+      deletedAt: { not: null },
+      status: "DELETED",
+    },
+    skip,
+    take,
+  });
+
 export const createOrReplacePayslipWithAuditLog = async ({
   actorUserId,
   contentType,

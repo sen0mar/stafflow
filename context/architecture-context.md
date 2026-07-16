@@ -57,6 +57,7 @@ Controllers must stay thin. Services own business rules. Repositories own databa
 - **Cloudflare R2** stores large private files:
   - Payslip PDFs and future employee documents.
   - PostgreSQL stores only metadata and the R2 object key, not the file contents.
+  - The server lazily configures one private R2 client per process. Soft-deleted payslip metadata retains its key so an idempotent manual/daily maintenance command can retry failed object deletion; missing objects count as successful cleanup.
 - **Render stdout logs** store structured technical logs emitted by Pino:
   - Operational logs are not a source of business truth.
 - **PostgreSQL AuditLog** stores business/security history:
@@ -303,6 +304,7 @@ Recommended domain setup:
 - Configure Express `trust proxy` correctly on Render so secure cookies and client IPs work as intended.
 - Activate and verify the provider-level public-auth rate-limit rule in `deployment/public-auth-edge-throttling.md`; repository code does not imply that external Cloudflare state is active.
 - Activate and verify the daily Render auth-table maintenance cron declared in `render.yaml` by following `deployment/auth-table-maintenance.md`; repository configuration does not prove that the external cron service or its database secret is active.
+- Activate and verify the daily Render payslip-storage maintenance cron declared in `render.yaml` by following `deployment/payslip-storage-maintenance.md`; it requires private R2 credentials and retries only soft-deleted payslip objects.
 
 Environment variables must be validated at server startup. Missing required variables should fail fast.
 
@@ -353,6 +355,8 @@ Storage risks:
 - Signed URLs live too long or are exposed in logs.
 - R2 uploads succeed but database writes fail, leaving orphan files.
 - Database writes succeed but R2 operations fail, leaving broken metadata.
+- Private R2 keys or signed URLs reach technical logs during storage failures.
+- Soft-deleted payslip objects remain in R2 because the deletion retry command or its scheduled deployment is inactive.
 
 Operational risks:
 
@@ -384,3 +388,4 @@ Operational risks:
 17. Leave request overlap checks, expected-status transitions, balance adjustments, and review audit logs commit atomically; balance-changing operations use serializable transactions with bounded serialization retries.
 18. Calendar-only fields use PostgreSQL `date` and `YYYY-MM-DD` API contracts; timestamp instants remain ISO strings, and browsers never timezone-convert date-only values.
 19. Every audit-worthy database mutation and its audit row use the same Prisma transaction client; related session revocation is part of that transaction.
+20. Payslip multipart parsing and display filenames are bounded; private R2 object keys and signed URLs never enter technical logs, and soft-deleted object removal has an idempotent retry path.

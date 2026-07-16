@@ -8,7 +8,7 @@ import {
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 import { payslipPdfMimeType } from "./file-validation";
-import { createR2Client, getR2Config } from "./r2.client";
+import { getR2Client, getR2Config } from "./r2.client";
 
 const signedUrlTtlSeconds = 60 * 5;
 
@@ -34,7 +34,7 @@ export const uploadPrivatePayslipPdf = async ({
   key: string;
 }) => {
   const r2Config = getR2Config();
-  const client = createR2Client();
+  const client = getR2Client();
 
   await client.send(
     new PutObjectCommand({
@@ -48,7 +48,7 @@ export const uploadPrivatePayslipPdf = async ({
 
 export const deletePrivateObject = async (key: string) => {
   const r2Config = getR2Config();
-  const client = createR2Client();
+  const client = getR2Client();
 
   await client.send(
     new DeleteObjectCommand({
@@ -60,7 +60,7 @@ export const deletePrivateObject = async (key: string) => {
 
 export const createPrivateDownloadUrl = async (key: string) => {
   const r2Config = getR2Config();
-  const client = createR2Client();
+  const client = getR2Client();
   const expiresAt = new Date(Date.now() + signedUrlTtlSeconds * 1000);
   const url = await getSignedUrl(
     client,
