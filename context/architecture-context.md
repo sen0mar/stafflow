@@ -111,6 +111,16 @@ Authorization layers:
 3. Feature policy files verify resource-specific ownership and self-vs-any behavior.
 4. Services enforce business rules before persistence.
 
+### Leave Request Date Policy
+
+For the simple MVP, leave duration is the inclusive count of calendar dates from
+the start date through the end date. Weekends and holidays are included; the MVP
+does not maintain a business-day or holiday calendar. A request must start and
+end in the same UTC calendar year and may span at most 365 inclusive calendar
+days. This keeps each approved request attributable to one annual balance and
+prevents a duration outside the supported product and database bounds from
+reaching Prisma.
+
 Examples:
 
 - Employees must not be able to access another employee's payslip by guessing an ID.

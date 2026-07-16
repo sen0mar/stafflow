@@ -21,6 +21,7 @@ import { Textarea } from '@/shared/components/ui/textarea'
 import type { LeaveType } from '../api/leave.api'
 import {
   leaveRequestFormSchema,
+  MAX_LEAVE_REQUEST_CALENDAR_DAYS,
   type LeaveRequestFormValues,
 } from '../schemas/leave-form.schema'
 
@@ -115,6 +116,11 @@ export const LeaveRequestForm = ({
             {isSubmitting ? 'Submitting...' : 'Submit request'}
           </Button>
         </div>
+        <p className="text-xs text-muted lg:col-span-4">
+          Requests must stay within one calendar year and may cover up to{' '}
+          {MAX_LEAVE_REQUEST_CALENDAR_DAYS} days. Every date in the range
+          counts, including weekends and holidays.
+        </p>
         <FormField
           control={form.control}
           name="reason"

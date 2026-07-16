@@ -20,7 +20,16 @@ export const leaveIdSchema = z.object({
 
 export const listLeaveTypesSchema = z.object({
   query: z.object({
-    isActive: z.coerce.boolean().optional(),
+    isActive: z
+      .enum(["true", "false"])
+      .optional()
+      .transform((value) => {
+        if (value === undefined) {
+          return undefined;
+        }
+
+        return value === "true";
+      }),
     limit: limitQuerySchema.default(100),
     page: pageQuerySchema,
     search: z.string().trim().optional(),

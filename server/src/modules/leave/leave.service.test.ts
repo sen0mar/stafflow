@@ -112,6 +112,82 @@ describe("leave.service", () => {
     expect(createLeaveRequestAtomically).not.toHaveBeenCalled();
   });
 
+  it("accepts a request ending on the same-year boundary", async () => {
+    vi.mocked(createLeaveRequestAtomically).mockResolvedValue(
+      leaveRequest({
+        endDate: new Date("2026-12-31T00:00:00.000Z"),
+        startDate: new Date("2026-12-31T00:00:00.000Z"),
+        totalDays: new Prisma.Decimal(1),
+      }),
+    );
+
+    await createSelfLeaveRequest(auth, {
+      endDate: "2026-12-31",
+      leaveTypeId: "leave-type-1",
+      reason: null,
+      startDate: "2026-12-31",
+    });
+
+    expect(createLeaveRequestAtomically).toHaveBeenCalledWith(
+      expect.objectContaining({
+        endDate: new Date("2026-12-31T00:00:00.000Z"),
+        startDate: new Date("2026-12-31T00:00:00.000Z"),
+        totalDays: 1,
+      }),
+    );
+  });
+
+  it("rejects cross-year requests before repository access", async () => {
+    await expect(
+      createSelfLeaveRequest(auth, {
+        endDate: "2027-01-01",
+        leaveTypeId: "leave-type-1",
+        reason: null,
+        startDate: "2026-12-31",
+      }),
+    ).rejects.toMatchObject({
+      code: "LEAVE_CROSS_YEAR_NOT_ALLOWED",
+      statusCode: 422,
+    });
+    expect(createLeaveRequestAtomically).not.toHaveBeenCalled();
+  });
+
+  it("accepts the maximum 365-day request span", async () => {
+    vi.mocked(createLeaveRequestAtomically).mockResolvedValue(
+      leaveRequest({
+        endDate: new Date("2025-12-31T00:00:00.000Z"),
+        startDate: new Date("2025-01-01T00:00:00.000Z"),
+        totalDays: new Prisma.Decimal(365),
+      }),
+    );
+
+    await createSelfLeaveRequest(auth, {
+      endDate: "2025-12-31",
+      leaveTypeId: "leave-type-1",
+      reason: null,
+      startDate: "2025-01-01",
+    });
+
+    expect(createLeaveRequestAtomically).toHaveBeenCalledWith(
+      expect.objectContaining({ totalDays: 365 }),
+    );
+  });
+
+  it("rejects a 366-day request before repository access", async () => {
+    await expect(
+      createSelfLeaveRequest(auth, {
+        endDate: "2024-12-31",
+        leaveTypeId: "leave-type-1",
+        reason: null,
+        startDate: "2024-01-01",
+      }),
+    ).rejects.toMatchObject({
+      code: "LEAVE_REQUEST_SPAN_EXCEEDED",
+      statusCode: 422,
+    });
+    expect(createLeaveRequestAtomically).not.toHaveBeenCalled();
+  });
+
   it("blocks approving requests that are already approved", async () => {
     vi.mocked(approveLeaveRequestWithBalance).mockRejectedValue(
       new LeaveMutationError("LEAVE_REQUEST_NOT_APPROVABLE"),

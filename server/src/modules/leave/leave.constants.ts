@@ -1,0 +1,1 @@
+export const MAX_LEAVE_REQUEST_CALENDAR_DAYS = 365;

@@ -58,6 +58,7 @@ Keep entries short. This file should explain what changed, not become a detailed
 - Feature 51: Atomic Authentication Transitions — made password changes and invitation acceptance transactional with conditional single-use/invariant checks, all-session revocation, atomic audit writes, and focused concurrency and rollback integration coverage while preserving password-reset deferral.
 - Feature 52: Bounded Auth Table Growth — made login session persistence atomic, serialized the 100-row shared-demo cap, added seven-day terminal-row retention with idempotent Prisma cleanup, declared a daily Render cron, and added preservation, rollback, concurrency, and retry coverage.
 - Feature 53: Leave Concurrency and Balance Integrity — moved leave overlap and status checks into conditional serializable transactions with bounded retries, made competing transitions commit exclusively, preserved shared balance updates and atomic audit writes, and added guarded PostgreSQL race coverage.
+- Feature 54: Leave Validation and Inactive Filtering — fixed literal active/inactive leave-type filtering, limited leave requests to 365 inclusive calendar days within one year before persistence, documented calendar-day balance behavior, mirrored the policy in the employee form, and added boundary regressions without changing transactional review semantics.
 
 ## Entry Format
 

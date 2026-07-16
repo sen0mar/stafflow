@@ -1,5 +1,15 @@
 import { z } from 'zod'
 
+export const MAX_LEAVE_REQUEST_CALENDAR_DAYS = 365
+
+const millisecondsPerDay = 86_400_000
+
+const toUtcDate = (value: string) => {
+  const [year, month, day] = value.split('-').map(Number)
+
+  return new Date(Date.UTC(year, month - 1, day))
+}
+
 export const leaveRequestFormSchema = z
   .object({
     endDate: z.string().min(1, 'End date is required.'),
@@ -10,14 +20,45 @@ export const leaveRequestFormSchema = z
       .optional(),
     startDate: z.string().min(1, 'Start date is required.'),
   })
-  .refine(
-    (value) =>
-      !value.startDate || !value.endDate || value.endDate >= value.startDate,
-    {
-      message: 'End date must be on or after start date.',
-      path: ['endDate'],
-    },
-  )
+  .superRefine((value, context) => {
+    if (!value.startDate || !value.endDate) {
+      return
+    }
+
+    const startDate = toUtcDate(value.startDate)
+    const endDate = toUtcDate(value.endDate)
+
+    if (endDate < startDate) {
+      context.addIssue({
+        code: 'custom',
+        message: 'End date must be on or after start date.',
+        path: ['endDate'],
+      })
+      return
+    }
+
+    if (startDate.getUTCFullYear() !== endDate.getUTCFullYear()) {
+      context.addIssue({
+        code: 'custom',
+        message: 'Leave requests must stay within one calendar year.',
+        path: ['endDate'],
+      })
+      return
+    }
+
+    const totalDays =
+      Math.floor(
+        (endDate.getTime() - startDate.getTime()) / millisecondsPerDay,
+      ) + 1
+
+    if (totalDays > MAX_LEAVE_REQUEST_CALENDAR_DAYS) {
+      context.addIssue({
+        code: 'custom',
+        message: `Leave requests cannot exceed ${MAX_LEAVE_REQUEST_CALENDAR_DAYS} calendar days.`,
+        path: ['endDate'],
+      })
+    }
+  })
 
 export const leaveTypeFormSchema = z.object({
   annualAllowance: z

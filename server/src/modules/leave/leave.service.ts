@@ -7,6 +7,7 @@ import {
   getPaginationParams,
   toPaginatedResult,
 } from "../../core/pagination/pagination";
+import { MAX_LEAVE_REQUEST_CALENDAR_DAYS } from "./leave.constants";
 import { getSelfLeaveEmployeeId } from "./leave.policy";
 import {
   approveLeaveRequestWithBalance,
@@ -167,10 +168,28 @@ const assertDateRange = (input: CreateLeaveRequestInput) => {
     });
   }
 
+  if (startDate.getUTCFullYear() !== endDate.getUTCFullYear()) {
+    throw new AppError({
+      code: "LEAVE_CROSS_YEAR_NOT_ALLOWED",
+      message: "Leave requests must start and end in the same calendar year.",
+      statusCode: 422,
+    });
+  }
+
+  const totalDays = calculateTotalDays(startDate, endDate);
+
+  if (totalDays > MAX_LEAVE_REQUEST_CALENDAR_DAYS) {
+    throw new AppError({
+      code: "LEAVE_REQUEST_SPAN_EXCEEDED",
+      message: `Leave requests cannot exceed ${MAX_LEAVE_REQUEST_CALENDAR_DAYS} inclusive calendar days.`,
+      statusCode: 422,
+    });
+  }
+
   return {
     endDate,
     startDate,
-    totalDays: calculateTotalDays(startDate, endDate),
+    totalDays,
   };
 };
 
