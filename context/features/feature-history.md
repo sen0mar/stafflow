@@ -68,6 +68,7 @@ Keep entries short. This file should explain what changed, not become a detailed
 - Feature 61: Deterministic Singleton Settings — enforced stable company, attendance, and leave settings IDs with a fail-closed migration and read-only deployment preflight; serialized first access and audited updates; switched all readers to deterministic lookups; verified Unit 11 attendance enforcement; and labeled non-operational company/leave fields as metadata.
 - Feature 62: Searchable Relationship Selectors — replaced first-page employee, department, and leave-type option ceilings with accessible debounced server-backed selectors using bounded 20-row searches and selected-value detail preservation across attendance, leave, payslips, and employee management.
 - Feature 63: Frontend Auth and Filter Reliability — made protected auth failures fail closed with retry, kept authenticated UI intact on failed logout, synchronized URL-backed search drafts across navigation and resets, and restricted client page parsing to positive safe integers.
+- Feature 64: Idle Homepage Canvas Scheduling — replaced the homepage dot canvas's perpetual animation loop with a single-frame event-driven scheduler, added visibility and reduced-motion lifecycle handling, and verified idle, interaction, resize, theme, and high-DPI behavior with deterministic coverage.
 
 ## Entry Format
 
