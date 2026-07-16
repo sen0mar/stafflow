@@ -70,7 +70,9 @@ describe('EmployeeInvitationsPanel', () => {
       ),
     ).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Copied' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Hide link' })).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: 'Hide link' }),
+    ).toBeInTheDocument()
   })
 
   it('removes accepted or expired rows when invitations change', () => {

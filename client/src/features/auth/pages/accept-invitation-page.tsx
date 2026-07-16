@@ -1,12 +1,6 @@
 import { useMemo, useState } from 'react'
 import type { FormEvent } from 'react'
-import {
-  ArrowLeft,
-  CheckCircle2,
-  KeyRound,
-  Loader2,
-  LogIn,
-} from 'lucide-react'
+import { ArrowLeft, CheckCircle2, KeyRound, Loader2, LogIn } from 'lucide-react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { Button } from '@/shared/components/ui/button'
@@ -160,9 +154,7 @@ export const AcceptInvitationPage = () => {
                     autoComplete="new-password"
                     id="confirmPassword"
                     name="confirmPassword"
-                    onChange={(event) =>
-                      setConfirmPassword(event.target.value)
-                    }
+                    onChange={(event) => setConfirmPassword(event.target.value)}
                     placeholder="Repeat your password"
                     type="password"
                     value={confirmPassword}

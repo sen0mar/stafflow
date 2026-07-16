@@ -395,10 +395,7 @@ export const SettingsPage = () => {
                 render={({ field }) => (
                   <FormItem className="min-w-0">
                     <FormLabel>Timezone</FormLabel>
-                    <Select
-                      value={field.value}
-                      onValueChange={field.onChange}
-                    >
+                    <Select value={field.value} onValueChange={field.onChange}>
                       <FormControl>
                         <SelectTrigger className="w-full">
                           <SelectValue />

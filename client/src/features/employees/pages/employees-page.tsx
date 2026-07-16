@@ -178,7 +178,10 @@ export const EmployeesPage = () => {
     })
   }
 
-  const handleCopyInvitationUrl = async (employeeId: string, setupUrl: string) => {
+  const handleCopyInvitationUrl = async (
+    employeeId: string,
+    setupUrl: string,
+  ) => {
     try {
       await navigator.clipboard.writeText(setupUrl)
       setCopiedInvitationEmployeeId(employeeId)

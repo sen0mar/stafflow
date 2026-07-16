@@ -36,9 +36,8 @@ export const appRouter = createBrowserRouter([
     errorElement: <RouteErrorBoundary />,
     hydrateFallbackElement: routeFallbackElement,
     lazy: async () => {
-      const { AcceptInvitationPage } = await import(
-        '@/features/auth/pages/accept-invitation-page'
-      )
+      const { AcceptInvitationPage } =
+        await import('@/features/auth/pages/accept-invitation-page')
 
       return { Component: AcceptInvitationPage }
     },

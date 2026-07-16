@@ -80,8 +80,7 @@ export const ReactiveDotGrid = () => {
 
         easedPointer.x += (pointer.x - easedPointer.x) * pointerEase
         easedPointer.y += (pointer.y - easedPointer.y) * pointerEase
-        pointerInfluence +=
-          (targetInfluence - pointerInfluence) * influenceEase
+        pointerInfluence += (targetInfluence - pointerInfluence) * influenceEase
         easedPointer.active = pointerInfluence > 0.01
       }
 

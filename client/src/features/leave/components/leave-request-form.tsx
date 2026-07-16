@@ -62,10 +62,7 @@ export const LeaveRequestForm = ({
           render={({ field }) => (
             <FormItem className="min-w-0">
               <FormLabel>Leave type</FormLabel>
-              <Select
-                value={field.value}
-                onValueChange={field.onChange}
-              >
+              <Select value={field.value} onValueChange={field.onChange}>
                 <FormControl>
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Select type" />

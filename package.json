@@ -11,6 +11,7 @@
     "build": "npm run build --workspaces --if-present",
     "build:client": "npm --prefix client run build",
     "build:server": "npm --prefix server run build",
+    "check:npm-workspace": "node scripts/verify-npm-workspace.mjs",
     "lint": "npm run lint --workspaces --if-present",
     "format": "prettier --write .",
     "format:check": "prettier --check .",

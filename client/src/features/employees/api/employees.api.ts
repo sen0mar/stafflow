@@ -171,8 +171,9 @@ export const createEmployee = async (input: CreateEmployeeInput) => {
 }
 
 export const getEmployeeInvitations = async () => {
-  const response =
-    await apiClient<ApiResponse<EmployeeInvitation[]>>('/employees/invitations')
+  const response = await apiClient<ApiResponse<EmployeeInvitation[]>>(
+    '/employees/invitations',
+  )
 
   return response.data
 }

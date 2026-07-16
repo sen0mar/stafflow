@@ -88,9 +88,9 @@ export const EmployeeProfilePage = () => {
                   name="firstName"
                   render={({ field }) => (
                     <FormItem>
-                    <FormLabel>First name</FormLabel>
-                    <FormControl>
-                      <Input autoComplete="given-name" {...field} />
+                      <FormLabel>First name</FormLabel>
+                      <FormControl>
+                        <Input autoComplete="given-name" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -101,9 +101,9 @@ export const EmployeeProfilePage = () => {
                   name="lastName"
                   render={({ field }) => (
                     <FormItem>
-                    <FormLabel>Last name</FormLabel>
-                    <FormControl>
-                      <Input autoComplete="family-name" {...field} />
+                      <FormLabel>Last name</FormLabel>
+                      <FormControl>
+                        <Input autoComplete="family-name" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -114,9 +114,9 @@ export const EmployeeProfilePage = () => {
                   name="phone"
                   render={({ field }) => (
                     <FormItem>
-                    <FormLabel>Phone</FormLabel>
-                    <FormControl>
-                      <Input autoComplete="tel" {...field} />
+                      <FormLabel>Phone</FormLabel>
+                      <FormControl>
+                        <Input autoComplete="tel" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
