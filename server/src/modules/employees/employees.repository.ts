@@ -2,7 +2,10 @@ import type { EmploymentStatus, Prisma, UserStatus } from "@prisma/client";
 
 import { getCompanyDate } from "../../core/utils/company-day";
 import { parseDateOnly } from "../../core/utils/date-only";
-import { createAuditLog } from "../audit-logs/audit-log.service";
+import {
+  createAuditLog,
+  type AuditLogInput,
+} from "../audit-logs/audit-log.service";
 import { prisma } from "../../prisma/prisma.client";
 import type {
   CreateEmployeeInput,
@@ -414,60 +417,136 @@ export const regenerateEmployeeInvitationToken = async ({
     });
   });
 
-export const updateEmployee = (id: string, input: UpdateEmployeeInput) =>
-  prisma.employee.update({
-    data: {
-      ...(input.departmentId !== undefined
-        ? { departmentId: input.departmentId }
-        : {}),
-      ...(input.employeeCode !== undefined
-        ? { employeeCode: input.employeeCode }
-        : {}),
-      ...(input.firstName !== undefined ? { firstName: input.firstName } : {}),
-      ...(input.hireDate !== undefined
-        ? { hireDate: input.hireDate ? parseDateOnly(input.hireDate) : null }
-        : {}),
-      ...(input.jobTitle !== undefined ? { jobTitle: input.jobTitle } : {}),
-      ...(input.lastName !== undefined ? { lastName: input.lastName } : {}),
-      ...(input.phone !== undefined ? { phone: input.phone } : {}),
-      ...(input.terminationDate !== undefined
-        ? {
-            terminationDate: input.terminationDate
-              ? parseDateOnly(input.terminationDate)
-              : null,
-          }
-        : {}),
-    },
-    select: employeeSelect,
-    where: { id },
+type EmployeeMutationAuditLog = Omit<
+  AuditLogInput,
+  "entityId" | "entityType" | "metadata" | "tx"
+>;
+
+type StatusMutationAuditLog = Omit<
+  AuditLogInput,
+  "entityId" | "entityType" | "tx"
+> & { entityId: string | null };
+
+export const updateEmployeeWithAuditLog = ({
+  auditLog,
+  current,
+  id,
+  input,
+}: {
+  auditLog: EmployeeMutationAuditLog;
+  current: {
+    departmentId: string | null;
+    employeeCode: string;
+    firstName: string;
+    jobTitle: string | null;
+    lastName: string;
+    phone: string | null;
+  };
+  id: string;
+  input: UpdateEmployeeInput;
+}) =>
+  prisma.$transaction(async (tx) => {
+    const employee = await tx.employee.update({
+      data: {
+        ...(input.departmentId !== undefined
+          ? { departmentId: input.departmentId }
+          : {}),
+        ...(input.employeeCode !== undefined
+          ? { employeeCode: input.employeeCode }
+          : {}),
+        ...(input.firstName !== undefined
+          ? { firstName: input.firstName }
+          : {}),
+        ...(input.hireDate !== undefined
+          ? { hireDate: input.hireDate ? parseDateOnly(input.hireDate) : null }
+          : {}),
+        ...(input.jobTitle !== undefined ? { jobTitle: input.jobTitle } : {}),
+        ...(input.lastName !== undefined ? { lastName: input.lastName } : {}),
+        ...(input.phone !== undefined ? { phone: input.phone } : {}),
+        ...(input.terminationDate !== undefined
+          ? {
+              terminationDate: input.terminationDate
+                ? parseDateOnly(input.terminationDate)
+                : null,
+            }
+          : {}),
+      },
+      select: employeeSelect,
+      where: { id },
+    });
+
+    await createEmployeeAuditLog({
+      ...auditLog,
+      entityId: employee.id,
+      metadata: {
+        changedFields: Object.keys(input),
+        from: current,
+        to: {
+          departmentId: employee.departmentId,
+          employeeCode: employee.employeeCode,
+          firstName: employee.firstName,
+          jobTitle: employee.jobTitle,
+          lastName: employee.lastName,
+          phone: employee.phone,
+        },
+      },
+      tx,
+    });
+
+    return employee;
   });
 
-export const updateSelfEmployeeProfile = (
-  id: string,
+export const updateSelfEmployeeProfileWithAuditLog = ({
+  auditLog,
+  id,
+  input,
+}: {
+  auditLog: EmployeeMutationAuditLog;
+  id: string;
   input: {
     firstName?: string;
     lastName?: string;
     phone?: string | null;
-  },
-) =>
-  prisma.employee.update({
-    data: {
-      ...(input.firstName !== undefined ? { firstName: input.firstName } : {}),
-      ...(input.lastName !== undefined ? { lastName: input.lastName } : {}),
-      ...(input.phone !== undefined ? { phone: input.phone } : {}),
-    },
-    select: employeeSelect,
-    where: { id },
+  };
+}) =>
+  prisma.$transaction(async (tx) => {
+    const employee = await tx.employee.update({
+      data: {
+        ...(input.firstName !== undefined
+          ? { firstName: input.firstName }
+          : {}),
+        ...(input.lastName !== undefined ? { lastName: input.lastName } : {}),
+        ...(input.phone !== undefined ? { phone: input.phone } : {}),
+      },
+      select: employeeSelect,
+      where: { id },
+    });
+
+    await createEmployeeAuditLog({
+      ...auditLog,
+      entityId: employee.id,
+      metadata: {
+        changedFields: Object.keys(input),
+        selfService: true,
+      },
+      tx,
+    });
+
+    return employee;
   });
 
 export const updateEmployeeAndAccountStatus = async ({
   accountStatus,
   employeeId,
+  employeeAuditLog,
   employeeStatus,
+  userAuditLog,
 }: {
   accountStatus?: UserStatus;
   employeeId: string;
+  employeeAuditLog?: StatusMutationAuditLog;
   employeeStatus?: EmploymentStatus;
+  userAuditLog?: StatusMutationAuditLog;
 }) =>
   prisma.$transaction(async (tx) => {
     const companySettings =
@@ -512,6 +591,20 @@ export const updateEmployeeAndAccountStatus = async ({
           revokedAt: null,
           userId: employee.userId,
         },
+      });
+    }
+
+    if (employeeAuditLog) {
+      await createEmployeeAuditLog({
+        ...employeeAuditLog,
+        tx,
+      });
+    }
+
+    if (userAuditLog) {
+      await createUserAuditLogForEmployee({
+        ...userAuditLog,
+        tx,
       });
     }
 

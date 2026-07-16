@@ -1,7 +1,10 @@
 import type { Prisma } from "@prisma/client";
 
 import { prisma } from "../../prisma/prisma.client";
-import { createAuditLog } from "../audit-logs/audit-log.service";
+import {
+  createAuditLog,
+  type AuditLogInput,
+} from "../audit-logs/audit-log.service";
 import type {
   CreateDepartmentInput,
   ListDepartmentsInput,
@@ -82,63 +85,120 @@ export const findDepartmentByName = (name: string) =>
     where: { name },
   });
 
-export const createDepartment = (input: CreateDepartmentInput) =>
-  prisma.department.create({
-    data: {
-      description: input.description ?? null,
-      isActive: input.isActive ?? true,
-      name: input.name,
-    },
-    select: departmentSelect,
+type DepartmentAuditLog = Omit<
+  AuditLogInput,
+  "entityId" | "entityType" | "metadata" | "tx"
+>;
+
+export const createDepartmentWithAuditLog = ({
+  auditLog,
+  input,
+}: {
+  auditLog: DepartmentAuditLog;
+  input: CreateDepartmentInput;
+}) =>
+  prisma.$transaction(async (tx) => {
+    const department = await tx.department.create({
+      data: {
+        description: input.description ?? null,
+        isActive: input.isActive ?? true,
+        name: input.name,
+      },
+      select: departmentSelect,
+    });
+
+    await createAuditLog({
+      ...auditLog,
+      entityId: department.id,
+      entityType: "Department",
+      metadata: {
+        isActive: department.isActive,
+        name: department.name,
+      },
+      tx,
+    });
+
+    return department;
   });
 
-export const updateDepartment = (id: string, input: UpdateDepartmentInput) =>
-  prisma.department.update({
-    data: {
-      ...(input.description !== undefined
-        ? { description: input.description }
-        : {}),
-      ...(input.isActive !== undefined ? { isActive: input.isActive } : {}),
-      ...(input.name !== undefined ? { name: input.name } : {}),
-    },
-    select: departmentSelect,
-    where: { id },
+export const updateDepartmentWithAuditLog = ({
+  auditLog,
+  current,
+  id,
+  input,
+}: {
+  auditLog: DepartmentAuditLog;
+  current: {
+    description: string | null;
+    isActive: boolean;
+    name: string;
+  };
+  id: string;
+  input: UpdateDepartmentInput;
+}) =>
+  prisma.$transaction(async (tx) => {
+    const department = await tx.department.update({
+      data: {
+        ...(input.description !== undefined
+          ? { description: input.description }
+          : {}),
+        ...(input.isActive !== undefined ? { isActive: input.isActive } : {}),
+        ...(input.name !== undefined ? { name: input.name } : {}),
+      },
+      select: departmentSelect,
+      where: { id },
+    });
+
+    await createAuditLog({
+      ...auditLog,
+      entityId: department.id,
+      entityType: "Department",
+      metadata: {
+        changedFields: Object.keys(input),
+        from: current,
+        to: {
+          description: department.description,
+          isActive: department.isActive,
+          name: department.name,
+        },
+      },
+      tx,
+    });
+
+    return department;
   });
 
-export const deleteDepartment = (id: string) =>
-  prisma.department.delete({
-    select: departmentSelect,
-    where: { id },
+export const deleteDepartmentWithAuditLog = ({
+  auditLog,
+  employeeCount,
+  id,
+  name,
+}: {
+  auditLog: DepartmentAuditLog;
+  employeeCount: number;
+  id: string;
+  name: string;
+}) =>
+  prisma.$transaction(async (tx) => {
+    const department = await tx.department.delete({
+      select: departmentSelect,
+      where: { id },
+    });
+
+    await createAuditLog({
+      ...auditLog,
+      entityId: department.id,
+      entityType: "Department",
+      metadata: { employeeCount, name },
+      tx,
+    });
+
+    return department;
   });
 
 export const countDepartmentEmployees = (departmentId: string) =>
   prisma.employee.count({
     where: { departmentId },
-  });
-
-export const createDepartmentAuditLog = ({
-  action,
-  actorUserId,
-  entityId,
-  ipAddress,
-  metadata,
-  userAgent,
-}: {
-  action: string;
-  actorUserId: string | null;
-  entityId: string | null;
-  ipAddress?: string;
-  metadata?: Prisma.InputJsonValue;
-  userAgent?: string;
-}) =>
-  createAuditLog({
-    action,
-    actorUserId,
-    entityId,
-    entityType: "Department",
-    ipAddress,
-    metadata,
-    userAgent,
   });
 
 export type DepartmentRecord = Awaited<ReturnType<typeof findDepartmentById>>;

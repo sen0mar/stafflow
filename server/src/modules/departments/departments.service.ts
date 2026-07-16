@@ -12,13 +12,12 @@ import type {
 } from "./departments.schema";
 import {
   countDepartmentEmployees,
-  createDepartment,
-  createDepartmentAuditLog,
-  deleteDepartment,
+  createDepartmentWithAuditLog,
+  deleteDepartmentWithAuditLog,
   findDepartmentById,
   findDepartmentByName,
   listDepartments,
-  updateDepartment,
+  updateDepartmentWithAuditLog,
 } from "./departments.repository";
 
 interface AuditContext {
@@ -126,17 +125,14 @@ export const createNewDepartment = async (
   await assertUniqueDepartmentName(input.name);
 
   const department = await withDepartmentWriteErrors(() =>
-    createDepartment(input),
+    createDepartmentWithAuditLog({
+      auditLog: {
+        ...auditContext,
+        action: "DEPARTMENT_CREATED",
+      },
+      input,
+    }),
   );
-  await createDepartmentAuditLog({
-    ...auditContext,
-    action: "DEPARTMENT_CREATED",
-    entityId: department.id,
-    metadata: {
-      isActive: department.isActive,
-      name: department.name,
-    },
-  });
 
   return toDepartmentDto(department);
 };
@@ -153,26 +149,20 @@ export const updateExistingDepartment = async (
   }
 
   const department = await withDepartmentWriteErrors(() =>
-    updateDepartment(id, input),
-  );
-  await createDepartmentAuditLog({
-    ...auditContext,
-    action: "DEPARTMENT_UPDATED",
-    entityId: department.id,
-    metadata: {
-      changedFields: Object.keys(input),
-      from: {
+    updateDepartmentWithAuditLog({
+      auditLog: {
+        ...auditContext,
+        action: "DEPARTMENT_UPDATED",
+      },
+      current: {
         description: currentDepartment.description,
         isActive: currentDepartment.isActive,
         name: currentDepartment.name,
       },
-      to: {
-        description: department.description,
-        isActive: department.isActive,
-        name: department.name,
-      },
-    },
-  });
+      id,
+      input,
+    }),
+  );
 
   return toDepartmentDto(department);
 };
@@ -194,17 +184,16 @@ export const deleteExistingDepartment = async (
   }
 
   const deletedDepartment = await withDepartmentWriteErrors(() =>
-    deleteDepartment(id),
-  );
-  await createDepartmentAuditLog({
-    ...auditContext,
-    action: "DEPARTMENT_DELETED",
-    entityId: deletedDepartment.id,
-    metadata: {
+    deleteDepartmentWithAuditLog({
+      auditLog: {
+        ...auditContext,
+        action: "DEPARTMENT_DELETED",
+      },
       employeeCount,
+      id,
       name: department.name,
-    },
-  });
+    }),
+  );
 
   return toDepartmentDto(deletedDepartment);
 };

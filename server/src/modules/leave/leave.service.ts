@@ -15,9 +15,8 @@ import {
   cancelLeaveRequestAtomically,
   countLeaveTypeUsage,
   createLeaveRequestAtomically,
-  createLeaveType,
-  createLeaveTypeAuditLog,
-  deleteLeaveType,
+  createLeaveTypeWithAuditLog,
+  deleteLeaveTypeWithAuditLog,
   findLeaveRequestById,
   findLeaveTypeById,
   findLeaveTypeByName,
@@ -27,7 +26,7 @@ import {
   listLeaveTypes,
   listSelfLeaveRequests,
   rejectLeaveRequestAtomically,
-  updateLeaveType,
+  updateLeaveTypeWithAuditLog,
   type LeaveBalanceRecord,
   type LeaveRequestRecord,
   type LeaveTypeRecord,
@@ -340,19 +339,14 @@ export const createNewLeaveType = async (
 ) => {
   await assertUniqueLeaveTypeName(input.name);
   const leaveType = await withLeaveTypeWriteErrors(() =>
-    createLeaveType(input),
+    createLeaveTypeWithAuditLog({
+      auditLog: {
+        ...auditContext,
+        action: "LEAVE_TYPE_CREATED",
+      },
+      input,
+    }),
   );
-  await createLeaveTypeAuditLog({
-    ...auditContext,
-    action: "LEAVE_TYPE_CREATED",
-    entityId: leaveType.id,
-    metadata: {
-      annualAllowance: leaveType.annualAllowance?.toString() ?? null,
-      isActive: leaveType.isActive,
-      isPaid: leaveType.isPaid,
-      name: leaveType.name,
-    },
-  });
 
   return toLeaveTypeDto(leaveType);
 };
@@ -369,30 +363,22 @@ export const updateExistingLeaveType = async (
   }
 
   const leaveType = await withLeaveTypeWriteErrors(() =>
-    updateLeaveType(id, input),
-  );
-  await createLeaveTypeAuditLog({
-    ...auditContext,
-    action: "LEAVE_TYPE_UPDATED",
-    entityId: leaveType.id,
-    metadata: {
-      changedFields: Object.keys(input),
-      from: {
-        annualAllowance: current.annualAllowance?.toString() ?? null,
+    updateLeaveTypeWithAuditLog({
+      auditLog: {
+        ...auditContext,
+        action: "LEAVE_TYPE_UPDATED",
+      },
+      current: {
+        annualAllowance: current.annualAllowance,
         description: current.description,
         isActive: current.isActive,
         isPaid: current.isPaid,
         name: current.name,
       },
-      to: {
-        annualAllowance: leaveType.annualAllowance?.toString() ?? null,
-        description: leaveType.description,
-        isActive: leaveType.isActive,
-        isPaid: leaveType.isPaid,
-        name: leaveType.name,
-      },
-    },
-  });
+      id,
+      input,
+    }),
+  );
 
   return toLeaveTypeDto(leaveType);
 };
@@ -413,17 +399,17 @@ export const deleteExistingLeaveType = async (
     });
   }
 
-  const leaveType = await withLeaveTypeWriteErrors(() => deleteLeaveType(id));
-  await createLeaveTypeAuditLog({
-    ...auditContext,
-    action: "LEAVE_TYPE_DELETED",
-    entityId: leaveType.id,
-    metadata: {
-      leaveBalances: usage.leaveBalances,
-      leaveRequests: usage.leaveRequests,
+  const leaveType = await withLeaveTypeWriteErrors(() =>
+    deleteLeaveTypeWithAuditLog({
+      auditLog: {
+        ...auditContext,
+        action: "LEAVE_TYPE_DELETED",
+      },
+      id,
       name: current.name,
-    },
-  });
+      usage,
+    }),
+  );
 
   return toLeaveTypeDto(leaveType);
 };

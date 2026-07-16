@@ -1,7 +1,10 @@
 import { Prisma } from "@prisma/client";
 
 import { prisma } from "../../prisma/prisma.client";
-import { createAuditLog } from "../audit-logs/audit-log.service";
+import {
+  createAuditLog,
+  type AuditLogInput,
+} from "../audit-logs/audit-log.service";
 import type {
   CreateLeaveRequestInput,
   CreateLeaveTypeInput,
@@ -276,39 +279,134 @@ export const findLeaveTypeByName = (name: string) =>
     where: { name },
   });
 
-export const createLeaveType = (input: CreateLeaveTypeInput) =>
-  prisma.leaveType.create({
-    data: {
-      annualAllowance: input.annualAllowance ?? null,
-      description: input.description ?? null,
-      isActive: input.isActive ?? true,
-      isPaid: input.isPaid ?? true,
-      name: input.name,
-    },
-    select: leaveTypeSelect,
+type LeaveTypeAuditLog = Omit<
+  AuditLogInput,
+  "entityId" | "entityType" | "metadata" | "tx"
+>;
+
+export const createLeaveTypeWithAuditLog = ({
+  auditLog,
+  input,
+}: {
+  auditLog: LeaveTypeAuditLog;
+  input: CreateLeaveTypeInput;
+}) =>
+  prisma.$transaction(async (tx) => {
+    const leaveType = await tx.leaveType.create({
+      data: {
+        annualAllowance: input.annualAllowance ?? null,
+        description: input.description ?? null,
+        isActive: input.isActive ?? true,
+        isPaid: input.isPaid ?? true,
+        name: input.name,
+      },
+      select: leaveTypeSelect,
+    });
+
+    await createAuditLog({
+      ...auditLog,
+      entityId: leaveType.id,
+      entityType: "LeaveType",
+      metadata: {
+        annualAllowance: leaveType.annualAllowance?.toString() ?? null,
+        isActive: leaveType.isActive,
+        isPaid: leaveType.isPaid,
+        name: leaveType.name,
+      },
+      tx,
+    });
+
+    return leaveType;
   });
 
-export const updateLeaveType = (id: string, input: UpdateLeaveTypeInput) =>
-  prisma.leaveType.update({
-    data: {
-      ...(input.annualAllowance !== undefined
-        ? { annualAllowance: input.annualAllowance }
-        : {}),
-      ...(input.description !== undefined
-        ? { description: input.description }
-        : {}),
-      ...(input.isActive !== undefined ? { isActive: input.isActive } : {}),
-      ...(input.isPaid !== undefined ? { isPaid: input.isPaid } : {}),
-      ...(input.name !== undefined ? { name: input.name } : {}),
-    },
-    select: leaveTypeSelect,
-    where: { id },
+export const updateLeaveTypeWithAuditLog = ({
+  auditLog,
+  current,
+  id,
+  input,
+}: {
+  auditLog: LeaveTypeAuditLog;
+  current: {
+    annualAllowance: Prisma.Decimal | null;
+    description: string | null;
+    isActive: boolean;
+    isPaid: boolean;
+    name: string;
+  };
+  id: string;
+  input: UpdateLeaveTypeInput;
+}) =>
+  prisma.$transaction(async (tx) => {
+    const leaveType = await tx.leaveType.update({
+      data: {
+        ...(input.annualAllowance !== undefined
+          ? { annualAllowance: input.annualAllowance }
+          : {}),
+        ...(input.description !== undefined
+          ? { description: input.description }
+          : {}),
+        ...(input.isActive !== undefined ? { isActive: input.isActive } : {}),
+        ...(input.isPaid !== undefined ? { isPaid: input.isPaid } : {}),
+        ...(input.name !== undefined ? { name: input.name } : {}),
+      },
+      select: leaveTypeSelect,
+      where: { id },
+    });
+
+    await createAuditLog({
+      ...auditLog,
+      entityId: leaveType.id,
+      entityType: "LeaveType",
+      metadata: {
+        changedFields: Object.keys(input),
+        from: {
+          ...current,
+          annualAllowance: current.annualAllowance?.toString() ?? null,
+        },
+        to: {
+          annualAllowance: leaveType.annualAllowance?.toString() ?? null,
+          description: leaveType.description,
+          isActive: leaveType.isActive,
+          isPaid: leaveType.isPaid,
+          name: leaveType.name,
+        },
+      },
+      tx,
+    });
+
+    return leaveType;
   });
 
-export const deleteLeaveType = (id: string) =>
-  prisma.leaveType.delete({
-    select: leaveTypeSelect,
-    where: { id },
+export const deleteLeaveTypeWithAuditLog = ({
+  auditLog,
+  id,
+  name,
+  usage,
+}: {
+  auditLog: LeaveTypeAuditLog;
+  id: string;
+  name: string;
+  usage: { leaveBalances: number; leaveRequests: number };
+}) =>
+  prisma.$transaction(async (tx) => {
+    const leaveType = await tx.leaveType.delete({
+      select: leaveTypeSelect,
+      where: { id },
+    });
+
+    await createAuditLog({
+      ...auditLog,
+      entityId: leaveType.id,
+      entityType: "LeaveType",
+      metadata: {
+        leaveBalances: usage.leaveBalances,
+        leaveRequests: usage.leaveRequests,
+        name,
+      },
+      tx,
+    });
+
+    return leaveType;
   });
 
 export const countLeaveTypeUsage = async (leaveTypeId: string) => {
@@ -746,28 +844,3 @@ export const rejectLeaveRequestAtomically = ({
     return leaveRequest;
   });
 };
-
-export const createLeaveTypeAuditLog = ({
-  action,
-  actorUserId,
-  entityId,
-  ipAddress,
-  metadata,
-  userAgent,
-}: {
-  action: string;
-  actorUserId: string | null;
-  entityId: string | null;
-  ipAddress?: string;
-  metadata?: Prisma.InputJsonValue;
-  userAgent?: string;
-}) =>
-  createAuditLog({
-    action,
-    actorUserId,
-    entityId,
-    entityType: "LeaveType",
-    ipAddress,
-    metadata,
-    userAgent,
-  });

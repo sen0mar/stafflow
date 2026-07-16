@@ -27,6 +27,7 @@ module.exports = defineConfig([
             "test/integration/*.ts",
             "vitest.config.mts",
           ],
+          maximumDefaultProjectFileMatchCount_THIS_WILL_SLOW_DOWN_LINTING: 9,
         },
         tsconfigRootDir: __dirname,
       },

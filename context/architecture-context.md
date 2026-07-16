@@ -357,6 +357,7 @@ Storage risks:
 Operational risks:
 
 - Demo seed data is missing, stale, or not reset, making the public demo confusing or abusable.
+- An audit-worthy database mutation commits separately from its audit row, leaving a sensitive change without its required business record when auditing fails.
 - Logs are unstructured or inconsistent.
 - Request IDs are missing, making production debugging difficult.
 - Technical logs and audit logs are treated as the same thing.
@@ -382,3 +383,4 @@ Operational risks:
 16. Public demo deployments must enforce `DEMO_READ_ONLY` on identity-persistence mutations; frontend hiding is not a security control.
 17. Leave request overlap checks, expected-status transitions, balance adjustments, and review audit logs commit atomically; balance-changing operations use serializable transactions with bounded serialization retries.
 18. Calendar-only fields use PostgreSQL `date` and `YYYY-MM-DD` API contracts; timestamp instants remain ISO strings, and browsers never timezone-convert date-only values.
+19. Every audit-worthy database mutation and its audit row use the same Prisma transaction client; related session revocation is part of that transaction.

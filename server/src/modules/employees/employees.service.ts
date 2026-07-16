@@ -13,9 +13,7 @@ import {
 } from "../../core/pagination/pagination";
 import { formatDateOnly } from "../../core/utils/date-only";
 import {
-  createEmployeeAuditLog,
   createInvitedEmployeeAccount,
-  createUserAuditLogForEmployee,
   findDepartmentForEmployee,
   findEmployeeByCode,
   findEmployeeById,
@@ -24,9 +22,9 @@ import {
   listPendingEmployeeInvitations,
   regenerateEmployeeInvitationToken,
   listEmployees,
-  updateEmployee,
+  updateEmployeeWithAuditLog,
   updateEmployeeAndAccountStatus,
-  updateSelfEmployeeProfile,
+  updateSelfEmployeeProfileWithAuditLog,
   type EmployeeRecord,
 } from "./employees.repository";
 import { requireSelfEmployeeId } from "./employees.policy";
@@ -334,15 +332,12 @@ export const updateExistingEmployee = async (
   }
 
   const employee = await withEmployeeWriteErrors(() =>
-    updateEmployee(id, input),
-  );
-  await createEmployeeAuditLog({
-    ...auditContext,
-    action: "EMPLOYEE_UPDATED",
-    entityId: employee.id,
-    metadata: {
-      changedFields: Object.keys(input),
-      from: {
+    updateEmployeeWithAuditLog({
+      auditLog: {
+        ...auditContext,
+        action: "EMPLOYEE_UPDATED",
+      },
+      current: {
         departmentId: currentEmployee.departmentId,
         employeeCode: currentEmployee.employeeCode,
         firstName: currentEmployee.firstName,
@@ -350,16 +345,10 @@ export const updateExistingEmployee = async (
         lastName: currentEmployee.lastName,
         phone: currentEmployee.phone,
       },
-      to: {
-        departmentId: employee.departmentId,
-        employeeCode: employee.employeeCode,
-        firstName: employee.firstName,
-        jobTitle: employee.jobTitle,
-        lastName: employee.lastName,
-        phone: employee.phone,
-      },
-    },
-  });
+      id,
+      input,
+    }),
+  );
 
   return toEmployeeDto(employee);
 };
@@ -370,47 +359,56 @@ export const updateEmployeeStatuses = async (
   auditContext: AuditContext,
 ) => {
   const currentEmployee = await assertEmployeeExists(id);
-  const employee = await withEmployeeWriteErrors(() =>
-    updateEmployeeAndAccountStatus({
-      accountStatus: input.accountStatus,
-      employeeId: id,
-      employeeStatus: input.employeeStatus,
-    }),
-  );
-
-  if (
+  const accountStatus =
+    input.accountStatus !== undefined &&
+    (!currentEmployee.user ||
+      input.accountStatus !== currentEmployee.user.status)
+      ? input.accountStatus
+      : undefined;
+  const employeeStatus =
     input.employeeStatus !== undefined &&
     input.employeeStatus !== currentEmployee.status
-  ) {
-    await createEmployeeAuditLog({
-      ...auditContext,
-      action:
-        input.employeeStatus === "ACTIVE"
-          ? "EMPLOYEE_ENABLED"
-          : "EMPLOYEE_DISABLED",
-      entityId: employee.id,
-      metadata: {
-        from: currentEmployee.status,
-        to: input.employeeStatus,
-      },
-    });
+      ? input.employeeStatus
+      : undefined;
+
+  if (accountStatus === undefined && employeeStatus === undefined) {
+    return toEmployeeDto(currentEmployee);
   }
 
-  if (
-    input.accountStatus !== undefined &&
-    currentEmployee.user &&
-    input.accountStatus !== currentEmployee.user.status
-  ) {
-    await createUserAuditLogForEmployee({
-      ...auditContext,
-      action: "USER_STATUS_CHANGED",
-      entityId: currentEmployee.user.id,
-      metadata: {
-        from: currentEmployee.user.status,
-        to: input.accountStatus,
-      },
-    });
-  }
+  const employee = await withEmployeeWriteErrors(() =>
+    updateEmployeeAndAccountStatus({
+      accountStatus,
+      employeeId: id,
+      employeeAuditLog:
+        employeeStatus !== undefined
+          ? {
+              ...auditContext,
+              action:
+                employeeStatus === "ACTIVE"
+                  ? "EMPLOYEE_ENABLED"
+                  : "EMPLOYEE_DISABLED",
+              entityId: id,
+              metadata: {
+                from: currentEmployee.status,
+                to: employeeStatus,
+              },
+            }
+          : undefined,
+      employeeStatus,
+      userAuditLog:
+        accountStatus !== undefined && currentEmployee.user
+          ? {
+              ...auditContext,
+              action: "USER_STATUS_CHANGED",
+              entityId: currentEmployee.user.id,
+              metadata: {
+                from: currentEmployee.user.status,
+                to: accountStatus,
+              },
+            }
+          : undefined,
+    }),
+  );
 
   return toEmployeeDto(employee);
 };
@@ -436,18 +434,15 @@ export const updateSelfProfile = async (
 ) => {
   const employeeId = requireSelfEmployeeId(auth);
   const employee = await withEmployeeWriteErrors(() =>
-    updateSelfEmployeeProfile(employeeId, input),
+    updateSelfEmployeeProfileWithAuditLog({
+      auditLog: {
+        ...auditContext,
+        action: "EMPLOYEE_UPDATED",
+      },
+      id: employeeId,
+      input,
+    }),
   );
-
-  await createEmployeeAuditLog({
-    ...auditContext,
-    action: "EMPLOYEE_UPDATED",
-    entityId: employee.id,
-    metadata: {
-      changedFields: Object.keys(input),
-      selfService: true,
-    },
-  });
 
   return toEmployeeDto(employee);
 };
