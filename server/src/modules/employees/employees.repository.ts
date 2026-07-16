@@ -135,6 +135,15 @@ export const findEmployeeByCode = (employeeCode: string) =>
     where: { employeeCode },
   });
 
+export const findUserAccountByEmail = (email: string) =>
+  prisma.user.findUnique({
+    select: {
+      email: true,
+      id: true,
+    },
+    where: { email },
+  });
+
 export const findDepartmentForEmployee = (departmentId: string) =>
   prisma.department.findUnique({
     select: {

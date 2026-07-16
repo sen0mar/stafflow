@@ -3,6 +3,7 @@ import { Router } from "express";
 import { attachAuth, requireAuth } from "../../core/auth/auth.middleware";
 import { requireCsrf } from "../../core/auth/csrf.service";
 import { requirePermission } from "../../core/auth/permissions";
+import { requireDemoAccountMutationAllowed } from "../../core/security/demo-account.guard";
 import {
   createEmployeeController,
   disableEmployeeController,
@@ -54,6 +55,7 @@ export const createEmployeeRoutes = (): Router => {
     requireAuth,
     requirePermission("employees:update:any"),
     requireCsrf,
+    requireDemoAccountMutationAllowed,
     regenerateEmployeeInvitationController,
   );
   router.get(
@@ -69,6 +71,7 @@ export const createEmployeeRoutes = (): Router => {
     requireAuth,
     requirePermission("employees:create"),
     requireCsrf,
+    requireDemoAccountMutationAllowed,
     createEmployeeController,
   );
   router.patch(
@@ -85,6 +88,7 @@ export const createEmployeeRoutes = (): Router => {
     requireAuth,
     requirePermission("employees:update:any"),
     requireCsrf,
+    requireDemoAccountMutationAllowed,
     updateEmployeeStatusController,
   );
   router.delete(
@@ -93,6 +97,7 @@ export const createEmployeeRoutes = (): Router => {
     requireAuth,
     requirePermission("employees:delete"),
     requireCsrf,
+    requireDemoAccountMutationAllowed,
     disableEmployeeController,
   );
 

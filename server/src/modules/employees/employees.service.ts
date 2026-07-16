@@ -11,7 +11,6 @@ import {
   getPaginationParams,
   toPaginatedResult,
 } from "../../core/pagination/pagination";
-import { findUserAccountByEmail } from "../users/users.repository";
 import {
   createEmployeeAuditLog,
   createInvitedEmployeeAccount,
@@ -20,6 +19,7 @@ import {
   findEmployeeByCode,
   findEmployeeById,
   findInvitedEmployeeForInvitation,
+  findUserAccountByEmail,
   listPendingEmployeeInvitations,
   regenerateEmployeeInvitationToken,
   listEmployees,

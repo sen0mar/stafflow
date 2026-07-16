@@ -20,7 +20,7 @@
 | Frontend hosting     | Vercel                            | Client deployment                                                                                                  |
 | Backend hosting      | Render                            | Express API deployment                                                                                             |
 | Domain model         | One custom domain with subdomains | Example: `app.company.com` for frontend and `api.company.com` for backend                                          |
-| Public demo model    | Seeded demo users, no sign-up     | Portfolio visitors can log in, but cannot create a clean reusable workspace from the login page                    |
+| Public demo model    | Seeded demo users + guard         | Visitors can log in; demo mode blocks persistent account creation, activation, status changes, and elevation       |
 
 ## System Boundaries
 
@@ -81,6 +81,7 @@ Auth model:
 - Session invalidation must be possible after logout, password change, account disable, and suspicious activity.
 - Frontend route guards are UX-only; the backend is the security boundary.
 - Public demo mode must prevent storage abuse through disabled uploads, strict quotas, automatic cleanup, or another explicit guardrail before unrestricted R2 writes are exposed.
+- Public demo mode must reject employee/account creation, invitation generation and acceptance, account-status mutations, and account elevation with `DEMO_READ_ONLY`.
 
 MVP roles:
 
@@ -130,7 +131,6 @@ Each frontend feature may contain:
 Backend modules should mirror the domain structure:
 
 - `auth`
-- `users`
 - `employees`
 - `departments`
 - `attendance`
@@ -257,6 +257,7 @@ Auth/session risks:
 
 - Public registration is accidentally added and lets visitors create fresh accounts or company workspaces.
 - Demo admin access allows unrestricted mutations or storage-consuming actions without guardrails.
+- Demo admin access creates or activates a reusable private identity, changes account status, or elevates a role.
 - Cookies fail in production because custom domains, CORS, `credentials: "include"`, `SameSite`, or `trust proxy` are misconfigured.
 - Role changes do not take effect if permissions are cached incorrectly.
 - Session tokens are stored raw instead of hashed.
@@ -313,3 +314,4 @@ Operational risks:
 13. The MVP supports `ADMIN` and `EMPLOYEE`; future roles must be possible without rewriting the whole auth model.
 14. Public self-registration is not allowed; account creation is admin-only, seeded, or controlled by invitation/password setup.
 15. Public demo deployments must protect Cloudflare R2 from unrestricted uploads and storage abuse.
+16. Public demo deployments must enforce `DEMO_READ_ONLY` on identity-persistence mutations; frontend hiding is not a security control.

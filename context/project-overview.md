@@ -54,9 +54,10 @@ Employee flow:
 - HTTP-only cookie-based session auth.
 - bcrypt password hashing.
 - Admin and employee roles for MVP.
-- Admin-created employee accounts only.
+- Admin-created employee accounts only outside public demo mode.
 - Invitation or password setup flow for new employees.
 - Public visitors cannot create clean company accounts from the login page.
+- Public demo credentials cannot create, activate, disable, or elevate reusable private accounts.
 - Password reset flow.
 - Logout and session invalidation.
 - Backend-enforced RBAC and resource ownership checks.
@@ -182,4 +183,4 @@ Employee flow:
 14. The app can be deployed with Vercel, Render, Neon, and Cloudflare R2.
 15. The login page has no public registration path.
 16. New users are created only by admins or controlled seed/invitation flows.
-17. The public demo cannot be used to consume unbounded R2 storage or create a fresh company workspace.
+17. The public demo cannot be used to consume unbounded R2 storage, create a fresh company workspace, or create/elevate a reusable private identity.

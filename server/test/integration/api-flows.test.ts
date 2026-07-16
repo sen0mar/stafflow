@@ -1,6 +1,7 @@
 import request from "supertest";
 
 import { createApp } from "../../src/app";
+import { env } from "../../src/config/env";
 import { hashPassword } from "../../src/core/auth/password.service";
 import { prisma } from "../../src/prisma/prisma.client";
 
@@ -177,6 +178,97 @@ describeWithTestDatabase("core API flows", () => {
       .expect(({ body }) => {
         expect(body.error.code).toBe("NOT_FOUND");
       });
+  });
+
+  it("blocks the public demo account-takeover chain", async () => {
+    const { admin, employee, employeeUser } = await seedUsers();
+    const { agent, csrfToken } = await login(admin.email);
+    const fixtureResponse = await agent
+      .post("/employees")
+      .set("x-csrf-token", csrfToken)
+      .send({
+        email: "pending.fixture.integration@example.com",
+        employeeCode: "IT-EMP-PENDING",
+        firstName: "Pending",
+        lastName: "Fixture",
+      })
+      .expect(201);
+    const pendingEmployee = fixtureResponse.body.data.employee as {
+      account: { id: string };
+      id: string;
+    };
+    const pendingToken = fixtureResponse.body.data.invitation.token as string;
+    const originalDemoMode = env.DEMO_MODE;
+
+    env.DEMO_MODE = true;
+
+    try {
+      const blockedRequests = [
+        agent.post("/employees").set("x-csrf-token", csrfToken).send({
+          email: "attacker.private.integration@example.com",
+          employeeCode: "IT-EMP-ATTACKER",
+          firstName: "Private",
+          lastName: "Account",
+        }),
+        agent
+          .post(`/employees/${pendingEmployee.id}/invitation`)
+          .set("x-csrf-token", csrfToken),
+        request(app)
+          .post("/auth/invitations/accept")
+          .send({ password: "AttackerPrivatePass", token: pendingToken }),
+        agent
+          .patch(`/employees/${employee.id}/status`)
+          .set("x-csrf-token", csrfToken)
+          .send({ accountStatus: "DISABLED" }),
+        agent
+          .delete(`/employees/${employee.id}`)
+          .set("x-csrf-token", csrfToken)
+          .send({ employeeStatus: "INACTIVE" }),
+      ];
+
+      for (const blockedRequest of blockedRequests) {
+        await blockedRequest.expect(403).expect(({ body }) => {
+          expect(body.error.code).toBe("DEMO_READ_ONLY");
+        });
+      }
+
+      await agent
+        .patch(`/users/${pendingEmployee.account.id}`)
+        .set("x-csrf-token", csrfToken)
+        .send({ role: "ADMIN", status: "ACTIVE" })
+        .expect(404)
+        .expect(({ body }) => {
+          expect(body.error.code).toBe("NOT_FOUND");
+        });
+
+      await request(app)
+        .post("/auth/login")
+        .send({
+          email: "pending.fixture.integration@example.com",
+          password: "AttackerPrivatePass",
+        })
+        .expect(401);
+
+      await expect(
+        prisma.user.findUnique({
+          select: { role: true, status: true },
+          where: { id: pendingEmployee.account.id },
+        }),
+      ).resolves.toEqual({ role: "EMPLOYEE", status: "INVITED" });
+      await expect(
+        prisma.user.findUnique({
+          where: { email: "attacker.private.integration@example.com" },
+        }),
+      ).resolves.toBeNull();
+      await expect(
+        prisma.user.findUnique({
+          select: { role: true, status: true },
+          where: { id: employeeUser.id },
+        }),
+      ).resolves.toEqual({ role: "EMPLOYEE", status: "ACTIVE" });
+    } finally {
+      env.DEMO_MODE = originalDemoMode;
+    }
   });
 
   it("allows employee self access without trusting request employee ids", async () => {

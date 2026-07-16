@@ -23,7 +23,7 @@ The project is designed as a safe public portfolio demo. Visitors can use seeded
 | Area        | Administrators                                                          | Employees                                              |
 | ----------- | ----------------------------------------------------------------------- | ------------------------------------------------------ |
 | Dashboard   | View company-wide attendance, leave, employee, and department summaries | View personal attendance, leave, and payslip summaries |
-| Employees   | Create, invite, update, disable, and review employee records            | View and update allowed profile details                |
+| Employees   | Create, invite, update, disable, and review records outside demo mode   | View and update allowed profile details                |
 | Departments | Create, edit, and safely remove departments                             | View their assigned department                         |
 | Attendance  | Filter records and make audited corrections                             | Clock in, clock out, and review personal history       |
 | Leave       | Manage leave types and approve or reject requests                       | Submit, track, and cancel personal requests            |
@@ -42,7 +42,7 @@ The login page is prefilled for the admin demo. You can switch roles from the de
 | Admin    | `admin.demo@example.com`    | `StafflowDemo` |
 | Employee | `employee.demo@example.com` | `StafflowDemo` |
 
-There is no public sign-up page. New accounts are created by an administrator and completed through a controlled invitation link.
+There is no public sign-up page. Outside the public demo, new accounts are created by an administrator and completed through a controlled invitation link. With `DEMO_MODE=true`, the API blocks employee/account creation, invitation generation and acceptance, account-status changes, and account elevation with the stable `DEMO_READ_ONLY` error.
 
 ## Technology
 
@@ -80,7 +80,7 @@ The backend follows the same domain structure in `server/src/modules`. Controlle
 - Payslip PDFs remain private. The database stores file metadata and object keys, not PDF contents.
 - Passwords, cookies, tokens, hashes, files, and private signed URLs are excluded from logs.
 - Employee changes, attendance corrections, leave decisions, payslip changes, password events, and settings updates create audit records.
-- Demo mode protects seeded passwords and blocks file uploads unless uploads are explicitly enabled.
+- Demo mode protects seeded passwords, blocks identity-persistence mutations with `DEMO_READ_ONLY`, and blocks file uploads unless uploads are explicitly enabled.
 
 ## Run locally
 
@@ -198,4 +198,4 @@ The intended production setup is:
 
 Set `CLIENT_URL` to the exact deployed frontend origin. Configure `VITE_API_URL` in the Vercel project when the API uses a separate Render origin. Production cookies require HTTPS, and the frontend and API must use matching credentialed CORS settings.
 
-For a public portfolio deployment, keep `DEMO_MODE=true` and `DEMO_UPLOADS_ENABLED=false` unless a separate upload quota and cleanup policy has been put in place.
+For a public portfolio deployment, keep `DEMO_MODE=true` so public credentials cannot create, activate, disable, or elevate reusable private accounts. Keep `DEMO_UPLOADS_ENABLED=false` unless a separate upload quota and cleanup policy has been put in place.

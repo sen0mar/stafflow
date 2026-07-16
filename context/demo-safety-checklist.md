@@ -4,10 +4,16 @@ Use this checklist before sharing the public portfolio demo and after any auth, 
 
 ## Access Model
 
-- Public sign-up is not available. The backend exposes login, password reset, invitation acceptance, logout, password change, and `/auth/me`, but no `/auth/register` route.
+- Public sign-up is not available. The backend exposes login, password reset, logout, password change, and `/auth/me`, but no `/auth/register` or general user role/status mutation route. Invitation acceptance exists only outside demo mode.
 - The login page must not include a registration CTA, create-account link, or company onboarding path.
 - Company onboarding is intentionally absent. The demo is a single seeded workspace, not a self-service SaaS workspace.
-- Users are created only by admin employee creation flows, controlled invitation/password setup flows, seed scripts, or the demo bootstrap script.
+- Outside demo mode, users are created only by admin employee creation flows, controlled invitation/password setup flows, seed scripts, or the demo bootstrap script.
+
+## Demo Identity Policy
+
+- With `DEMO_MODE=true`, the backend must return `DEMO_READ_ONLY` for employee/account creation, invitation generation or acceptance, employee/account status mutations, and employee disable operations.
+- The MVP exposes no general `/users/:id` role or status mutation route. Public demo credentials cannot elevate an identity to `ADMIN`.
+- Frontend hiding is optional UX only. The API guard is the security boundary, and blocked mutations must not persist users, passwords, roles, statuses, sessions, or invitation tokens.
 
 ## Demo Upload Policy
 
