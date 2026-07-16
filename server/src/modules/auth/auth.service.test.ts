@@ -19,12 +19,10 @@ vi.mock("./auth.repository", () => ({
   acceptInvitationAtomically: vi.fn(),
   AuthTransitionError: class AuthTransitionError extends Error {},
   changePasswordAtomically: vi.fn(),
-  createSession: vi.fn(),
+  createLoginSessionAtomically: vi.fn(),
   findUserByEmailForAuth,
   findUserByIdForAuth: vi.fn(),
-  pruneUserSessions: vi.fn(),
   revokeSession: vi.fn(),
-  updateLastLoginAt: vi.fn(),
 }));
 
 import { login } from "./auth.service";

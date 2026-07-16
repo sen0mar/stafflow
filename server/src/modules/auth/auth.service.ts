@@ -20,12 +20,10 @@ import {
   acceptInvitationAtomically,
   AuthTransitionError,
   changePasswordAtomically,
-  createSession,
+  createLoginSessionAtomically,
   findUserByEmailForAuth,
   findUserByIdForAuth,
   revokeSession,
-  updateLastLoginAt,
-  pruneUserSessions,
 } from "./auth.repository";
 
 const demoSessionLimitPerUser = 100;
@@ -105,16 +103,13 @@ export const login = async (input: LoginInput) => {
   const token = createSessionToken();
   const tokenHash = hashSessionToken(token);
 
-  await createSession({
+  await createLoginSessionAtomically({
+    demoSessionLimit: env.DEMO_MODE ? demoSessionLimitPerUser : null,
     expiresAt: getSessionExpiresAt(),
+    loggedInAt: new Date(),
     tokenHash,
     userId: user.id,
   });
-  if (env.DEMO_MODE) {
-    await pruneUserSessions({ keep: demoSessionLimitPerUser, userId: user.id });
-  } else {
-    await updateLastLoginAt(user.id);
-  }
 
   return {
     token,

@@ -1,0 +1,11 @@
+services:
+  - type: cron
+    name: stafflow-auth-table-maintenance
+    runtime: node
+    plan: starter
+    schedule: "17 3 * * *"
+    buildCommand: npm ci && npm exec -- prisma generate
+    startCommand: npm run db:maintain-auth
+    envVars:
+      - key: DATABASE_URL
+        sync: false

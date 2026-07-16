@@ -56,6 +56,7 @@ Keep entries short. This file should explain what changed, not become a detailed
 - Feature 49: Public Auth Entry-Point Hardening — made public auth JSON-only with bounded inputs, equalized missing-user bcrypt work, deduplicated expected failed-login logs, and added a Cloudflare edge-throttling deployment artifact and runbook.
 - Feature 50: Password Reset Deferral — removed the nonfunctional public forgot/reset routes and unreachable runtime scaffold, retained the existing database table and migrations, documented password recovery as deferred, and added 404 regression coverage.
 - Feature 51: Atomic Authentication Transitions — made password changes and invitation acceptance transactional with conditional single-use/invariant checks, all-session revocation, atomic audit writes, and focused concurrency and rollback integration coverage while preserving password-reset deferral.
+- Feature 52: Bounded Auth Table Growth — made login session persistence atomic, serialized the 100-row shared-demo cap, added seven-day terminal-row retention with idempotent Prisma cleanup, declared a daily Render cron, and added preservation, rollback, concurrency, and retry coverage.
 
 ## Entry Format
 

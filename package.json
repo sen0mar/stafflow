@@ -16,6 +16,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "db:bootstrap-demo-auth": "tsx prisma/bootstrap-demo-auth.ts",
+    "db:maintain-auth": "tsx scripts/maintain-auth-tables.ts",
     "db:migrate:deploy": "prisma migrate deploy",
     "db:migrate:status": "prisma migrate status",
     "db:seed": "tsx prisma/seed.ts",

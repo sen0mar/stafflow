@@ -166,6 +166,7 @@ Open `http://localhost:5173`. The API runs on `http://localhost:4000` by default
 | `npm run format:check`           | Check formatting                                |
 | `npm run db:migrate:status`      | Inspect Prisma migration status                 |
 | `npm run db:migrate:deploy`      | Apply existing Prisma migrations                |
+| `npm run db:maintain-auth`       | Prune terminal auth rows past retention         |
 | `npm run db:seed`                | Seed the demo company and users                 |
 | `npm run db:seed:check`          | Verify the seeded baseline                      |
 | `npm run db:bootstrap-demo-auth` | Create or repair production demo login accounts |
@@ -201,3 +202,5 @@ Set `CLIENT_URL` to the exact deployed frontend origin. Configure `VITE_API_URL`
 For a public portfolio deployment, keep `DEMO_MODE=true` so public credentials cannot create, activate, disable, or elevate reusable private accounts. Keep `DEMO_UPLOADS_ENABLED=false` unless a separate upload quota and cleanup policy has been put in place.
 
 Public auth throttling is a provider control, not process-local middleware. Follow [the Cloudflare edge-throttling runbook](deployment/public-auth-edge-throttling.md), including disabling the direct Render hostname, before considering login and token traffic externally bounded.
+
+Auth lifecycle cleanup is declared as a daily Render cron job in `render.yaml`. Follow [the auth-table maintenance runbook](deployment/auth-table-maintenance.md) to activate the Blueprint cron, provide its database secret, trigger an initial run, and verify retention behavior. Repository configuration alone does not prove that the external cron is active.

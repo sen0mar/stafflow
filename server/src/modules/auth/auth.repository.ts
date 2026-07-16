@@ -50,54 +50,63 @@ export const findUserByIdForAuth = async (userId: string) =>
   });
 
 // Persist only the hashed token; the raw token lives solely in the cookie.
-export const createSession = async ({
+export const createLoginSessionAtomically = async ({
+  demoSessionLimit,
   expiresAt,
+  loggedInAt,
   tokenHash,
   userId,
 }: {
+  demoSessionLimit: number | null;
   expiresAt: Date;
+  loggedInAt: Date;
   tokenHash: string;
   userId: string;
 }) =>
-  prisma.session.create({
-    data: {
-      expiresAt,
-      tokenHash,
-      userId,
-    },
-    select: {
-      id: true,
-    },
-  });
+  prisma.$transaction(async (tx) => {
+    // Lock the user row so concurrent shared-demo logins cannot each prune from
+    // a stale snapshot and leave more than the configured per-user cap.
+    await tx.$queryRaw`SELECT "id" FROM "User" WHERE "id" = ${userId} FOR UPDATE`;
 
-export const pruneUserSessions = async ({
-  keep,
-  userId,
-}: {
-  keep: number;
-  userId: string;
-}) => {
-  const retainedSessions = await prisma.session.findMany({
-    orderBy: { createdAt: "desc" },
-    select: { id: true },
-    take: keep,
-    where: { userId },
-  });
+    const session = await tx.session.create({
+      data: {
+        expiresAt,
+        tokenHash,
+        userId,
+      },
+      select: {
+        id: true,
+      },
+    });
 
-  await prisma.session.deleteMany({
-    where: {
-      id: { notIn: retainedSessions.map(({ id }) => id) },
-      userId,
-    },
-  });
-};
+    if (demoSessionLimit === null) {
+      await tx.user.update({
+        data: { lastLoginAt: loggedInAt },
+        select: { id: true },
+        where: { id: userId },
+      });
+    } else {
+      const retainedSessions = await tx.session.findMany({
+        orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+        select: { id: true },
+        take: demoSessionLimit - 1,
+        where: {
+          id: { not: session.id },
+          userId,
+        },
+      });
 
-// Track successful login time separately from session creation for auditability.
-export const updateLastLoginAt = async (userId: string) =>
-  prisma.user.update({
-    where: { id: userId },
-    data: { lastLoginAt: new Date() },
-    select: { id: true },
+      await tx.session.deleteMany({
+        where: {
+          id: {
+            notIn: [session.id, ...retainedSessions.map(({ id }) => id)],
+          },
+          userId,
+        },
+      });
+    }
+
+    return session;
   });
 
 // Mark sessions revoked instead of deleting them so invalidation remains explicit.
