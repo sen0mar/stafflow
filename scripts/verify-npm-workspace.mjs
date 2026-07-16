@@ -30,6 +30,12 @@ const trackedLocks = trackedFiles.filter(
 );
 const errors = [];
 
+if (packageJson.packageManager !== "npm@10.9.4") {
+  errors.push(
+    `Expected packageManager to pin npm@10.9.4; found: ${packageJson.packageManager ?? "none"}.`,
+  );
+}
+
 if (trackedLocks.length !== 1 || trackedLocks[0] !== "package-lock.json") {
   errors.push(
     `Expected package-lock.json to be the only tracked package-manager lock; found: ${trackedLocks.join(", ") || "none"}.`,
@@ -42,6 +48,16 @@ for (const workspace of packageJson.workspaces ?? []) {
       `Root package-lock.json does not cover workspace: ${workspace}.`,
     );
   }
+}
+
+const extraneousLockEntries = Object.entries(packageLock.packages ?? {})
+  .filter(([, metadata]) => metadata.extraneous === true)
+  .map(([path]) => path);
+
+if (extraneousLockEntries.length > 0) {
+  errors.push(
+    `Root package-lock.json contains extraneous package entries: ${extraneousLockEntries.join(", ")}.`,
+  );
 }
 
 if (errors.length > 0) {

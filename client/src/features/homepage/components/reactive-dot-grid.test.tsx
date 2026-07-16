@@ -53,7 +53,8 @@ const createRafHarness = (): RafHarness => {
   const cancel = vi.fn((id: number) => callbacks.delete(id))
   const runNextFrame = (frameDurationMs = 16.67) => {
     const entry = callbacks.entries().next().value as
-      [number, FrameRequestCallback] | undefined
+      | [number, FrameRequestCallback]
+      | undefined
 
     if (!entry) {
       return false

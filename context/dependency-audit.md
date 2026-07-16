@@ -20,3 +20,11 @@ dependency-chain entries and one low item), with zero high or critical
 findings. npm's hoisted peer-dependency metadata keeps these tools visible even
 with `--omit=dev`, so reachability is classified from the dependency and import
 paths above rather than from that flag alone.
+
+## 2026-07-16 — Clean npm and CI baseline
+
+The canonical root lockfile is generated for the npm 10.9.4 version pinned in
+`package.json`. It includes optional peer packages required by npm 10's strict
+`npm ci` validation and no longer contains the stale extraneous `backend`
+workspace record. CI uses the Node 24-based checkout/setup actions while testing
+the application on Node.js 22.

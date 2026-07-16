@@ -88,7 +88,7 @@ Regression-backed controls below map to exact tests in the [Section 25 regressio
 
 ### Requirements
 
-- Node.js and npm
+- Node.js 22 and npm 10.9.4 (the version pinned in `package.json`)
 - A PostgreSQL database
 - Cloudflare R2 credentials only if you want to test payslip file operations
 
