@@ -287,6 +287,7 @@ RBAC/resource-access risks:
 - Employees access another employee's payslip, attendance, or leave request by guessing an ID.
 - Admin actions are not audit logged.
 - Sensitive fields such as salary or passwordHash leak through broad API responses.
+- Concurrent leave creation or review bypasses overlap/status checks, loses a shared balance update, duplicates an audit event, or commits request and balance state inconsistently.
 
 Performance risks:
 
@@ -331,3 +332,4 @@ Operational risks:
 14. Public self-registration is not allowed; account creation is admin-only, seeded, or controlled by invitation/password setup.
 15. Public demo deployments must protect Cloudflare R2 from unrestricted uploads and storage abuse.
 16. Public demo deployments must enforce `DEMO_READ_ONLY` on identity-persistence mutations; frontend hiding is not a security control.
+17. Leave request overlap checks, expected-status transitions, balance adjustments, and review audit logs commit atomically; balance-changing operations use serializable transactions with bounded serialization retries.

@@ -115,6 +115,102 @@ export type LeaveBalanceRecord = Prisma.LeaveBalanceGetPayload<{
   select: typeof leaveBalanceSelect;
 }>;
 
+type LeaveRequestVersion = Pick<LeaveRequestRecord, "status" | "updatedAt">;
+
+type LeaveMutationFailureReason =
+  | "INSUFFICIENT_LEAVE_BALANCE"
+  | "LEAVE_REQUEST_FORBIDDEN"
+  | "LEAVE_REQUEST_NOT_APPROVABLE"
+  | "LEAVE_REQUEST_NOT_FOUND"
+  | "LEAVE_REQUEST_NOT_PENDING"
+  | "LEAVE_REQUEST_NOT_REJECTABLE"
+  | "LEAVE_REQUEST_OVERLAP"
+  | "LEAVE_REQUEST_STALE_TRANSITION"
+  | "LEAVE_TYPE_INACTIVE"
+  | "LEAVE_TYPE_NOT_FOUND";
+
+export class LeaveMutationError extends Error {
+  public readonly reason: LeaveMutationFailureReason;
+
+  public constructor(reason: LeaveMutationFailureReason) {
+    super(reason);
+    this.name = "LeaveMutationError";
+    this.reason = reason;
+  }
+}
+
+const maxSerializableAttempts = 3;
+
+const isSerializationConflict = (error: unknown) =>
+  error instanceof Prisma.PrismaClientKnownRequestError &&
+  error.code === "P2034";
+
+const runSerializableTransaction = async <T>(
+  operation: (tx: Prisma.TransactionClient) => Promise<T>,
+) => {
+  for (let attempt = 1; attempt <= maxSerializableAttempts; attempt += 1) {
+    try {
+      return await prisma.$transaction(operation, {
+        isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+      });
+    } catch (error) {
+      if (
+        !isSerializationConflict(error) ||
+        attempt === maxSerializableAttempts
+      ) {
+        throw error;
+      }
+    }
+  }
+
+  throw new Error("Serializable leave transaction exhausted its retry limit.");
+};
+
+const requestVersionMatches = (
+  current: LeaveRequestVersion,
+  expected: LeaveRequestVersion,
+) =>
+  current.status === expected.status &&
+  current.updatedAt.getTime() === expected.updatedAt.getTime();
+
+// Keep the first attempt's version across serialization retries so a losing
+// review cannot reinterpret the winner's new status as a fresh transition.
+const preserveExpectedRequestVersion = (
+  current: LeaveRequestVersion,
+  expected: LeaveRequestVersion | undefined,
+) => {
+  if (expected && !requestVersionMatches(current, expected)) {
+    throw new LeaveMutationError("LEAVE_REQUEST_STALE_TRANSITION");
+  }
+
+  return expected ?? { status: current.status, updatedAt: current.updatedAt };
+};
+
+const findOverlappingLeaveRequestInTransaction = (
+  tx: Prisma.TransactionClient,
+  {
+    employeeId,
+    endDate,
+    excludeId,
+    startDate,
+  }: {
+    employeeId: string;
+    endDate: Date;
+    excludeId?: string;
+    startDate: Date;
+  },
+) =>
+  tx.leaveRequest.findFirst({
+    select: { id: true },
+    where: {
+      employeeId,
+      ...(excludeId ? { id: { not: excludeId } } : {}),
+      endDate: { gte: startDate },
+      startDate: { lte: endDate },
+      status: { in: ["PENDING", "APPROVED"] },
+    },
+  });
+
 const getLeaveTypeWhere = ({
   isActive,
   search,
@@ -268,29 +364,7 @@ export const findLeaveRequestById = (id: string) =>
     where: { id },
   });
 
-export const findOverlappingLeaveRequest = ({
-  employeeId,
-  endDate,
-  excludeId,
-  startDate,
-}: {
-  employeeId: string;
-  endDate: Date;
-  excludeId?: string;
-  startDate: Date;
-}) =>
-  prisma.leaveRequest.findFirst({
-    select: { id: true },
-    where: {
-      employeeId,
-      ...(excludeId ? { id: { not: excludeId } } : {}),
-      endDate: { gte: startDate },
-      startDate: { lte: endDate },
-      status: { in: ["PENDING", "APPROVED"] },
-    },
-  });
-
-export const createLeaveRequest = ({
+export const createLeaveRequestAtomically = ({
   employeeId,
   input,
   startDate,
@@ -303,38 +377,89 @@ export const createLeaveRequest = ({
   startDate: Date;
   totalDays: number;
 }) =>
-  prisma.leaveRequest.create({
-    data: {
-      employeeId,
-      endDate,
-      leaveTypeId: input.leaveTypeId,
-      reason: input.reason ?? null,
-      startDate,
-      totalDays,
-    },
-    select: leaveRequestSelect,
+  runSerializableTransaction(async (tx) => {
+    const leaveType = await tx.leaveType.findUnique({
+      select: { isActive: true },
+      where: { id: input.leaveTypeId },
+    });
+
+    if (!leaveType) {
+      throw new LeaveMutationError("LEAVE_TYPE_NOT_FOUND");
+    }
+
+    if (!leaveType.isActive) {
+      throw new LeaveMutationError("LEAVE_TYPE_INACTIVE");
+    }
+
+    const overlappingRequest = await findOverlappingLeaveRequestInTransaction(
+      tx,
+      { employeeId, endDate, startDate },
+    );
+
+    if (overlappingRequest) {
+      throw new LeaveMutationError("LEAVE_REQUEST_OVERLAP");
+    }
+
+    return tx.leaveRequest.create({
+      data: {
+        employeeId,
+        endDate,
+        leaveTypeId: input.leaveTypeId,
+        reason: input.reason ?? null,
+        startDate,
+        totalDays,
+      },
+      select: leaveRequestSelect,
+    });
   });
 
-export const cancelLeaveRequest = (id: string) =>
-  prisma.leaveRequest.update({
-    data: { status: "CANCELLED" },
-    select: leaveRequestSelect,
-    where: { id },
-  });
+export const cancelLeaveRequestAtomically = ({
+  employeeId,
+  id,
+}: {
+  employeeId: string;
+  id: string;
+}) => {
+  let expectedVersion: LeaveRequestVersion | undefined;
 
-export const getLeaveSettings = async () => {
-  const settings = await prisma.leaveSettings.findFirst({
-    orderBy: { createdAt: "asc" },
-    select: {
-      allowNegativeBalance: true,
-      defaultAnnualAllowanceDays: true,
-    },
-  });
+  return runSerializableTransaction(async (tx) => {
+    const current = await tx.leaveRequest.findUnique({
+      select: leaveRequestSelect,
+      where: { id },
+    });
 
-  return {
-    allowNegativeBalance: settings?.allowNegativeBalance ?? false,
-    defaultAnnualAllowanceDays: settings?.defaultAnnualAllowanceDays ?? 0,
-  };
+    if (!current) {
+      throw new LeaveMutationError("LEAVE_REQUEST_NOT_FOUND");
+    }
+
+    if (current.employeeId !== employeeId) {
+      throw new LeaveMutationError("LEAVE_REQUEST_FORBIDDEN");
+    }
+
+    expectedVersion = preserveExpectedRequestVersion(current, expectedVersion);
+
+    if (current.status !== "PENDING") {
+      throw new LeaveMutationError("LEAVE_REQUEST_NOT_PENDING");
+    }
+
+    const cancellation = await tx.leaveRequest.updateMany({
+      data: { status: "CANCELLED" },
+      where: {
+        id,
+        status: current.status,
+        updatedAt: current.updatedAt,
+      },
+    });
+
+    if (cancellation.count !== 1) {
+      throw new LeaveMutationError("LEAVE_REQUEST_STALE_TRANSITION");
+    }
+
+    return tx.leaveRequest.findUniqueOrThrow({
+      select: leaveRequestSelect,
+      where: { id },
+    });
+  });
 };
 
 export const listLeaveBalancesForEmployee = ({
@@ -352,30 +477,71 @@ export const listLeaveBalancesForEmployee = ({
 
 export const approveLeaveRequestWithBalance = ({
   actorUserId,
-  allocation,
-  allowNegativeBalance,
   entityId,
   ipAddress,
   reviewNote,
-  totalDays,
   userAgent,
-  year,
 }: {
   actorUserId: string | null;
-  allocation: Prisma.Decimal | number;
-  allowNegativeBalance: boolean;
   entityId: string;
   ipAddress?: string;
   reviewNote: string | null;
-  totalDays: Prisma.Decimal;
   userAgent?: string;
-  year: number;
-}) =>
-  prisma.$transaction(async (tx) => {
-    const current = await tx.leaveRequest.findUniqueOrThrow({
+}) => {
+  let expectedVersion: LeaveRequestVersion | undefined;
+
+  return runSerializableTransaction(async (tx) => {
+    const current = await tx.leaveRequest.findUnique({
       select: leaveRequestSelect,
       where: { id: entityId },
     });
+
+    if (!current) {
+      throw new LeaveMutationError("LEAVE_REQUEST_NOT_FOUND");
+    }
+
+    expectedVersion = preserveExpectedRequestVersion(current, expectedVersion);
+
+    if (current.status !== "PENDING" && current.status !== "REJECTED") {
+      throw new LeaveMutationError("LEAVE_REQUEST_NOT_APPROVABLE");
+    }
+
+    const overlappingRequest = await findOverlappingLeaveRequestInTransaction(
+      tx,
+      {
+        employeeId: current.employeeId,
+        endDate: current.endDate,
+        excludeId: current.id,
+        startDate: current.startDate,
+      },
+    );
+
+    if (overlappingRequest) {
+      throw new LeaveMutationError("LEAVE_REQUEST_OVERLAP");
+    }
+
+    const leaveType = await tx.leaveType.findUnique({
+      select: { annualAllowance: true },
+      where: { id: current.leaveTypeId },
+    });
+
+    if (!leaveType) {
+      throw new LeaveMutationError("LEAVE_TYPE_NOT_FOUND");
+    }
+
+    const settings = await tx.leaveSettings.findFirst({
+      orderBy: { createdAt: "asc" },
+      select: {
+        allowNegativeBalance: true,
+        defaultAnnualAllowanceDays: true,
+      },
+    });
+    const allowNegativeBalance = settings?.allowNegativeBalance ?? false;
+    const allocation =
+      leaveType.annualAllowance ??
+      settings?.defaultAnnualAllowanceDays ??
+      new Prisma.Decimal(0);
+    const year = current.startDate.getUTCFullYear();
     const existingBalance = await tx.leaveBalance.findUnique({
       where: {
         employeeId_leaveTypeId_year: {
@@ -387,11 +553,11 @@ export const approveLeaveRequestWithBalance = ({
     });
     const allocated = existingBalance?.allocated ?? allocation;
     const used = existingBalance?.used ?? 0;
-    const nextUsed = new Prisma.Decimal(used).plus(totalDays);
+    const nextUsed = new Prisma.Decimal(used).plus(current.totalDays);
     const nextRemaining = new Prisma.Decimal(allocated).minus(nextUsed);
 
     if (!allowNegativeBalance && nextRemaining.lessThan(0)) {
-      throw new Error("INSUFFICIENT_LEAVE_BALANCE");
+      throw new LeaveMutationError("INSUFFICIENT_LEAVE_BALANCE");
     }
 
     await tx.leaveBalance.upsert({
@@ -416,13 +582,25 @@ export const approveLeaveRequestWithBalance = ({
       },
     });
 
-    const leaveRequest = await tx.leaveRequest.update({
+    const transition = await tx.leaveRequest.updateMany({
       data: {
         reviewedAt: new Date(),
         reviewedById: actorUserId,
         reviewNote,
         status: "APPROVED",
       },
+      where: {
+        id: entityId,
+        status: current.status,
+        updatedAt: current.updatedAt,
+      },
+    });
+
+    if (transition.count !== 1) {
+      throw new LeaveMutationError("LEAVE_REQUEST_STALE_TRANSITION");
+    }
+
+    const leaveRequest = await tx.leaveRequest.findUniqueOrThrow({
       select: leaveRequestSelect,
       where: { id: entityId },
     });
@@ -447,8 +625,9 @@ export const approveLeaveRequestWithBalance = ({
 
     return leaveRequest;
   });
+};
 
-export const rejectLeaveRequestWithAuditLog = ({
+export const rejectLeaveRequestAtomically = ({
   actorUserId,
   entityId,
   ipAddress,
@@ -460,73 +639,38 @@ export const rejectLeaveRequestWithAuditLog = ({
   ipAddress?: string;
   reviewNote: string | null;
   userAgent?: string;
-}) =>
-  prisma.$transaction(async (tx) => {
-    const current = await tx.leaveRequest.findUniqueOrThrow({
-      select: leaveRequestSelect,
-      where: { id: entityId },
-    });
-    const leaveRequest = await tx.leaveRequest.update({
-      data: {
-        reviewedAt: new Date(),
-        reviewedById: actorUserId,
-        reviewNote,
-        status: "REJECTED",
-      },
+}) => {
+  let expectedVersion: LeaveRequestVersion | undefined;
+
+  return runSerializableTransaction(async (tx) => {
+    const current = await tx.leaveRequest.findUnique({
       select: leaveRequestSelect,
       where: { id: entityId },
     });
 
-    await createAuditLog({
-      action: "LEAVE_REQUEST_REJECTED",
-      actorUserId,
-      entityId,
-      entityType: "LeaveRequest",
-      ipAddress,
-      metadata: {
-        employeeId: current.employeeId,
-        fromStatus: current.status,
-        leaveTypeId: current.leaveTypeId,
-        reviewNote,
-        toStatus: "REJECTED",
-        totalDays: current.totalDays.toString(),
-      },
-      tx,
-      userAgent,
-    });
+    if (!current) {
+      throw new LeaveMutationError("LEAVE_REQUEST_NOT_FOUND");
+    }
 
-    return leaveRequest;
-  });
+    expectedVersion = preserveExpectedRequestVersion(current, expectedVersion);
 
-export const rejectApprovedLeaveRequestWithBalance = ({
-  actorUserId,
-  entityId,
-  ipAddress,
-  reviewNote,
-  userAgent,
-  year,
-}: {
-  actorUserId: string | null;
-  entityId: string;
-  ipAddress?: string;
-  reviewNote: string | null;
-  userAgent?: string;
-  year: number;
-}) =>
-  prisma.$transaction(async (tx) => {
-    const current = await tx.leaveRequest.findUniqueOrThrow({
-      select: leaveRequestSelect,
-      where: { id: entityId },
-    });
-    const existingBalance = await tx.leaveBalance.findUnique({
-      where: {
-        employeeId_leaveTypeId_year: {
-          employeeId: current.employeeId,
-          leaveTypeId: current.leaveTypeId,
-          year,
-        },
-      },
-    });
+    if (current.status !== "PENDING" && current.status !== "APPROVED") {
+      throw new LeaveMutationError("LEAVE_REQUEST_NOT_REJECTABLE");
+    }
+
+    const year = current.startDate.getUTCFullYear();
+    const existingBalance =
+      current.status === "APPROVED"
+        ? await tx.leaveBalance.findUnique({
+            where: {
+              employeeId_leaveTypeId_year: {
+                employeeId: current.employeeId,
+                leaveTypeId: current.leaveTypeId,
+                year,
+              },
+            },
+          })
+        : null;
 
     if (existingBalance) {
       const nextUsed = Prisma.Decimal.max(
@@ -552,25 +696,42 @@ export const rejectApprovedLeaveRequestWithBalance = ({
       });
     }
 
-    const leaveRequest = await tx.leaveRequest.update({
+    const transition = await tx.leaveRequest.updateMany({
       data: {
         reviewedAt: new Date(),
         reviewedById: actorUserId,
         reviewNote,
         status: "REJECTED",
       },
+      where: {
+        id: entityId,
+        status: current.status,
+        updatedAt: current.updatedAt,
+      },
+    });
+
+    if (transition.count !== 1) {
+      throw new LeaveMutationError("LEAVE_REQUEST_STALE_TRANSITION");
+    }
+
+    const leaveRequest = await tx.leaveRequest.findUniqueOrThrow({
       select: leaveRequestSelect,
       where: { id: entityId },
     });
 
     await createAuditLog({
-      action: "LEAVE_REQUEST_APPROVAL_REVERSED",
+      action:
+        current.status === "APPROVED"
+          ? "LEAVE_REQUEST_APPROVAL_REVERSED"
+          : "LEAVE_REQUEST_REJECTED",
       actorUserId,
       entityId,
       entityType: "LeaveRequest",
       ipAddress,
       metadata: {
-        balanceAdjusted: Boolean(existingBalance),
+        ...(current.status === "APPROVED"
+          ? { balanceAdjusted: Boolean(existingBalance) }
+          : {}),
         employeeId: current.employeeId,
         fromStatus: current.status,
         leaveTypeId: current.leaveTypeId,
@@ -584,6 +745,7 @@ export const rejectApprovedLeaveRequestWithBalance = ({
 
     return leaveRequest;
   });
+};
 
 export const createLeaveTypeAuditLog = ({
   action,

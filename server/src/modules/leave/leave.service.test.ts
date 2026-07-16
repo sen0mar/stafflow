@@ -1,44 +1,33 @@
 import { Prisma } from "@prisma/client";
 
 import type { AuthContext } from "../../core/auth/auth.types";
-import type { LeaveRequestRecord, LeaveTypeRecord } from "./leave.repository";
+import type { LeaveRequestRecord } from "./leave.repository";
 import {
   approveLeaveRequestWithBalance,
-  createLeaveRequest,
-  findLeaveRequestById,
-  findLeaveTypeById,
-  findOverlappingLeaveRequest,
-  getLeaveSettings,
-  rejectApprovedLeaveRequestWithBalance,
-  rejectLeaveRequestWithAuditLog,
+  cancelLeaveRequestAtomically,
+  createLeaveRequestAtomically,
+  LeaveMutationError,
+  rejectLeaveRequestAtomically,
 } from "./leave.repository";
 import {
   approveLeaveRequest,
+  cancelSelfLeaveRequest,
   createSelfLeaveRequest,
   rejectLeaveRequest,
 } from "./leave.service";
 
-vi.mock("./leave.repository", () => ({
-  approveLeaveRequestWithBalance: vi.fn(),
-  cancelLeaveRequest: vi.fn(),
-  countLeaveTypeUsage: vi.fn(),
-  createLeaveRequest: vi.fn(),
-  createLeaveType: vi.fn(),
-  createLeaveTypeAuditLog: vi.fn(),
-  deleteLeaveType: vi.fn(),
-  findLeaveRequestById: vi.fn(),
-  findLeaveTypeById: vi.fn(),
-  findLeaveTypeByName: vi.fn(),
-  findOverlappingLeaveRequest: vi.fn(),
-  getLeaveSettings: vi.fn(),
-  listLeaveBalancesForEmployee: vi.fn(),
-  listLeaveRequests: vi.fn(),
-  listLeaveTypes: vi.fn(),
-  listSelfLeaveRequests: vi.fn(),
-  rejectApprovedLeaveRequestWithBalance: vi.fn(),
-  rejectLeaveRequestWithAuditLog: vi.fn(),
-  updateLeaveType: vi.fn(),
-}));
+vi.mock("./leave.repository", async (importOriginal) => {
+  const repository =
+    await importOriginal<typeof import("./leave.repository")>();
+
+  return {
+    ...repository,
+    approveLeaveRequestWithBalance: vi.fn(),
+    cancelLeaveRequestAtomically: vi.fn(),
+    createLeaveRequestAtomically: vi.fn(),
+    rejectLeaveRequestAtomically: vi.fn(),
+  };
+});
 
 const auth: AuthContext = {
   employeeId: "employee-1",
@@ -55,21 +44,6 @@ const auth: AuthContext = {
   },
   userId: "user-1",
 };
-
-const leaveType = (
-  overrides: Partial<LeaveTypeRecord> = {},
-): LeaveTypeRecord => ({
-  _count: { leaveBalances: 0, leaveRequests: 0 },
-  annualAllowance: new Prisma.Decimal(20),
-  createdAt: new Date("2026-01-01T00:00:00.000Z"),
-  description: null,
-  id: "leave-type-1",
-  isActive: true,
-  isPaid: true,
-  name: "Annual Leave",
-  updatedAt: new Date("2026-01-01T00:00:00.000Z"),
-  ...overrides,
-});
 
 const leaveRequest = (
   overrides: Partial<LeaveRequestRecord> = {},
@@ -102,15 +76,11 @@ const leaveRequest = (
 describe("leave.service", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(getLeaveSettings).mockResolvedValue({
-      allowNegativeBalance: false,
-      defaultAnnualAllowanceDays: new Prisma.Decimal(20),
-    });
   });
 
   it("rejects self leave requests with an inactive leave type", async () => {
-    vi.mocked(findLeaveTypeById).mockResolvedValue(
-      leaveType({ isActive: false }),
+    vi.mocked(createLeaveRequestAtomically).mockRejectedValue(
+      new LeaveMutationError("LEAVE_TYPE_INACTIVE"),
     );
 
     await expect(
@@ -124,12 +94,10 @@ describe("leave.service", () => {
       code: "LEAVE_TYPE_INACTIVE",
       statusCode: 422,
     });
-    expect(createLeaveRequest).not.toHaveBeenCalled();
+    expect(createLeaveRequestAtomically).toHaveBeenCalledOnce();
   });
 
   it("rejects self leave requests with invalid date ranges", async () => {
-    vi.mocked(findLeaveTypeById).mockResolvedValue(leaveType());
-
     await expect(
       createSelfLeaveRequest(auth, {
         endDate: "2026-05-09",
@@ -141,12 +109,12 @@ describe("leave.service", () => {
       code: "LEAVE_INVALID_DATE_RANGE",
       statusCode: 422,
     });
-    expect(findOverlappingLeaveRequest).not.toHaveBeenCalled();
+    expect(createLeaveRequestAtomically).not.toHaveBeenCalled();
   });
 
   it("blocks approving requests that are already approved", async () => {
-    vi.mocked(findLeaveRequestById).mockResolvedValue(
-      leaveRequest({ status: "APPROVED" }),
+    vi.mocked(approveLeaveRequestWithBalance).mockRejectedValue(
+      new LeaveMutationError("LEAVE_REQUEST_NOT_APPROVABLE"),
     );
 
     await expect(
@@ -159,15 +127,12 @@ describe("leave.service", () => {
       code: "LEAVE_REQUEST_NOT_APPROVABLE",
       statusCode: 409,
     });
-    expect(approveLeaveRequestWithBalance).not.toHaveBeenCalled();
+    expect(approveLeaveRequestWithBalance).toHaveBeenCalledOnce();
   });
 
   it("maps insufficient leave balance errors to an app error", async () => {
-    vi.mocked(findLeaveRequestById).mockResolvedValue(leaveRequest());
-    vi.mocked(findOverlappingLeaveRequest).mockResolvedValue(null);
-    vi.mocked(findLeaveTypeById).mockResolvedValue(leaveType());
     vi.mocked(approveLeaveRequestWithBalance).mockRejectedValue(
-      new Error("INSUFFICIENT_LEAVE_BALANCE"),
+      new LeaveMutationError("INSUFFICIENT_LEAVE_BALANCE"),
     );
 
     await expect(
@@ -182,10 +147,8 @@ describe("leave.service", () => {
     });
   });
 
-  it("routes rejection of approved leave through balance reversal", async () => {
-    const approved = leaveRequest({ status: "APPROVED" });
-    vi.mocked(findLeaveRequestById).mockResolvedValue(approved);
-    vi.mocked(rejectApprovedLeaveRequestWithBalance).mockResolvedValue(
+  it("delegates rejection status and balance handling to one atomic mutation", async () => {
+    vi.mocked(rejectLeaveRequestAtomically).mockResolvedValue(
       leaveRequest({ status: "REJECTED" }),
     );
 
@@ -195,7 +158,23 @@ describe("leave.service", () => {
       { actorUserId: "admin-1" },
     );
 
-    expect(rejectApprovedLeaveRequestWithBalance).toHaveBeenCalled();
-    expect(rejectLeaveRequestWithAuditLog).not.toHaveBeenCalled();
+    expect(rejectLeaveRequestAtomically).toHaveBeenCalledWith({
+      actorUserId: "admin-1",
+      entityId: "leave-request-1",
+      reviewNote: "changed",
+    });
+  });
+
+  it("maps a stale cancellation to the existing pending conflict", async () => {
+    vi.mocked(cancelLeaveRequestAtomically).mockRejectedValue(
+      new LeaveMutationError("LEAVE_REQUEST_STALE_TRANSITION"),
+    );
+
+    await expect(
+      cancelSelfLeaveRequest(auth, "leave-request-1"),
+    ).rejects.toMatchObject({
+      code: "LEAVE_REQUEST_NOT_PENDING",
+      statusCode: 409,
+    });
   });
 });
