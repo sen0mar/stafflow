@@ -54,6 +54,7 @@ Controllers must stay thin. Services own business rules. Repositories own databa
 
 - **PostgreSQL / Neon** stores relational application data:
   - Users, sessions, employee profiles, departments, attendance records, leave types, leave requests, leave balances, payslip metadata, company settings, audit logs, invitation tokens, and the retained but runtime-unused password-reset table.
+  - Company, attendance, and leave settings are deterministic singleton rows with stable IDs (`company-settings`, `attendance-settings`, and `leave-settings`). Readers use those IDs directly, first access uses idempotent upserts, and database check constraints reject any other settings ID. The singleton migration aborts before changes if a legacy table has duplicates; cleanup is never selected, merged, or deleted implicitly.
 - **Cloudflare R2** stores large private files:
   - Payslip PDFs and future employee documents.
   - PostgreSQL stores only metadata and the R2 object key, not the file contents.

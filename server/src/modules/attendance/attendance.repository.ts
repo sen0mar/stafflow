@@ -7,6 +7,7 @@ import type {
 import { parseDateOnly } from "../../core/utils/date-only";
 import { prisma } from "../../prisma/prisma.client";
 import { createAuditLog } from "../audit-logs/audit-log.service";
+import { SETTINGS_SINGLETON_IDS } from "../settings/settings.constants";
 import type {
   ListAttendanceInput,
   ListSelfAttendanceInput,
@@ -73,9 +74,9 @@ export interface SelfClockActionContext {
 }
 
 export const getCompanyTimezone = async () => {
-  const settings = await prisma.companySettings.findFirst({
-    orderBy: { createdAt: "asc" },
+  const settings = await prisma.companySettings.findUnique({
     select: { timezone: true },
+    where: { id: SETTINGS_SINGLETON_IDS.company },
   });
 
   return settings?.timezone ?? "UTC";
@@ -89,12 +90,11 @@ export const getSelfClockActionContext = async (
       select: { status: true },
       where: { id: employeeId },
     }),
-    prisma.companySettings.findFirst({
-      orderBy: { createdAt: "asc" },
+    prisma.companySettings.findUnique({
       select: { timezone: true },
+      where: { id: SETTINGS_SINGLETON_IDS.company },
     }),
-    prisma.attendanceSettings.findFirst({
-      orderBy: { createdAt: "asc" },
+    prisma.attendanceSettings.findUnique({
       select: {
         allowEmployeeClockIn: true,
         lateGracePeriodMinutes: true,
@@ -103,6 +103,7 @@ export const getSelfClockActionContext = async (
         workdayMinutes: true,
         workdayStart: true,
       },
+      where: { id: SETTINGS_SINGLETON_IDS.attendance },
     }),
   ]);
 

@@ -1,12 +1,12 @@
 import { env } from "../../config/env";
 import { AppError } from "../../core/errors/app-error";
 import {
-  createDefaultAttendanceSettings,
-  createDefaultCompanySettings,
-  createDefaultLeaveSettings,
   findAttendanceSettings,
   findCompanySettings,
   findLeaveSettings,
+  upsertDefaultAttendanceSettings,
+  upsertDefaultCompanySettings,
+  upsertDefaultLeaveSettings,
   updateAttendanceSettingsWithAuditLog,
   updateCompanySettingsWithAuditLog,
   updateLeaveSettingsWithAuditLog,
@@ -114,13 +114,13 @@ const assertWorkdayRange = ({
 };
 
 const getCompanySettingsRecord = async () =>
-  (await findCompanySettings()) ?? (await createDefaultCompanySettings());
+  (await findCompanySettings()) ?? (await upsertDefaultCompanySettings());
 
 const getAttendanceSettingsRecord = async () =>
-  (await findAttendanceSettings()) ?? (await createDefaultAttendanceSettings());
+  (await findAttendanceSettings()) ?? (await upsertDefaultAttendanceSettings());
 
 const getLeaveSettingsRecord = async () =>
-  (await findLeaveSettings()) ?? (await createDefaultLeaveSettings());
+  (await findLeaveSettings()) ?? (await upsertDefaultLeaveSettings());
 
 export const getCompanySettings = async () =>
   toCompanySettingsDto(await getCompanySettingsRecord());
@@ -135,21 +135,19 @@ export const updateCompanySettings = async (
   input: UpdateCompanySettingsInput,
   auditContext: AuditContext,
 ) => {
-  const current = await getCompanySettingsRecord();
   const settings = await updateCompanySettingsWithAuditLog({
     auditLog: {
       ...auditContext,
       action: "SETTINGS_COMPANY_UPDATED",
-      metadata: {
-        changedFields: getChangedFields(input),
-        from: getCompanyAuditSnapshot(current),
-        to: {
-          ...getCompanyAuditSnapshot(current),
-          ...input,
-        },
-      },
     },
-    id: current.id,
+    getAuditMetadata: (current) => ({
+      changedFields: getChangedFields(input),
+      from: getCompanyAuditSnapshot(current),
+      to: {
+        ...getCompanyAuditSnapshot(current),
+        ...input,
+      },
+    }),
     input,
   });
 
@@ -160,28 +158,28 @@ export const updateAttendanceSettings = async (
   input: UpdateAttendanceSettingsInput,
   auditContext: AuditContext,
 ) => {
-  const current = await getAttendanceSettingsRecord();
-  const next = {
-    ...getAttendanceAuditSnapshot(current),
-    ...input,
-  };
-  assertWorkdayRange({
-    workdayEnd: next.workdayEnd,
-    workdayStart: next.workdayStart,
-  });
-
   const settings = await updateAttendanceSettingsWithAuditLog({
     auditLog: {
       ...auditContext,
       action: "SETTINGS_ATTENDANCE_UPDATED",
-      metadata: {
+    },
+    input,
+    prepareUpdate: (current) => {
+      const next = {
+        ...getAttendanceAuditSnapshot(current),
+        ...input,
+      };
+      assertWorkdayRange({
+        workdayEnd: next.workdayEnd,
+        workdayStart: next.workdayStart,
+      });
+
+      return {
         changedFields: getChangedFields(input),
         from: getAttendanceAuditSnapshot(current),
         to: next,
-      },
+      };
     },
-    id: current.id,
-    input,
   });
 
   return toAttendanceSettingsDto(settings);
@@ -191,21 +189,19 @@ export const updateLeaveSettings = async (
   input: UpdateLeaveSettingsInput,
   auditContext: AuditContext,
 ) => {
-  const current = await getLeaveSettingsRecord();
   const settings = await updateLeaveSettingsWithAuditLog({
     auditLog: {
       ...auditContext,
       action: "SETTINGS_LEAVE_UPDATED",
-      metadata: {
-        changedFields: getChangedFields(input),
-        from: getLeaveAuditSnapshot(current),
-        to: {
-          ...getLeaveAuditSnapshot(current),
-          ...input,
-        },
-      },
     },
-    id: current.id,
+    getAuditMetadata: (current) => ({
+      changedFields: getChangedFields(input),
+      from: getLeaveAuditSnapshot(current),
+      to: {
+        ...getLeaveAuditSnapshot(current),
+        ...input,
+      },
+    }),
     input,
   });
 

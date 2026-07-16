@@ -1,5 +1,6 @@
 import bcrypt from "bcrypt";
 
+import { SETTINGS_SINGLETON_IDS } from "../server/src/modules/settings/settings.constants";
 import { prisma } from "./prisma-script-client";
 
 const demoPassword = "StafflowDemo";
@@ -456,14 +457,14 @@ const main = async () => {
   }
 
   await prisma.companySettings.upsert({
-    where: { id: "demo-company-settings" },
+    where: { id: SETTINGS_SINGLETON_IDS.company },
     update: {
       name: "Stafflow Demo Company",
       timezone: "America/New_York",
       locale: "en-US",
     },
     create: {
-      id: "demo-company-settings",
+      id: SETTINGS_SINGLETON_IDS.company,
       name: "Stafflow Demo Company",
       timezone: "America/New_York",
       locale: "en-US",
@@ -471,7 +472,7 @@ const main = async () => {
   });
 
   await prisma.attendanceSettings.upsert({
-    where: { id: "demo-attendance-settings" },
+    where: { id: SETTINGS_SINGLETON_IDS.attendance },
     update: {
       workdayMinutes: 480,
       workdayStart: "09:00",
@@ -481,7 +482,7 @@ const main = async () => {
       allowEmployeeClockIn: true,
     },
     create: {
-      id: "demo-attendance-settings",
+      id: SETTINGS_SINGLETON_IDS.attendance,
       workdayMinutes: 480,
       workdayStart: "09:00",
       workdayEnd: "17:00",
@@ -492,7 +493,7 @@ const main = async () => {
   });
 
   await prisma.leaveSettings.upsert({
-    where: { id: "demo-leave-settings" },
+    where: { id: SETTINGS_SINGLETON_IDS.leave },
     update: {
       defaultAnnualAllowanceDays: 20,
       allowNegativeBalance: false,
@@ -500,7 +501,7 @@ const main = async () => {
         "Annual leave is requested in full-day increments and reviewed by an admin before approval.",
     },
     create: {
-      id: "demo-leave-settings",
+      id: SETTINGS_SINGLETON_IDS.leave,
       defaultAnnualAllowanceDays: 20,
       allowNegativeBalance: false,
       policyText:

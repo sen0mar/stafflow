@@ -20,6 +20,7 @@
     "db:retry-payslip-deletes": "tsx scripts/retry-payslip-object-deletes.ts",
     "db:migrate:deploy": "prisma migrate deploy",
     "db:migrate:status": "prisma migrate status",
+    "db:preflight-settings-singletons": "tsx scripts/preflight-settings-singletons.ts",
     "db:seed": "tsx prisma/seed.ts",
     "db:seed:check": "tsx prisma/seed-check.ts",
     "db:reset-added-users": "tsx prisma/reset-added-demo-users.ts",

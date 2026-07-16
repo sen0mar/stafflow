@@ -5,6 +5,7 @@ import {
   LeaveMutationError,
   rejectLeaveRequestAtomically,
 } from "../../src/modules/leave/leave.repository";
+import { SETTINGS_SINGLETON_IDS } from "../../src/modules/settings/settings.constants";
 import { prisma } from "../../src/prisma/prisma.client";
 
 const getTestDatabaseName = () => {
@@ -82,6 +83,7 @@ const createLeaveFixture = async () => {
     data: {
       allowNegativeBalance: false,
       defaultAnnualAllowanceDays: 20,
+      id: SETTINGS_SINGLETON_IDS.leave,
     },
   });
 

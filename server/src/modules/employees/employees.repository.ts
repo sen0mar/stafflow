@@ -7,6 +7,7 @@ import {
   type AuditLogInput,
 } from "../audit-logs/audit-log.service";
 import { prisma } from "../../prisma/prisma.client";
+import { SETTINGS_SINGLETON_IDS } from "../settings/settings.constants";
 import type {
   CreateEmployeeInput,
   ListEmployeesInput,
@@ -551,9 +552,9 @@ export const updateEmployeeAndAccountStatus = async ({
   prisma.$transaction(async (tx) => {
     const companySettings =
       employeeStatus === "TERMINATED"
-        ? await tx.companySettings.findFirst({
-            orderBy: { createdAt: "asc" },
+        ? await tx.companySettings.findUnique({
             select: { timezone: true },
+            where: { id: SETTINGS_SINGLETON_IDS.company },
           })
         : null;
     const employee = await tx.employee.update({

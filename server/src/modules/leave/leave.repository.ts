@@ -5,6 +5,7 @@ import {
   createAuditLog,
   type AuditLogInput,
 } from "../audit-logs/audit-log.service";
+import { SETTINGS_SINGLETON_IDS } from "../settings/settings.constants";
 import type {
   CreateLeaveRequestInput,
   CreateLeaveTypeInput,
@@ -627,12 +628,12 @@ export const approveLeaveRequestWithBalance = ({
       throw new LeaveMutationError("LEAVE_TYPE_NOT_FOUND");
     }
 
-    const settings = await tx.leaveSettings.findFirst({
-      orderBy: { createdAt: "asc" },
+    const settings = await tx.leaveSettings.findUnique({
       select: {
         allowNegativeBalance: true,
         defaultAnnualAllowanceDays: true,
       },
+      where: { id: SETTINGS_SINGLETON_IDS.leave },
     });
     const allowNegativeBalance = settings?.allowNegativeBalance ?? false;
     const allocation =

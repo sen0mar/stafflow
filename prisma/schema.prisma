@@ -225,7 +225,7 @@ model Payslip {
 }
 
 model CompanySettings {
-  id        String   @id @default(cuid())
+  id        String   @id
   name      String
   timezone  String   @default("UTC")
   locale    String   @default("en-US")
@@ -234,7 +234,7 @@ model CompanySettings {
 }
 
 model AttendanceSettings {
-  id                     String   @id @default(cuid())
+  id                     String   @id
   workdayMinutes         Int      @default(480)
   workdayStart           String   @default("09:00")
   workdayEnd             String   @default("17:00")
@@ -246,7 +246,7 @@ model AttendanceSettings {
 }
 
 model LeaveSettings {
-  id                         String   @id @default(cuid())
+  id                         String   @id
   defaultAnnualAllowanceDays Decimal  @default(0) @db.Decimal(5, 2)
   allowNegativeBalance       Boolean  @default(false)
   policyText                 String?  @db.Text

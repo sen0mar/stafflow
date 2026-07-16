@@ -27,6 +27,7 @@ import {
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -134,19 +135,19 @@ const confirmationContent = {
   attendance: {
     buttonLabel: 'Save attendance',
     description:
-      'These attendance defaults will be used by admin and employee attendance workflows.',
+      'These controls change employee self clock availability and attendance classification.',
     title: 'Save attendance settings?',
   },
   company: {
     buttonLabel: 'Save company',
     description:
-      'This will update the company identity and regional defaults used across Stafflow.',
+      'This updates stored company metadata and the operational timezone. It does not rename or localize the Stafflow interface.',
     title: 'Save company settings?',
   },
   leave: {
     buttonLabel: 'Save leave',
     description:
-      'This will update the default leave policy and balance behavior.',
+      'This updates leave balance defaults and the admin-only policy metadata note.',
     title: 'Save leave settings?',
   },
 } satisfies Record<
@@ -344,21 +345,21 @@ export const SettingsPage = () => {
           Settings
         </h1>
         <p className="mt-2 max-w-3xl text-sm leading-6 text-muted">
-          Manage the basic company defaults used across attendance, leave, and
-          employee self-service.
+          Manage operational attendance and leave defaults alongside clearly
+          labeled company and policy metadata.
         </p>
       </div>
 
       <Card className="overflow-hidden border-default bg-surface">
         <SectionHeader
-          description="Set the organization name and regional defaults."
+          description="Timezone drives company-day behavior. Name and locale are stored metadata, not global branding or localization controls."
           icon={Building2}
           title="Company"
         />
         <CardContent>
           <Form {...companyForm}>
             <form
-              className="grid min-w-0 gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_120px_auto] lg:items-end"
+              className="grid min-w-0 gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_auto] lg:items-end"
               onSubmit={companyForm.handleSubmit((values) => {
                 if (!demoMode) {
                   setPendingSave({ type: 'company', values })
@@ -370,10 +371,14 @@ export const SettingsPage = () => {
                 name="name"
                 render={({ field }) => (
                   <FormItem className="min-w-0">
-                    <FormLabel>Company name</FormLabel>
+                    <FormLabel>Company name (metadata)</FormLabel>
                     <FormControl>
                       <Input placeholder="Stafflow Demo Company" {...field} />
                     </FormControl>
+                    <FormDescription>
+                      Stored for company records; this does not rename the
+                      Stafflow interface.
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -398,6 +403,10 @@ export const SettingsPage = () => {
                         ))}
                       </SelectContent>
                     </Select>
+                    <FormDescription>
+                      Sets attendance calendar days, schedules, and dated
+                      employee status changes.
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -407,10 +416,14 @@ export const SettingsPage = () => {
                 name="locale"
                 render={({ field }) => (
                   <FormItem className="min-w-0">
-                    <FormLabel>Locale</FormLabel>
+                    <FormLabel>Locale (metadata)</FormLabel>
                     <FormControl>
                       <Input placeholder="en-US" {...field} />
                     </FormControl>
+                    <FormDescription>
+                      Stored for future use; this does not currently localize
+                      dates, numbers, or interface text.
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -428,7 +441,7 @@ export const SettingsPage = () => {
 
       <Card className="overflow-hidden border-default bg-surface">
         <SectionHeader
-          description="Set the standard workday and employee clock-in availability."
+          description="These controls are enforced for employee self clock actions and their resulting attendance status."
           icon={CalendarClock}
           title="Attendance"
         />
@@ -452,6 +465,10 @@ export const SettingsPage = () => {
                       <FormControl>
                         <Input type="time" autoComplete="off" {...field} />
                       </FormControl>
+                      <FormDescription>
+                        Clock-ins after this time plus the grace period are
+                        late.
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -465,6 +482,9 @@ export const SettingsPage = () => {
                       <FormControl>
                         <Input type="time" autoComplete="off" {...field} />
                       </FormControl>
+                      <FormDescription>
+                        Clocking out before this time produces a partial day.
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -486,6 +506,9 @@ export const SettingsPage = () => {
                           }
                         />
                       </FormControl>
+                      <FormDescription>
+                        Fewer elapsed minutes produces a partial day.
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -509,6 +532,9 @@ export const SettingsPage = () => {
                           }
                         />
                       </FormControl>
+                      <FormDescription>
+                        Added to the scheduled start before a clock-in is late.
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -535,6 +561,10 @@ export const SettingsPage = () => {
                           <SelectItem value="disabled">Disabled</SelectItem>
                         </SelectContent>
                       </Select>
+                      <FormDescription>
+                        Disabling blocks new employee clock-ins but still lets
+                        an active clock-in be closed.
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -576,6 +606,10 @@ export const SettingsPage = () => {
                         )
                       })}
                     </div>
+                    <FormDescription>
+                      Employee self clock actions are blocked on unselected
+                      company-local weekdays.
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -597,7 +631,7 @@ export const SettingsPage = () => {
 
       <Card className="overflow-hidden border-default bg-surface">
         <SectionHeader
-          description="Set default leave allowance behavior and the visible policy note."
+          description="Allowance controls affect leave balance approval. The policy note is stored admin metadata and is not published to employees."
           icon={FileText}
           title="Leave"
         />
@@ -630,6 +664,10 @@ export const SettingsPage = () => {
                           }
                         />
                       </FormControl>
+                      <FormDescription>
+                        Used when an approved request's leave type has no annual
+                        allowance.
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -656,6 +694,10 @@ export const SettingsPage = () => {
                           <SelectItem value="allowed">Allowed</SelectItem>
                         </SelectContent>
                       </Select>
+                      <FormDescription>
+                        Controls whether approval may reduce the employee's
+                        remaining leave below zero.
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -666,7 +708,7 @@ export const SettingsPage = () => {
                 name="policyText"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Policy note</FormLabel>
+                    <FormLabel>Policy note (metadata)</FormLabel>
                     <FormControl>
                       <Textarea
                         rows={5}
@@ -674,6 +716,10 @@ export const SettingsPage = () => {
                         {...field}
                       />
                     </FormControl>
+                    <FormDescription>
+                      Stored with leave settings for admins; it is not shown in
+                      employee leave screens.
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}

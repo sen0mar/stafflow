@@ -65,6 +65,7 @@ Keep entries short. This file should explain what changed, not become a detailed
 - Feature 58: Payslip Storage Hardening — bounded multipart parsing and sanitized display filenames, reused one lazy private R2 client, replaced key-bearing failure logs with safe request-scoped classifications, and added idempotent scheduled recovery for soft-deleted objects with focused mock coverage.
 - Feature 59: Secret Cache and Referrer Hardening — moved invitation tokens to fragment links with synchronous fragment/legacy-query scrubbing, made auth and signed-download responses non-cacheable, redacted access-log URL/referrer secrets, and added baseline Vercel browser headers while deferring CSP to verified deployment origins.
 - Feature 60: Generic Request Validation — bounded safe pagination and shared scalar inputs at API schemas, restricted reflected request IDs, validated client URL filter unions, and added boundary-focused regression coverage.
+- Feature 61: Deterministic Singleton Settings — enforced stable company, attendance, and leave settings IDs with a fail-closed migration and read-only deployment preflight; serialized first access and audited updates; switched all readers to deterministic lookups; verified Unit 11 attendance enforcement; and labeled non-operational company/leave fields as metadata.
 
 ## Entry Format
 

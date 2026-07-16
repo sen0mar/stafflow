@@ -5,6 +5,7 @@ import {
   clockInSelf,
   clockOutSelf,
 } from "../../src/modules/attendance/attendance.service";
+import { SETTINGS_SINGLETON_IDS } from "../../src/modules/settings/settings.constants";
 import { prisma } from "../../src/prisma/prisma.client";
 
 const getTestDatabaseName = () => {
@@ -63,11 +64,16 @@ const createFixture = async () => {
 
   await Promise.all([
     prisma.companySettings.create({
-      data: { name: "Attendance Test", timezone: "UTC" },
+      data: {
+        id: SETTINGS_SINGLETON_IDS.company,
+        name: "Attendance Test",
+        timezone: "UTC",
+      },
     }),
     prisma.attendanceSettings.create({
       data: {
         allowEmployeeClockIn: true,
+        id: SETTINGS_SINGLETON_IDS.attendance,
         lateGracePeriodMinutes: 0,
         weeklyWorkingDays: [0, 1, 2, 3, 4, 5, 6],
         workdayEnd: "23:59",

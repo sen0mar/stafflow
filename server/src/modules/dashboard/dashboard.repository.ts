@@ -5,6 +5,7 @@ import type {
 } from "@prisma/client";
 
 import { prisma } from "../../prisma/prisma.client";
+import { SETTINGS_SINGLETON_IDS } from "../settings/settings.constants";
 
 export interface DateRange {
   endExclusive: Date;
@@ -17,9 +18,9 @@ const activeEmployeeWhere = {
 };
 
 export const getCompanyTimezone = async () => {
-  const settings = await prisma.companySettings.findFirst({
-    orderBy: { createdAt: "asc" },
+  const settings = await prisma.companySettings.findUnique({
     select: { timezone: true },
+    where: { id: SETTINGS_SINGLETON_IDS.company },
   });
 
   return settings?.timezone ?? "UTC";
