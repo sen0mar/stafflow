@@ -10,7 +10,8 @@ interface RafHarness {
   cancel: ReturnType<typeof vi.fn>
   pendingCount: () => number
   request: ReturnType<typeof vi.fn>
-  runUntilIdle: () => number
+  runNextFrame: (frameDurationMs?: number) => boolean
+  runUntilIdle: (frameDurationMs?: number) => number
 }
 
 let resizeCallback: ResizeObserverCallback
@@ -19,6 +20,8 @@ let motionPreference: MockMediaQueryList
 let visibilityState: DocumentVisibilityState
 let containerWidth = 320
 let containerHeight = 160
+let currentFillStyle = ''
+const fillStyleAssignments: string[] = []
 
 const context = {
   arc: vi.fn(),
@@ -26,13 +29,20 @@ const context = {
   clearRect: vi.fn(),
   fill: vi.fn(),
   fillRect: vi.fn(),
-  fillStyle: '',
+  get fillStyle() {
+    return currentFillStyle
+  },
+  set fillStyle(value: string) {
+    currentFillStyle = value
+    fillStyleAssignments.push(value)
+  },
   globalAlpha: 1,
   setTransform: vi.fn(),
 }
 
 const createRafHarness = (): RafHarness => {
   let nextId = 1
+  let elapsedMs = 0
   const callbacks = new Map<number, FrameRequestCallback>()
   const request = vi.fn((callback: FrameRequestCallback) => {
     const id = nextId
@@ -41,12 +51,27 @@ const createRafHarness = (): RafHarness => {
     return id
   })
   const cancel = vi.fn((id: number) => callbacks.delete(id))
+  const runNextFrame = (frameDurationMs = 16.67) => {
+    const entry = callbacks.entries().next().value as
+      [number, FrameRequestCallback] | undefined
+
+    if (!entry) {
+      return false
+    }
+
+    const [id, callback] = entry
+    callbacks.delete(id)
+    elapsedMs += frameDurationMs
+    callback(elapsedMs)
+    return true
+  }
 
   return {
     cancel,
     pendingCount: () => callbacks.size,
     request,
-    runUntilIdle: () => {
+    runNextFrame,
+    runUntilIdle: (frameDurationMs = 16.67) => {
       let frames = 0
 
       while (callbacks.size > 0) {
@@ -54,12 +79,7 @@ const createRafHarness = (): RafHarness => {
           throw new Error('Animation did not settle')
         }
 
-        const [id, callback] = callbacks.entries().next().value as [
-          number,
-          FrameRequestCallback,
-        ]
-        callbacks.delete(id)
-        callback(frames * 16.67)
+        runNextFrame(frameDurationMs)
         frames += 1
       }
 
@@ -137,6 +157,8 @@ describe('ReactiveDotGrid', () => {
     containerWidth = 320
     containerHeight = 160
     visibilityState = 'visible'
+    currentFillStyle = ''
+    fillStyleAssignments.length = 0
     motionPreference = createMotionPreference()
     raf = createRafHarness()
 
@@ -150,6 +172,17 @@ describe('ReactiveDotGrid', () => {
     })
     vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(
       context as unknown as CanvasRenderingContext2D,
+    )
+    vi.spyOn(window, 'getComputedStyle').mockImplementation(
+      () =>
+        ({
+          getPropertyValue: (name: string) => {
+            if (name === '--bg-base') return '#0e0e0e'
+            if (name === '--bg-dot') return 'rgba(217, 119, 38, 0.16)'
+            if (name === '--accent-primary-text') return '#f0a05b'
+            return ''
+          },
+        }) as CSSStyleDeclaration,
     )
     vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(
       () =>
@@ -235,7 +268,8 @@ describe('ReactiveDotGrid', () => {
     })
     const requestsAfterActiveSettle = raf.request.mock.calls.length
 
-    expect(activeFrames).toBe(56)
+    expect(activeFrames).toBeGreaterThan(40)
+    expect(activeFrames).toBeLessThan(70)
     expect(raf.pendingCount()).toBe(0)
     expect(context.arc).toHaveBeenCalled()
 
@@ -251,7 +285,47 @@ describe('ReactiveDotGrid', () => {
     act(() => {
       leaveFrames = raf.runUntilIdle()
     })
-    expect(leaveFrames).toBe(56)
+    expect(leaveFrames).toBeGreaterThan(40)
+    expect(leaveFrames).toBeLessThan(70)
+    expect(raf.pendingCount()).toBe(0)
+  })
+
+  it('highlights nearby dots, renders a short-lived ripple, and returns to idle', () => {
+    renderGrid()
+    context.fill.mockClear()
+    fillStyleAssignments.length = 0
+
+    fireEvent.pointerMove(window, { clientX: 80, clientY: 60 })
+
+    act(() => {
+      raf.runNextFrame()
+    })
+
+    expect(context.fill.mock.calls.length).toBeGreaterThan(231)
+    expect(fillStyleAssignments).toContain('#f0a05b')
+    expect(raf.pendingCount()).toBe(1)
+
+    let remainingFrames = 0
+    act(() => {
+      remainingFrames = raf.runUntilIdle()
+    })
+
+    expect(remainingFrames).toBeGreaterThan(0)
+    expect(remainingFrames).toBeLessThan(70)
+    expect(raf.pendingCount()).toBe(0)
+  })
+
+  it('uses elapsed time to preserve easing duration on high-refresh displays', () => {
+    renderGrid()
+    fireEvent.pointerMove(window, { clientX: 120, clientY: 90 })
+
+    let highRefreshFrames = 0
+    act(() => {
+      highRefreshFrames = raf.runUntilIdle(8.33)
+    })
+
+    expect(highRefreshFrames).toBeGreaterThan(80)
+    expect(highRefreshFrames).toBeLessThan(140)
     expect(raf.pendingCount()).toBe(0)
   })
 

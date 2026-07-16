@@ -147,7 +147,13 @@ Radius increases with surface depth. Keep the rounded visual language consistent
 
 ## Homepage Background
 
-The homepage uses a full-page dotted background in both themes so it can later become reactive. The dots should be visible but still secondary to content.
+The homepage uses a full-page reactive dotted canvas in both themes. Nearby dots
+move away from the pointer with frame-rate-independent easing, brighten toward
+the semantic brand accent with a restrained distance-based falloff, and can emit
+a short-lived trailing ripple while the pointer moves. The canvas must remain
+event-driven and stop scheduling frames once the interaction settles.
+Reduced-motion users receive the static grid. The dots should be visible but
+still secondary to content.
 
 Recommended CSS pattern:
 

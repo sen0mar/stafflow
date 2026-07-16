@@ -5,14 +5,29 @@ interface Dot {
   y: number
 }
 
+interface Ripple {
+  age: number
+  x: number
+  y: number
+}
+
 const dotSpacing = 16
 const dotRadius = 1
 const pushRadius = 126
 const maxPush = 18
 const pointerEase = 0.16
 const influenceEase = 0.08
+const referenceFrameMs = 1000 / 60
+const maxFrameDeltaMs = 50
 const pointerSettleThreshold = 0.1
 const influenceSettleThreshold = 0.01
+const rippleDurationMs = 640
+const rippleMaxRadius = 104
+const rippleBandWidth = 22
+const ripplePush = 2.4
+const rippleDotGrowth = 0.12
+const rippleTriggerDistance = 52
+const maxRipples = 2
 
 const getCssVariable = (name: string) =>
   getComputedStyle(document.documentElement).getPropertyValue(name).trim()
@@ -35,13 +50,17 @@ export const ReactiveDotGrid = () => {
     let width = 0
     let height = 0
     let needsDraw = false
+    let lastFrameTime: number | null = null
+    let ripples: Ripple[] = []
     let baseColor = getCssVariable('--bg-base')
     let dotColor = getCssVariable('--bg-dot')
+    let highlightColor = getCssVariable('--accent-primary-text')
     let prefersReducedMotion = window.matchMedia(
       '(prefers-reduced-motion: reduce)',
     ).matches
     const pointer = { x: 0, y: 0, active: false }
     const easedPointer = { x: 0, y: 0, active: false }
+    const lastRippleOrigin = { x: 0, y: 0, active: false }
     let pointerInfluence = 0
 
     const isDocumentVisible = () => document.visibilityState !== 'hidden'
@@ -78,14 +97,16 @@ export const ReactiveDotGrid = () => {
     const settle = (
       current: number,
       target: number,
-      ease: number,
+      baseEase: number,
       threshold: number,
+      deltaMs: number,
     ) => {
+      const ease = 1 - (1 - baseEase) ** (deltaMs / referenceFrameMs)
       const next = current + (target - current) * ease
       return Math.abs(target - next) <= threshold ? target : next
     }
 
-    const easePointerState = () => {
+    const easePointerState = (deltaMs: number) => {
       const targetInfluence = pointer.active ? 1 : 0
 
       easedPointer.x = settle(
@@ -93,20 +114,36 @@ export const ReactiveDotGrid = () => {
         pointer.x,
         pointerEase,
         pointerSettleThreshold,
+        deltaMs,
       )
       easedPointer.y = settle(
         easedPointer.y,
         pointer.y,
         pointerEase,
         pointerSettleThreshold,
+        deltaMs,
       )
       pointerInfluence = settle(
         pointerInfluence,
         targetInfluence,
         influenceEase,
         influenceSettleThreshold,
+        deltaMs,
       )
       easedPointer.active = pointerInfluence > 0
+    }
+
+    const updateRipples = (deltaMs: number) => {
+      ripples = ripples
+        .map((ripple) => ({ ...ripple, age: ripple.age + deltaMs }))
+        .filter((ripple) => ripple.age < rippleDurationMs)
+    }
+
+    const addRipple = (x: number, y: number) => {
+      ripples = [...ripples.slice(-(maxRipples - 1)), { x, y, age: 0 }]
+      lastRippleOrigin.x = x
+      lastRippleOrigin.y = y
+      lastRippleOrigin.active = true
     }
 
     const pointerStateIsSettled = () => {
@@ -123,6 +160,8 @@ export const ReactiveDotGrid = () => {
       let drawX = dot.x
       let drawY = dot.y
       let radius = dotRadius
+      let extraOpacity = 0
+      let pointerHighlightOpacity = 0
 
       if (!prefersReducedMotion && easedPointer.active) {
         const deltaX = dot.x - easedPointer.x
@@ -138,13 +177,55 @@ export const ReactiveDotGrid = () => {
           drawX += (deltaX / safeDistance) * force
           drawY += (deltaY / safeDistance) * force
           radius += easedFalloff * 0.18 * pointerInfluence
+          pointerHighlightOpacity = easedFalloff * 0.58 * pointerInfluence
         }
+      }
+
+      if (!prefersReducedMotion) {
+        ripples.forEach((ripple) => {
+          const progress = ripple.age / rippleDurationMs
+          const rippleRadius = progress * rippleMaxRadius
+          const deltaX = dot.x - ripple.x
+          const deltaY = dot.y - ripple.y
+          const distance = Math.hypot(deltaX, deltaY)
+          const distanceFromBand = Math.abs(distance - rippleRadius)
+
+          if (distanceFromBand >= rippleBandWidth) {
+            return
+          }
+
+          const safeDistance = Math.max(distance, 1)
+          const bandFalloff = 1 - distanceFromBand / rippleBandWidth
+          const lifecycle = Math.sin(progress * Math.PI)
+          const strength = bandFalloff * lifecycle
+
+          drawX += (deltaX / safeDistance) * ripplePush * strength
+          drawY += (deltaY / safeDistance) * ripplePush * strength
+          radius += rippleDotGrowth * strength
+          extraOpacity = Math.max(extraOpacity, 0.14 * strength)
+        })
       }
 
       context.globalAlpha = 1
       context.beginPath()
       context.arc(drawX, drawY, radius, 0, Math.PI * 2)
       context.fill()
+
+      if (extraOpacity > 0) {
+        context.globalAlpha = extraOpacity
+        context.beginPath()
+        context.arc(drawX, drawY, radius, 0, Math.PI * 2)
+        context.fill()
+      }
+
+      if (pointerHighlightOpacity > 0) {
+        context.fillStyle = highlightColor
+        context.globalAlpha = pointerHighlightOpacity
+        context.beginPath()
+        context.arc(drawX, drawY, radius + 0.14, 0, Math.PI * 2)
+        context.fill()
+        context.fillStyle = dotColor
+      }
     }
 
     const scheduleAnimation = () => {
@@ -152,15 +233,18 @@ export const ReactiveDotGrid = () => {
         animationFrame !== null ||
         prefersReducedMotion ||
         !isDocumentVisible() ||
-        pointerStateIsSettled()
+        (pointerStateIsSettled() && ripples.length === 0)
       ) {
+        if (pointerStateIsSettled() && ripples.length === 0) {
+          lastFrameTime = null
+        }
         return
       }
 
       animationFrame = window.requestAnimationFrame(render)
     }
 
-    const render = () => {
+    const render = (time: number) => {
       animationFrame = null
 
       if (!isDocumentVisible()) {
@@ -168,12 +252,21 @@ export const ReactiveDotGrid = () => {
         return
       }
 
-      easePointerState()
+      const deltaMs =
+        lastFrameTime === null
+          ? referenceFrameMs
+          : Math.min(Math.max(time - lastFrameTime, 1), maxFrameDeltaMs)
+      lastFrameTime = time
+
+      easePointerState(deltaMs)
+      updateRipples(deltaMs)
       drawWhenVisible()
       scheduleAnimation()
     }
 
     const cancelAnimation = () => {
+      lastFrameTime = null
+
       if (animationFrame === null) {
         return
       }
@@ -202,6 +295,7 @@ export const ReactiveDotGrid = () => {
     const syncThemeColors = () => {
       baseColor = getCssVariable('--bg-base')
       dotColor = getCssVariable('--bg-dot')
+      highlightColor = getCssVariable('--accent-primary-text')
       drawWhenVisible()
     }
 
@@ -219,11 +313,21 @@ export const ReactiveDotGrid = () => {
         easedPointer.y = y
       }
 
+      if (
+        pointer.active &&
+        (!lastRippleOrigin.active ||
+          Math.hypot(x - lastRippleOrigin.x, y - lastRippleOrigin.y) >=
+            rippleTriggerDistance)
+      ) {
+        addRipple(x, y)
+      }
+
       scheduleAnimation()
     }
 
     const handlePointerLeave = () => {
       pointer.active = false
+      lastRippleOrigin.active = false
       scheduleAnimation()
     }
 
@@ -234,6 +338,8 @@ export const ReactiveDotGrid = () => {
         cancelAnimation()
         pointerInfluence = 0
         easedPointer.active = false
+        ripples = []
+        lastRippleOrigin.active = false
         drawWhenVisible()
         return
       }

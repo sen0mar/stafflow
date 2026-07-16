@@ -77,6 +77,7 @@ Keep entries short. This file should explain what changed, not become a detailed
 - Feature 70: Audit Section 26 Environment and Docs Sync — completed safe local/client/production environment examples and provider ownership mapping, aligned demo/password-recovery/security claims with exact regression evidence, and added a deployment verification checklist separating code controls from external activation.
 - Feature 71: Subtle UI Shadows — replaced broad surface and brand-glow shadows with compact neutral elevation, flattened bordered form controls, normalized layered overlays, and tightened the public homepage footer spacing.
 - Feature 72: Page Header Cleanup — removed redundant role/context eyebrow labels across admin, employee, settings, and not-found pages, and removed the unused employee and payslip shortcuts from the admin dashboard header while preserving actions on their owning pages.
+- Feature 73: Reactive Homepage Background Polish — added frame-rate-independent dot easing, bounded pointer ripples, distance-based brand highlighting, and focused scheduling coverage while preserving idle, reduced-motion, theme, visibility, and high-DPI safeguards.
 
 ## Entry Format
 
