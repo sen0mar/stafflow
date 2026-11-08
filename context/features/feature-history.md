@@ -84,6 +84,8 @@ Keep entries short. This file should explain what changed, not become a detailed
 
 - Feature 76: Parallel CI and Integration Reliability — split static checks, client/server builds, client/server unit tests, and database integration/smoke checks into parallel jobs with a compatible quality gate; fixed API test listener/CSRF handling, concurrent settings initialization, and PostgreSQL adapter serialization retries; verified 275 tests and workflow validation.
 
+- Feature 77: Demo Showcase Seed — populated both role experiences with 15 fictional employees, eight weeks of attendance, all leave statuses, reconciled balances, audits, and optional real private payslip PDFs; added explicit environment targeting, repeatable fixture identities, read-only verification, and CI seed coverage. Verified development reruns and both demo accounts.
+
 ## Entry Format
 
 - Feature 01: Feature Name — concise summary of what was added, changed, verified, or migrated.

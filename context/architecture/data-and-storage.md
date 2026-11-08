@@ -31,3 +31,9 @@ Validate PDF type, size, multipart limits, and sanitized bounded display filenam
 ## Review risks
 
 Exercise both partial-failure directions: an uploaded object without committed metadata, and committed metadata whose object is unavailable. Ensure the scheduled deletion retry is active; repository configuration alone does not prove cleanup runs.
+
+## Demo showcase seeding
+
+`npm run db:seed` previews fictional fixtures without connecting to PostgreSQL or R2. Applying requires the target fingerprint and explicitly loads the selected environment file; development rejects configured production database aliases and production R2 buckets. Production apply additionally requires `SEED_ALLOW_PRODUCTION=true` and separate user authorization after development review.
+
+The seed uses existing models with stable fixture identities, preserves unrelated data and existing credentials/files, and refuses ownership collisions. Demo profiles and singleton settings are refreshed; current-year balances reconcile all approved leave. Dated history is retained rather than reset. The fictional company uses a UTC schedule so generated attendance agrees with its company timezone and workday duration. Business fixtures and representative audits commit atomically. Real sample PDFs are optional private R2 objects; each metadata/audit transaction cleans up its new object on failure. Explicit data-only mode skips uploads and creates no placeholder payslip metadata. The seed never enables runtime demo mutations or uploads. Read-only verification and commands are documented in the root README.

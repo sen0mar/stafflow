@@ -67,6 +67,8 @@ jobs:
         run: npm exec -- prisma generate
       - name: Typecheck
         run: npm --prefix server run typecheck
+      - name: Typecheck seed scripts
+        run: npm exec -- tsc -p prisma/tsconfig.json
       - name: Build
         run: npm run build:server
 
@@ -97,6 +99,8 @@ jobs:
         run: npm exec -- prisma generate
       - name: Test
         run: npm --prefix server run test:unit
+      - name: Seed fixture and target guard tests
+        run: npm run db:seed:test
 
   database:
     name: Database integration and smoke
@@ -129,6 +133,18 @@ jobs:
         run: npm run db:migrate:deploy
       - name: Guarded database integration tests
         run: npm run test:integration
+      - name: Seed the fixed CI test database
+        run: |
+          node --import tsx <<'NODE'
+          const { writeFileSync } = require("node:fs");
+          const { spawnSync } = require("node:child_process");
+          const { targetFingerprint } = require("./prisma/demo/target.ts");
+          const database = "postgresql://postgres:postgres@localhost:5432/stafflow_test";
+          if (process.env.DATABASE_URL !== database) throw new Error("Unexpected CI database target.");
+          writeFileSync(".env.local", `NODE_ENV=test\nDATABASE_URL=${database}\nDIRECT_URL=${database}\nDEMO_MODE=false\nDEMO_UPLOADS_ENABLED=false\n`);
+          const result = spawnSync(process.execPath, ["--import", "tsx", "prisma/seed.ts", "--data-only", "--apply", `--target=${targetFingerprint(database)}`], { stdio: "inherit" });
+          process.exit(result.status ?? 1);
+          NODE
       - name: Database smoke checks
         run: npm run smoke
 
