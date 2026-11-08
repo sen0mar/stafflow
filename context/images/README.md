@@ -1,6 +1,6 @@
 # UI Reference Images
 
-These images are visual references for the app UI. Use `context/ui-context.md` for the token and layout rules, and use these images for visual alignment.
+These images are visual references for the app UI. Use `context/design/ui.md` for the token and layout rules, and use these images for visual alignment.
 
 ## Dashboard
 

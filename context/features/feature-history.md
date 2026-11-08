@@ -80,6 +80,8 @@ Keep entries short. This file should explain what changed, not become a detailed
 - Feature 73: Reactive Homepage Background Polish — added frame-rate-independent dot easing, bounded pointer ripples, distance-based brand highlighting, and focused scheduling coverage while preserving idle, reduced-motion, theme, visibility, and high-DPI safeguards.
 - Feature 74: Clean npm and CI Baseline — regenerated the canonical lockfile for npm 10.9.4, removed stale workspace metadata, hardened workspace validation, updated GitHub Actions runtimes, repaired formatting drift, and restored clean install, build, and test checks.
 
+- Feature 75: Context Documentation Organization — split architecture by responsibility, grouped product/design/development/checklist/audit documents, added task-based reading routes, consolidated duplicate rules, and trimmed token tables and workflow examples; verified local links, section anchors, and formatting.
+
 ## Entry Format
 
 - Feature 01: Feature Name — concise summary of what was added, changed, verified, or migrated.
@@ -88,4 +90,4 @@ Keep entries short. This file should explain what changed, not become a detailed
 
 - Add an entry only after the feature works end to end within its defined scope and the user asks to commit and merge.
 - Include important migrations, security changes, storage changes, and deployment changes when relevant.
-- Do not duplicate all details from `features/current-feature.md`.
+- Do not duplicate all details from [current feature](current-feature.md).

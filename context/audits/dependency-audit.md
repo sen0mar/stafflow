@@ -1,5 +1,7 @@
 # Dependency Audit
 
+Historical snapshot, not a live vulnerability assessment. Re-run the dependency audit before making current security or upgrade decisions.
+
 ## 2026-07-16 — Section 02
 
 The canonical root npm lockfile was patched without `npm audit fix --force`.

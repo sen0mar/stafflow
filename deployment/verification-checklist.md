@@ -1,7 +1,7 @@
 # Deployment Verification Checklist
 
 Use this checklist after environment or provider changes and before sharing the
-public demo. The linked [Section 25 regression matrix](../context/audit-25-regression-matrix.md)
+public demo. The linked [Section 25 regression matrix](../context/audits/audit-25-regression-matrix.md)
 records code-level coverage. Items marked **external/manual** cannot be proven by
 the repository or `render.yaml` alone.
 

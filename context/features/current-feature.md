@@ -2,7 +2,7 @@
 
 Update this file only for the active feature after the user and agent agree on its scope.
 
-This file tracks the current feature branch. After implementation is complete, reset this file to placeholders and add a concise summary to `features/feature-history.md` only when the user asks to commit and merge into `main`.
+This file tracks the current feature branch. After implementation is complete, reset this file to placeholders and add a concise summary to [feature history](feature-history.md) only when the user asks to commit and merge into `main`.
 
 ## Current Phase
 
@@ -51,8 +51,8 @@ This file tracks the current feature branch. After implementation is complete, r
 
 ## Architecture Decisions
 
-- Current global decisions are documented in `architecture-context.md`.
-- Move project-wide decisions to `architecture-context.md` once confirmed.
+- Consult the [context map](../README.md) for the owning architecture document.
+- Record confirmed project-wide decisions in that document; keep feature-specific decisions here.
 
 ## Session Notes
 

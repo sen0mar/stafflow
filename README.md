@@ -2,7 +2,9 @@
 
 Stafflow is a full-stack employee management app for a single company. It gives administrators one place to manage day-to-day people operations and gives employees a private self-service workspace.
 
-The project is designed as a safe public portfolio demo. Visitors can use seeded accounts, but the backend rejects persistent business and identity mutations, so they cannot register a company or turn the shared demo into their own workspace. Login/logout are the bounded session-lifecycle exception. Exact route and non-persistence coverage is recorded under audit Sections 03–04 in the [Section 25 regression matrix](context/audit-25-regression-matrix.md).
+The project is designed as a safe public portfolio demo. Visitors can use seeded accounts, but the backend rejects persistent business and identity mutations, so they cannot register a company or turn the shared demo into their own workspace. Login/logout are the bounded session-lifecycle exception. Exact route and non-persistence coverage is recorded under audit Sections 03–04 in the [Section 25 regression matrix](context/audits/audit-25-regression-matrix.md).
+
+Documentation: [context map](context/README.md) for product/design/technical contracts; [AGENTS.md](AGENTS.md) for task-specific reading.
 
 ## Current interface
 
@@ -42,7 +44,7 @@ The login page is prefilled for the admin demo. You can switch roles from the de
 | Admin    | `admin.demo@example.com`    | `StafflowDemo` |
 | Employee | `employee.demo@example.com` | `StafflowDemo` |
 
-There is no public sign-up page. Outside the public demo, new accounts are created by an administrator and completed through a controlled invitation link. With `DEMO_MODE=true`, shared backend middleware returns the stable `DEMO_READ_ONLY` error for every exposed persistent business or identity mutation; frontend-disabled controls are explanatory UX only. Password recovery is deferred, and `/auth/forgot-password` and `/auth/reset-password` return `404 NOT_FOUND` ([deferred-route regression](server/test/integration/deferred-password-reset.test.ts); guarded non-persistence coverage is mapped under audit Section 06 in the [Section 25 matrix](context/audit-25-regression-matrix.md)).
+There is no public sign-up page. Outside the public demo, new accounts are created by an administrator and completed through a controlled invitation link. With `DEMO_MODE=true`, shared backend middleware returns the stable `DEMO_READ_ONLY` error for every exposed persistent business or identity mutation; frontend-disabled controls are explanatory UX only. Password recovery is deferred, and `/auth/forgot-password` and `/auth/reset-password` return `404 NOT_FOUND` ([deferred-route regression](server/test/integration/deferred-password-reset.test.ts); guarded non-persistence coverage is mapped under audit Section 06 in the [Section 25 matrix](context/audits/audit-25-regression-matrix.md)).
 
 ## Technology
 
@@ -72,7 +74,7 @@ The backend follows the same domain structure in `server/src/modules`. Controlle
 
 ## Security and demo safety
 
-Regression-backed controls below map to exact tests in the [Section 25 regression matrix](context/audit-25-regression-matrix.md). Production cookie attributes, provider privacy, external rules, and provider activation still require the [deployment verification checklist](deployment/verification-checklist.md).
+Regression-backed controls below map to exact tests in the [Section 25 regression matrix](context/audits/audit-25-regression-matrix.md). Production cookie attributes, provider privacy, external rules, and provider activation still require the [deployment verification checklist](deployment/verification-checklist.md).
 
 - Production sessions are code-configured with secure HTTP-only cookies; verify the deployed attributes manually. Auth tokens are never stored in `localStorage`.
 - Session tokens are hashed before they are saved to the database.
