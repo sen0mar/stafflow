@@ -69,3 +69,14 @@ Verify CORS, cookies, and proxy settings in a production-like deployment. Expect
 - Database failures must not turn liveness checks into restart loops; readiness errors must not expose connection details.
 - Provider settings, maintenance crons, and credentials can differ from repository configuration; verify external activation through the linked runbooks.
 - Preserve the [API request-ID boundary](api-and-performance.md#api-and-data-flow-model) through proxies and logging.
+
+## Continuous integration
+
+GitHub Actions runs lint/formatting, client types/build, server types/build,
+client unit tests, server unit tests, and database integration/smoke checks in
+parallel. Only the database job starts PostgreSQL 16 and applies migrations to
+its disposable `stafflow_test` database. Each job installs the root lockfile
+with Node 22 and npm download caching; server jobs generate Prisma explicitly.
+The lightweight `quality` gate preserves the existing required check and fails
+if any job fails, is cancelled, or is skipped. New runs cancel older runs for
+the same PR or branch.

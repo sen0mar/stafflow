@@ -1,0 +1,16 @@
+name: Prepare npm workspace
+description: Set up Node and install the canonical locked workspace dependencies.
+runs:
+  using: composite
+  steps:
+    - name: Set up Node
+      uses: actions/setup-node@v6
+      with:
+        node-version: 22
+        cache: npm
+    - name: Verify canonical npm workspace
+      shell: bash
+      run: npm run check:npm-workspace
+    - name: Install dependencies
+      shell: bash
+      run: npm ci

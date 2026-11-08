@@ -4,7 +4,7 @@
 
 - **PostgreSQL / Neon** stores relational application data:
   - Users, sessions, employee profiles, departments, attendance records, leave types, leave requests, leave balances, payslip metadata, company settings, audit logs, invitation tokens, and the retained but runtime-unused password-reset table.
-  - Company, attendance, and leave settings are deterministic singleton rows with stable IDs (`company-settings`, `attendance-settings`, and `leave-settings`). Readers use those IDs directly, first access uses idempotent upserts, and database check constraints reject any other settings ID. The singleton migration aborts before changes if a legacy table has duplicates; cleanup is never selected, merged, or deleted implicitly.
+  - Company, attendance, and leave settings are deterministic singleton rows with stable IDs (`company-settings`, `attendance-settings`, and `leave-settings`). Readers use those IDs directly, first access uses insert-on-conflict-do-nothing followed by a read, and database check constraints reject any other settings ID. The singleton migration aborts before changes if a legacy table has duplicates; cleanup is never selected, merged, or deleted implicitly.
 - **Cloudflare R2** stores large private files:
   - Payslip PDFs and future employee documents.
   - PostgreSQL stores only metadata and the R2 object key, not the file contents.
@@ -20,7 +20,7 @@ Large PDFs must not be stored in PostgreSQL. Access/demo policy belongs to [secu
 
 Use Prisma migrations only. Never run `prisma db push`, reset/drop a database, delete migrations, or execute destructive SQL unless explicitly requested. Use Neon's pooled URL for runtime traffic and direct URL for migrations.
 
-Leave overlap checks, expected-status transitions, balance changes, and review audits commit atomically, using serializable transactions with bounded serialization retries for balance changes.
+Leave overlap checks, expected-status transitions, balance changes, and review audits commit atomically, using serializable transactions with bounded serialization retries, including PostgreSQL adapter commit conflicts.
 
 Every audit-worthy database mutation uses the same transaction client for its audit record and any related session revocation. Audit-worthy changes include employee/profile/account changes, departments, leave types, attendance corrections, leave reviews, payslip changes, password changes, and settings.
 

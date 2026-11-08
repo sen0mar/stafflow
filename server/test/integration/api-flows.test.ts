@@ -1,3 +1,6 @@
+import { createServer } from "node:http";
+import { once } from "node:events";
+
 import request from "supertest";
 
 import { createApp } from "../../src/app";
@@ -5,7 +8,8 @@ import { env } from "../../src/config/env";
 import { hashPassword } from "../../src/core/auth/password.service";
 import { prisma } from "../../src/prisma/prisma.client";
 
-const app = createApp();
+// Keep one listener alive while preconstructed Supertest requests are awaited.
+const app = createServer(createApp());
 const testPassword = "StafflowDemo";
 
 const getTestDatabaseName = () => {
@@ -126,6 +130,8 @@ const describeWithTestDatabase = hasDedicatedTestDatabase()
 describeWithTestDatabase("core API flows", () => {
   beforeAll(async () => {
     expect(hasDedicatedTestDatabase()).toBe(true);
+    app.listen(0, "127.0.0.1");
+    await once(app, "listening");
   });
 
   beforeEach(async () => {
@@ -133,6 +139,9 @@ describeWithTestDatabase("core API flows", () => {
   });
 
   afterAll(async () => {
+    await new Promise<void>((resolve, reject) => {
+      app.close((error) => (error ? reject(error) : resolve()));
+    });
     await prisma.$disconnect();
   });
 
@@ -310,7 +319,8 @@ describeWithTestDatabase("core API flows", () => {
         .expect(({ body }) => {
           expect(body).toEqual({ data: { demoMode: true } });
         });
-      await adminAuth.agent.get("/auth/me").expect(200);
+      const meResponse = await adminAuth.agent.get("/auth/me").expect(200);
+      adminAuth.csrfToken = meResponse.body.data.csrfToken;
 
       const routeMatrix = [
         {

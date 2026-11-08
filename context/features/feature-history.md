@@ -82,6 +82,8 @@ Keep entries short. This file should explain what changed, not become a detailed
 
 - Feature 75: Context Documentation Organization — split architecture by responsibility, grouped product/design/development/checklist/audit documents, added task-based reading routes, consolidated duplicate rules, and trimmed token tables and workflow examples; verified local links, section anchors, and formatting.
 
+- Feature 76: Parallel CI and Integration Reliability — split static checks, client/server builds, client/server unit tests, and database integration/smoke checks into parallel jobs with a compatible quality gate; fixed API test listener/CSRF handling, concurrent settings initialization, and PostgreSQL adapter serialization retries; verified 275 tests and workflow validation.
+
 ## Entry Format
 
 - Feature 01: Feature Name — concise summary of what was added, changed, verified, or migrated.

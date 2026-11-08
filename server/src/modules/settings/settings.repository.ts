@@ -115,29 +115,44 @@ export const findLeaveSettings = () =>
     where: { id: SETTINGS_SINGLETON_IDS.leave },
   });
 
-export const upsertDefaultCompanySettings = () =>
-  prisma.companySettings.upsert({
-    create: companySettingsDefaults,
+export const upsertDefaultCompanySettings = async () => {
+  // An empty-update Prisma upsert can use a read/create sequence and race.
+  await prisma.companySettings.createMany({
+    data: companySettingsDefaults,
+    skipDuplicates: true,
+  });
+
+  return prisma.companySettings.findUniqueOrThrow({
     select: companySettingsSelect,
-    update: {},
     where: { id: SETTINGS_SINGLETON_IDS.company },
   });
+};
 
-export const upsertDefaultAttendanceSettings = () =>
-  prisma.attendanceSettings.upsert({
-    create: attendanceSettingsDefaults,
+export const upsertDefaultAttendanceSettings = async () => {
+  // An empty-update Prisma upsert can use a read/create sequence and race.
+  await prisma.attendanceSettings.createMany({
+    data: attendanceSettingsDefaults,
+    skipDuplicates: true,
+  });
+
+  return prisma.attendanceSettings.findUniqueOrThrow({
     select: attendanceSettingsSelect,
-    update: {},
     where: { id: SETTINGS_SINGLETON_IDS.attendance },
   });
+};
 
-export const upsertDefaultLeaveSettings = () =>
-  prisma.leaveSettings.upsert({
-    create: leaveSettingsDefaults,
+export const upsertDefaultLeaveSettings = async () => {
+  // An empty-update Prisma upsert can use a read/create sequence and race.
+  await prisma.leaveSettings.createMany({
+    data: leaveSettingsDefaults,
+    skipDuplicates: true,
+  });
+
+  return prisma.leaveSettings.findUniqueOrThrow({
     select: leaveSettingsSelect,
-    update: {},
     where: { id: SETTINGS_SINGLETON_IDS.leave },
   });
+};
 
 export const updateCompanySettingsWithAuditLog = ({
   auditLog,

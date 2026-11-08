@@ -145,9 +145,26 @@ export class LeaveMutationError extends Error {
 
 const maxSerializableAttempts = 3;
 
-const isSerializationConflict = (error: unknown) =>
-  error instanceof Prisma.PrismaClientKnownRequestError &&
-  error.code === "P2034";
+export const isSerializationConflict = (error: unknown) => {
+  if (error instanceof Prisma.PrismaClientKnownRequestError) {
+    return error.code === "P2034";
+  }
+
+  // The PostgreSQL adapter can surface commit failures without a Prisma wrapper.
+  if (!(error instanceof Error) || !("cause" in error)) {
+    return false;
+  }
+
+  const cause = error.cause;
+  return (
+    typeof cause === "object" &&
+    cause !== null &&
+    "kind" in cause &&
+    cause.kind === "TransactionWriteConflict" &&
+    "originalCode" in cause &&
+    cause.originalCode === "40001"
+  );
+};
 
 const runSerializableTransaction = async <T>(
   operation: (tx: Prisma.TransactionClient) => Promise<T>,

@@ -7,9 +7,101 @@ on:
       - main
       - "codex/**"
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_ENV: test
+  CLIENT_URL: http://localhost:5173
+  DATABASE_URL: postgresql://postgres:postgres@localhost:5432/stafflow_test
+  DIRECT_URL: postgresql://postgres:postgres@localhost:5432/stafflow_test
+  DEMO_MODE: "false"
+  DEMO_UPLOADS_ENABLED: "false"
+
 jobs:
-  quality:
+  static:
+    name: Lint and formatting
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+      - name: Prepare npm workspace
+        uses: ./.github/actions/setup
+      - name: Lint
+        run: npm run lint
+      - name: Check formatting
+        run: npm run format:check
+
+  client-build:
+    name: Client types and build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+      - name: Prepare npm workspace
+        uses: ./.github/actions/setup
+      - name: Typecheck
+        run: npm --prefix client run typecheck
+      - name: Build
+        run: npm run build:client
+
+  server-build:
+    name: Server types and build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+      - name: Prepare npm workspace
+        uses: ./.github/actions/setup
+      - name: Generate Prisma client
+        run: npm exec -- prisma generate
+      - name: Typecheck
+        run: npm --prefix server run typecheck
+      - name: Build
+        run: npm run build:server
+
+  client-tests:
+    name: Client unit tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+      - name: Prepare npm workspace
+        uses: ./.github/actions/setup
+      - name: Test
+        run: npm --prefix client run test
+
+  server-tests:
+    name: Server unit tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+      - name: Prepare npm workspace
+        uses: ./.github/actions/setup
+      - name: Generate Prisma client
+        run: npm exec -- prisma generate
+      - name: Test
+        run: npm --prefix server run test:unit
+
+  database:
+    name: Database integration and smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     services:
       postgres:
@@ -26,53 +118,30 @@ jobs:
         ports:
           - 5432:5432
 
-    env:
-      NODE_ENV: test
-      CLIENT_URL: http://localhost:5173
-      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/stafflow_test
-      DIRECT_URL: postgresql://postgres:postgres@localhost:5432/stafflow_test
-      DEMO_MODE: "false"
-      DEMO_UPLOADS_ENABLED: "false"
-
     steps:
       - name: Check out repository
         uses: actions/checkout@v6
-
-      - name: Set up Node
-        uses: actions/setup-node@v6
-        with:
-          node-version: 22
-          cache: npm
-
-      - name: Verify canonical npm workspace
-        run: npm run check:npm-workspace
-
-      - name: Install dependencies
-        run: npm ci
-
+      - name: Prepare npm workspace
+        uses: ./.github/actions/setup
       - name: Generate Prisma client
         run: npm exec -- prisma generate
-
-      - name: Lint
-        run: npm run lint
-
-      - name: Check formatting
-        run: npm run format:check
-
-      - name: Typecheck
-        run: npm run typecheck
-
-      - name: Build
-        run: npm run build
-
-      - name: Unit and non-database tests
-        run: npm run test:unit
-
       - name: Apply migrations to the fixed CI test database
         run: npm run db:migrate:deploy
-
       - name: Guarded database integration tests
         run: npm run test:integration
-
       - name: Database smoke checks
         run: npm run smoke
+
+  # Preserve the existing required check while exposing independent failures.
+  quality:
+    if: ${{ always() }}
+    needs:
+      [static, client-build, server-build, client-tests, server-tests, database]
+    runs-on: ubuntu-latest
+    timeout-minutes: 1
+    steps:
+      - name: Require every check to pass
+        env:
+          CHECK_RESULTS: ${{ toJSON(needs.*.result) }}
+        run: |
+          node -e 'if (!JSON.parse(process.env.CHECK_RESULTS).every(result => result === "success")) process.exit(1)'
