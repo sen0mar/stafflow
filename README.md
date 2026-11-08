@@ -139,10 +139,24 @@ See [environment configuration](deployment/environment-configuration.md) for the
 
 ```bash
 npm run db:migrate:deploy
-npm run db:seed
+# Preview only: prints a fingerprint without connecting to the database or R2.
+npm run db:seed -- --data-only
+# Copy the fingerprint printed by the preview:
+npm run db:seed -- --data-only --apply --target=<fingerprint>
+npm run db:seed:check
 ```
 
-Stafflow uses Prisma migrations only. Do not use `prisma db push` or reset a shared database.
+The seed explicitly loads `.env.local` for development and overrides inherited database/storage variables. It rejects a development database matching `.env.production` (including Neon pooled/direct aliases). Nothing is applied without the preview fingerprint. Never use `prisma db push` or reset a shared database; Stafflow uses migrations only.
+
+The fictional showcase includes 15 employees across five departments, active/invited/disabled accounts and inactive/terminated profiles, eight weeks of weekday attendance, 60 leave requests covering every status, current-year balances, and representative audits. The primary employee has a complete self-service history. This company's schedule is **09:00–17:00 UTC**; late employees finish later to complete eight hours. Approved leave dates appear as absence records with an explanatory note. Existing demo credentials are preserved; freshly created demo accounts use the credentials documented above. No usable invitation tokens are created.
+
+Reruns preserve unrelated records, existing passwords, natural-key departments/leave types, and existing payslips. The seed refreshes the named demo profiles and singleton settings, reconciles balances against **all** approved current-year leave, and repairs recognizable attendance timestamp patterns from the old seed. It refuses account/profile ownership collisions. Existing attendance and leave history is retained, including manual development records. Same-day reruns add no duplicate fixtures; future runs can add new dated attendance, annual leave scenarios, and pay periods without deleting history. Existing leave fixture dates remain unchanged within their year. This is a showcase seed, not a database reset.
+
+For sample payslips, configure all four R2 variables in `.env.local` with a **separate private development bucket**, then omit `--data-only` from both preview and apply commands. The seed creates up to 36 real, clearly fictional PDFs across the previous three completed months. Existing employee/month records are preserved. A development run refuses a bucket matching production. `--data-only` creates no files or fake payslip metadata; existing payslips remain visible. Business fixtures commit in one transaction, while each uploaded PDF's metadata and audit commit together; persistence failures trigger new-object cleanup. If storage fails after business fixtures commit, fix storage and rerun.
+
+`db:seed:check` is read-only: it checks profile roles/statuses, showcase coverage, calendar dates, review metadata, attendance durations, balance reconciliation, and audits. Run seed unit/guard tests with `npm run db:seed:test`; seed scripts are included in `npm run typecheck`.
+
+Production execution is a separate, explicitly authorized operation. Production uses `--environment=production`, its own preview fingerprint, and the additional `SEED_ALLOW_PRODUCTION=true` apply guard. Do not run it before development review and authorization. Runtime public-demo mutations/uploads remain blocked; running this administrative seed does not enable public writes.
 
 ### 4. Start the app
 
@@ -175,8 +189,8 @@ Open `http://localhost:5173`. The API runs on `http://localhost:4000` by default
 | `npm run db:migrate:deploy`           | Apply existing Prisma migrations                |
 | `npm run db:verify-duplicate-indexes` | Inspect duplicate-index catalogs and plans      |
 | `npm run db:maintain-auth`            | Prune terminal auth rows past retention         |
-| `npm run db:seed`                     | Seed the demo company and users                 |
-| `npm run db:seed:check`               | Verify the seeded baseline                      |
+| `npm run db:seed`                     | Preview demo fixtures; explicit apply required  |
+| `npm run db:seed:check`               | Read-only verification of the demo dataset      |
 | `npm run db:bootstrap-demo-auth`      | Create or repair production demo login accounts |
 | `npm run db:retry-payslip-deletes`    | Retry private objects for soft-deleted payslips |
 

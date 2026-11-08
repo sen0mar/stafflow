@@ -26,11 +26,12 @@
     "db:seed": "tsx prisma/seed.ts",
     "db:seed:check": "tsx prisma/seed-check.ts",
     "db:reset-added-users": "tsx prisma/reset-added-demo-users.ts",
-    "typecheck": "npm run typecheck --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present && tsc -p prisma/tsconfig.json",
     "test": "npm run test --workspaces --if-present",
     "test:unit": "npm --prefix client run test && npm --prefix server run test:unit",
     "test:integration": "npm --prefix server run test:integration",
-    "smoke": "npm run db:migrate:status && npm run db:seed:check"
+    "smoke": "npm run db:migrate:status && npm run db:seed:check",
+    "db:seed:test": "node --import tsx --test prisma/demo/*.test.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
